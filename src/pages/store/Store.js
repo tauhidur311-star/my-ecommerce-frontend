@@ -116,7 +116,13 @@ export default function Store() {
 
     try {
       const endpoint = authMode === 'login' ? '/auth/login' : '/auth/register';
-      const { data } = await (await fetch(`${process.env.REACT_APP_API_URL}/api${endpoint}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(authForm) })).json();
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api${endpoint}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(authForm) });
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Throw an error to be caught by the modal's handleSubmit
+        throw new Error(data.error || `Failed to ${authMode}`);
+      }
 
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
@@ -124,10 +130,10 @@ export default function Store() {
       setUser(data.user);
       setShowAuth(false);
       setAuthForm({ name: '', email: '', password: '' });
-      toast.success(`Successfully ${authMode}ed!`);
+      toast.success(`Successfully ${authMode === 'login' ? 'logged in' : 'registered'}!`);
     } catch (error) {
-      setAuthError(error.response?.data?.message || 'Authentication failed');
-      toast.error(error.response?.data?.message || 'Authentication failed');
+      // Re-throw the error so the modal can display it
+      throw error;
     } finally {
       setIsAuthLoading(false);
     }

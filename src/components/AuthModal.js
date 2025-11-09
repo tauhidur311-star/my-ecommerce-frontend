@@ -20,9 +20,15 @@ export default function AuthModal({
     setIsLoading(true);
     setError(null);
     try {
-      await handleAuth(e);
+      // The handleAuth function from Store.js needs to be awaited
+      // and we need to check its return value or catch its errors.
+      // For now, let's assume it throws on failure.
+      await handleAuth();
     } catch (err) {
-      setError(err.message || 'Authentication failed');
+      // This will now show the actual error message from the backend if available
+      const errorMessage = err.response?.data?.message || err.message || 'Authentication failed. Please try again.';
+      setError(errorMessage);
+      console.error('Authentication error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -51,11 +57,13 @@ export default function AuthModal({
           onLoginSuccess(data.user);
         }
       } else {
-        setError(data.message || 'Google login failed');
+        // Show the specific error from the backend
+        setError(data.error || 'Google login failed.');
       }
     } catch (err) {
       console.error('Google login error:', err);
-      setError('Server error during Google login.');
+      // Provide a more helpful message for network errors
+      setError('Could not connect to the server. Please check your connection and try again.');
     } finally {
       setIsLoading(false);
     }
