@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { GoogleLogin } from '@react-oauth/google';
 
 export default function AuthModal({ 
