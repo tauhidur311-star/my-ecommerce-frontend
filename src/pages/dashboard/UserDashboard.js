@@ -68,6 +68,30 @@ export default function UserDashboard() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+
+    // --- Validation ---
+    if (!userData.name.trim()) {
+      toast.error('Full Name is required.');
+      setLoading(false);
+      return;
+    }
+    if (!userData.address.trim()) {
+      toast.error('Billing Address is required.');
+      setLoading(false);
+      return;
+    }
+    if (!userData.province) {
+      toast.error('Please select your Province / Region.');
+      setLoading(false);
+      return;
+    }
+    const phoneRegex = /^01[0-9]{9}$/;
+    if (!phoneRegex.test(userData.phone)) {
+      toast.error('Please enter a valid 11-digit phone number starting with 01.');
+      setLoading(false);
+      return;
+    }
+
     const token = localStorage.getItem('token');
 
     try {
@@ -131,8 +155,11 @@ export default function UserDashboard() {
           <div>
             <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
             <div className="relative">
-              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-              <input type="tel" name="phone" id="phone" value={userData.phone} onChange={handleInputChange} className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg" />
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                <span>🇧🇩</span>
+                <span className="ml-2">+880</span>
+              </div>
+              <input type="tel" name="phone" id="phone" value={userData.phone} onChange={handleInputChange} className="w-full pl-24 pr-4 py-2 border border-gray-300 rounded-lg" placeholder="1XXXXXXXXX" maxLength="11" />
             </div>
           </div>
           <div>

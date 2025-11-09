@@ -117,6 +117,18 @@ export default function Store() {
       return;
     }
 
+    // --- Checkout Validation ---
+    const requiredFields = ['name', 'address', 'phone', 'province'];
+    const missingFields = requiredFields.filter(field => !user[field]);
+
+    if (missingFields.length > 0) {
+      toast.error('Please complete your profile before checking out.');
+      // Redirect to the dashboard to complete profile
+      navigate('/dashboard');
+      return;
+    }
+    // --- End Validation ---
+
     try {
       await fetch(`${process.env.REACT_APP_API_URL}/api/orders`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }, body: JSON.stringify({
         items: cart.map(item => ({
