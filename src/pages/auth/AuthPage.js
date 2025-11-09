@@ -118,27 +118,6 @@ export default function AuthPage() {
     }
   };
 
-  const handleForgotPassword = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage({ type: '', text: '' });
-    try {
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/forgot-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to send OTP.');
-      toast.success(data.message);
-      setAuthMode('resetPassword');
-    } catch (err) {
-      setMessage({ type: 'error', text: err.message });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -177,7 +156,7 @@ export default function AuthPage() {
         );
       case 'forgotPassword':
         return (
-          <form onSubmit={handleForgotPassword} className="space-y-4">
+          <form onSubmit={handleResetPassword} className="space-y-4">
             <p className="text-sm text-gray-600">Enter your email to receive a password reset OTP.</p>
             <InputField name="email" type="email" placeholder="your@email.com" value={formData.email} onChange={handleInputChange} Icon={Mail} required />
             <button type="submit" disabled={loading} className="w-full btn-primary">{loading ? 'Sending...' : 'Send OTP'}</button>
