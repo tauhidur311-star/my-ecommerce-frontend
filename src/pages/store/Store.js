@@ -181,7 +181,9 @@ export default function Store() {
               </button>
               {user && (
                 <div className="flex items-center gap-4">
-                  <span className="text-sm text-gray-600">Hello, {user.name}</span>
+                  <Link to="/dashboard" className="text-sm text-gray-600 hover:text-blue-600">
+                    Hello, {user.name}
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
