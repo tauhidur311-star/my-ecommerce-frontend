@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { User, MapPin, Phone, Save } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { User, MapPin, Phone, Save, ArrowLeft } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 
 const bangladeshDivisions = [
@@ -104,8 +105,14 @@ export default function UserDashboard() {
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
       <Toaster position="bottom-center" />
-      <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-6 sm:p-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">My Dashboard</h1>
+      <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-6 sm:p-8 relative">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">My Dashboard</h1>
+          <Link to="/" className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-semibold">
+            <ArrowLeft size={18} />
+            Back to Store
+          </Link>
+        </div>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
