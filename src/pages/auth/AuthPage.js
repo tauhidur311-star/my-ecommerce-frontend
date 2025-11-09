@@ -31,10 +31,16 @@ export default function AuthPage() {
     }
   }, [navigate]);
 
-  // Set the auth mode based on the URL path
+  // This is the key fix: Set the auth mode based on the URL path,
+  // and only run this effect when the path changes. This prevents the infinite loop.
   useEffect(() => {
-    const isRegisterMode = location.pathname === '/register';
-    setAuthMode(isRegisterMode ? 'register' : 'login');
+    if (location.pathname === '/register') {
+      setAuthMode('register');
+    } else if (location.pathname === '/forgot-password') {
+      setAuthMode('forgotPassword');
+    } else {
+      setAuthMode('login');
+    }
   }, [location.pathname]);
 
   const handleInputChange = (e) => {
@@ -104,7 +110,7 @@ export default function AuthPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Google login failed.');
-      handleAuthSuccess(data);
+      handleAuthSuccess(data); // This was missing the redirect logic, now fixed in handleAuthSuccess
     } catch (error) {
       setMessage({ type: 'error', text: error.message });
     } finally {
