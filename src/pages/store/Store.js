@@ -1,6 +1,7 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
 import { ShoppingCart, Heart, User, LogOut } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
+import { Link, useNavigate } from 'react-router-dom';
 import SearchFilters from '../../components/SearchFilters';
 import ProductSkeleton from '../../components/ProductSkeleton';
 import AuthModal from '../../components/AuthModal';
@@ -10,6 +11,7 @@ const ProductModal = lazy(() => import('../../components/ProductModal'));
 const CartSidebar = lazy(() => import('../../components/CartSidebar'));
 
 export default function Store() {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [cart, setCart] = useState([]);
@@ -17,15 +19,6 @@ export default function Store() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedSize, setSelectedSize] = useState('');
   const [user, setUser] = useState(null);
-  const [showAuth, setShowAuth] = useState(false);
-  const [authMode, setAuthMode] = useState('login');
-  const [authForm, setAuthForm] = useState({
-    name: '',
-    email: '',
-    password: ''
-  });
-  const [authError, setAuthError] = useState(null);
-  const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -108,37 +101,6 @@ export default function Store() {
 
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-  // Authentication functions
-  const handleAuth = async (e) => {
-    e.preventDefault();
-    setAuthError(null);
-    setIsAuthLoading(true);
-
-    try {
-      const endpoint = authMode === 'login' ? '/auth/login' : '/auth/register';
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api${endpoint}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(authForm) });
-      const data = await response.json();
-
-      if (!response.ok) {
-        // Throw an error to be caught by the modal's handleSubmit
-        throw new Error(data.error || `Failed to ${authMode}`);
-      }
-
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      
-      setUser(data.user);
-      setShowAuth(false);
-      setAuthForm({ name: '', email: '', password: '' });
-      toast.success(`Successfully ${authMode === 'login' ? 'logged in' : 'registered'}!`);
-    } catch (error) {
-      // Re-throw the error so the modal can display it
-      throw error;
-    } finally {
-      setIsAuthLoading(false);
-    }
-  };
-
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem('token');
@@ -149,7 +111,7 @@ export default function Store() {
 
   const handleCheckout = async () => {
     if (!user) {
-      setShowAuth(true);
+      navigate('/auth');
       return;
     }
 
@@ -228,14 +190,9 @@ export default function Store() {
                 </div>
               )}
               {!user && (
-                <button
-                  onClick={() => {
-                    setShowAuth(true);
-                  }}
-                  className="p-2 hover:bg-gray-100 rounded-full"
-                >
+                <Link to="/auth" className="p-2 hover:bg-gray-100 rounded-full">
                   <User size={24} />
-                </button>)}
+                </Link>)}
             </div>
           </div>
         </div>
@@ -331,24 +288,6 @@ export default function Store() {
           />
         )}
       </Suspense>
-
-      {showAuth && (
-        <AuthModal
-          showAuth={showAuth}
-          setShowAuth={setShowAuth}
-          handleAuth={handleAuth}
-          authMode={authMode}
-          setAuthMode={setAuthMode}
-          authForm={authForm}
-          setAuthForm={setAuthForm}
-          isLoading={isAuthLoading}
-          error={authError}
-          onLoginSuccess={(user) => {
-            setUser(user);
-            setShowAuth(false);
-          }}
-        />
-      )}
 
       <BackToTop />
       <Toaster position="bottom-center" />
