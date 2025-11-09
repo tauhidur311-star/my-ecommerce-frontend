@@ -8,9 +8,7 @@ export default function AuthPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Determine mode from URL path
-  const isRegisterMode = location.pathname === '/register';
-  const [authMode, setAuthMode] = useState(isRegisterMode ? 'register' : 'login');
+  const [authMode, setAuthMode] = useState('login');
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -32,6 +30,12 @@ export default function AuthPage() {
       navigate('/');
     }
   }, [navigate]);
+
+  // Set the auth mode based on the URL path
+  useEffect(() => {
+    const isRegisterMode = location.pathname === '/register';
+    setAuthMode(isRegisterMode ? 'register' : 'login');
+  }, [location.pathname]);
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
