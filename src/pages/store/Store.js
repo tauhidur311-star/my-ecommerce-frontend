@@ -1,0 +1,376 @@
+import { useState, useEffect, Suspense, lazy } from 'react';
+import { ShoppingCart, Heart, User, LogOut } from 'lucide-react';
+import toast, { Toaster } from 'react-hot-toast';
+import SearchFilters from '../../components/SearchFilters';
+import ProductSkeleton from '../../components/ProductSkeleton';
+import AuthModal from '../../components/AuthModal';
+import ZoomableImage from '../../components/ZoomableImage';
+
+const ProductModal = lazy(() => import('../../components/ProductModal'));
+const CartSidebar = lazy(() => import('../../components/CartSidebar'));
+
+export default function Store() {
+  const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [cart, setCart] = useState([]);
+  const [showCart, setShowCart] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedSize, setSelectedSize] = useState('');
+  const [user, setUser] = useState(null);
+  const [showAuth, setShowAuth] = useState(false);
+  const [authMode, setAuthMode] = useState('login');
+  const [authForm, setAuthForm] = useState({
+    name: '',
+    email: '',
+    password: ''
+  });
+  const [authError, setAuthError] = useState(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(false);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [sortBy, setSortBy] = useState('featured'); // 'featured', 'price-asc', 'price-desc'
+
+  // Load products
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
+  // Update the loadProducts function
+  const loadProducts = async () => {
+    try {
+      // First try to load from local storage
+      const localProducts = await window.storage.get('admin-products');
+      if (localProducts && localProducts.value) {
+        const parsedProducts = JSON.parse(localProducts.value);
+        setProducts(parsedProducts);
+      }
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error loading products:', error);
+      setIsLoading(false);
+    }
+  };
+
+  // Cart functions
+  const addToCart = async (product, size) => {
+    if (!size) {
+      toast.error('Please select a size');
+      return;
+    }
+
+    try {
+      setIsAddingToCart(true);
+      // Simulate a delay to show loading state
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      setCart(prevCart => {
+        const existingItem = prevCart.find(
+          item => item.id === product.id && item.selectedSize === size
+        );
+
+        if (existingItem) {
+          return prevCart.map(item =>
+            item.id === product.id && item.selectedSize === size
+              ? { ...item, quantity: item.quantity + 1 }
+              : item
+          );
+        }
+
+        return [...prevCart, { ...product, quantity: 1, selectedSize: size }];
+      });
+
+      toast.success('Added to cart!');
+    } catch (error) {
+      toast.error('Failed to add to cart');
+    } finally {
+      setIsAddingToCart(false);
+    }
+  };
+
+  const removeFromCart = (productId, size) => {
+    setCart(prevCart => 
+      prevCart.filter(item => !(item.id === productId && item.selectedSize === size))
+    );
+  };
+
+  const updateQuantity = (productId, size, change) => {
+    setCart(prevCart => 
+      prevCart.map(item => {
+        if (item.id === productId && item.selectedSize === size) {
+          const newQuantity = item.quantity + change;
+          return newQuantity > 0 ? { ...item, quantity: newQuantity } : item;
+        }
+        return item;
+      })
+    );
+  };
+
+  const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+  // Authentication functions
+  const handleAuth = async (e) => {
+    e.preventDefault();
+    setAuthError(null);
+    setIsAuthLoading(true);
+
+    try {
+      const endpoint = authMode === 'login' ? '/auth/login' : '/auth/register';
+      const { data } = await (await fetch(`${process.env.REACT_APP_API_URL}/api${endpoint}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(authForm) })).json();
+
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
+      setUser(data.user);
+      setShowAuth(false);
+      setAuthForm({ name: '', email: '', password: '' });
+      toast.success(`Successfully ${authMode}ed!`);
+    } catch (error) {
+      setAuthError(error.response?.data?.message || 'Authentication failed');
+      toast.error(error.response?.data?.message || 'Authentication failed');
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setCart([]);
+    localStorage.removeItem('cart');
+  };
+
+  const handleCheckout = async () => {
+    if (!user) {
+      setShowAuth(true);
+      return;
+    }
+
+    try {
+      await fetch(`${process.env.REACT_APP_API_URL}/api/orders`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }, body: JSON.stringify({
+        items: cart.map(item => ({
+          productId: item.id,
+          quantity: item.quantity,
+          size: item.selectedSize,
+        })),
+        shippingAddress: {
+          name: user.name,
+          phone: user.phone || '',
+          address: '',
+          city: '',
+          zipCode: ''
+        },
+        paymentMethod: 'cod'
+      })});
+      
+      // Clear cart after successful order
+      setCart([]);
+      localStorage.removeItem('cart');
+      
+      alert('Order placed successfully!');
+      setShowCart(false);
+    } catch (error) {
+      console.error('Failed to place order', error);
+    }
+  };
+
+  // Add token restoration on component mount
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {      
+      const savedUser = localStorage.getItem('user');
+      if (savedUser) {
+        setUser(JSON.parse(savedUser));
+      }
+    }
+  }, []);
+
+  // Wrap lazy-loaded components with Suspense
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Navigation */}
+      <nav className="bg-white shadow-sm sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold text-gray-800">Fashion Store</h1>
+            <div className="flex items-center gap-4">
+              <button className="p-2 hover:bg-gray-100 rounded-full relative">
+                <Heart size={24} />
+              </button>
+              <button 
+                className="p-2 hover:bg-gray-100 rounded-full relative"
+                onClick={() => setShowCart(true)}
+              >
+                <ShoppingCart size={24} />
+                {cart.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                    {cart.length}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => setShowAuth(true)}
+                className="p-2 hover:bg-gray-100 rounded-full"
+              >
+                <User size={24} />
+              </button>
+              {user && (
+                <div className="flex items-center gap-4">
+                  <span className="text-sm text-gray-600">Hello, {user.name}</span>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
+                  >
+                    <LogOut size={20} />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <SearchFilters
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        products={products}
+      />
+
+      {/* Products Grid */}
+      <div className="container mx-auto px-4 py-8">
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {[...Array(8)].map((_, i) => (
+              <ProductSkeleton key={i} />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {products
+              .filter(product => {
+                const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+                const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
+                return matchesSearch && matchesCategory;
+              })
+              .sort((a, b) => {
+                if (sortBy === 'price-asc') return a.price - b.price;
+                if (sortBy === 'price-desc') return b.price - a.price;
+                return 0;
+              })
+              .map(product => (
+              <div 
+                key={product.id} 
+                className="bg-white rounded-lg shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition"
+                onClick={() => setSelectedProduct(product)}
+              >
+                <ZoomableImage
+                  src={product.image || 'https://via.placeholder.com/300'}
+                  alt={product.name}
+                />
+                <div className="p-4">
+                  <h3 className="text-lg font-semibold">{product.name}</h3>
+                  <p className="text-sm text-gray-500 mt-1 line-clamp-2">{product.description}</p>
+                  <div className="mt-4 flex items-center justify-between">
+                    <span className="text-xl font-bold">৳{product.price}</span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedProduct(product);
+                      }}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >
+                      View Details
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Wrap lazy-loaded components with Suspense */}
+      <Suspense fallback={<div>Loading...</div>}>
+        {selectedProduct && (
+          <ProductModal
+            product={selectedProduct}
+            setSelectedProduct={setSelectedProduct}
+            selectedSize={selectedSize}
+            setSelectedSize={setSelectedSize}
+            addToCart={addToCart}
+            isAddingToCart={isAddingToCart}
+          />
+        )}
+      </Suspense>
+
+      <Suspense fallback={<div>Loading...</div>}>
+        {showCart && (
+          <CartSidebar
+            showCart={showCart}
+            setShowCart={setShowCart}
+            cart={cart}
+            updateQuantity={updateQuantity}
+            removeFromCart={removeFromCart}
+            cartTotal={cartTotal}
+            handleCheckout={handleCheckout}
+          />
+        )}
+      </Suspense>
+
+      {showAuth && (
+        <AuthModal
+          showAuth={showAuth}
+          setShowAuth={setShowAuth}
+          handleAuth={handleAuth}
+          authMode={authMode}
+          setAuthMode={setAuthMode}
+          authForm={authForm}
+          setAuthForm={setAuthForm}
+          isLoading={isAuthLoading}
+          error={authError}
+          onLoginSuccess={(user) => {
+            setShowAuth(false);
+          }}
+        />
+      )}
+
+      <BackToTop />
+      <Toaster position="bottom-center" />
+    </div>
+  );
+}
+
+// Add this new component outside the Store function
+const BackToTop = () => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const toggleVisibility = () => {
+      if (window.pageYOffset > 300) {
+        setIsVisible(true);
+      } else {
+        setIsVisible(false);
+      }
+    };
+
+    window.addEventListener('scroll', toggleVisibility);
+    return () => window.removeEventListener('scroll', toggleVisibility);
+  }, []);
+
+  return isVisible ? (
+    <button
+      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      className="fixed bottom-4 right-4 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-all"
+    >
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+    </button>
+  ) : null;
+};
