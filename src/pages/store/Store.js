@@ -4,7 +4,6 @@ import toast, { Toaster } from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
 import SearchFilters from '../../components/SearchFilters';
 import ProductSkeleton from '../../components/ProductSkeleton';
-import AuthModal from '../../components/AuthModal';
 import ZoomableImage from '../../components/ZoomableImage';
 
 const ProductModal = lazy(() => import('../../components/ProductModal'));
