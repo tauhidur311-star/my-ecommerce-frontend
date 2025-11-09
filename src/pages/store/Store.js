@@ -101,11 +101,14 @@ export default function Store() {
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setCart([]);
-    localStorage.removeItem('cart');
+    if (window.confirm('Are you sure you want to log out?')) {
+      setUser(null);
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      setCart([]);
+      localStorage.removeItem('cart');
+      toast.success('You have been logged out.');
+    }
   };
 
   const handleCheckout = async () => {
