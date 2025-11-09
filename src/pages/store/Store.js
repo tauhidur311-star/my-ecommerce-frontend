@@ -215,12 +215,6 @@ export default function Store() {
                   </span>
                 )}
               </button>
-              <button
-                onClick={() => setShowAuth(true)}
-                className="p-2 hover:bg-gray-100 rounded-full"
-              >
-                <User size={24} />
-              </button>
               {user && (
                 <div className="flex items-center gap-4">
                   <span className="text-sm text-gray-600">Hello, {user.name}</span>
@@ -233,6 +227,15 @@ export default function Store() {
                   </button>
                 </div>
               )}
+              {!user && (
+                <button
+                  onClick={() => {
+                    setShowAuth(true);
+                  }}
+                  className="p-2 hover:bg-gray-100 rounded-full"
+                >
+                  <User size={24} />
+                </button>)}
             </div>
           </div>
         </div>
@@ -341,6 +344,7 @@ export default function Store() {
           isLoading={isAuthLoading}
           error={authError}
           onLoginSuccess={(user) => {
+            setUser(user);
             setShowAuth(false);
           }}
         />
