@@ -1,7 +1,6 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
 import { ShoppingCart, Heart, User, LogOut } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
 import SearchFilters from '../../components/SearchFilters';
 import ProductSkeleton from '../../components/ProductSkeleton';
 import AuthModal from '../../components/AuthModal';
@@ -11,7 +10,6 @@ const ProductModal = lazy(() => import('../../components/ProductModal'));
 const CartSidebar = lazy(() => import('../../components/CartSidebar'));
 
 export default function Store() {
-  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [cart, setCart] = useState([]);
