@@ -23,7 +23,7 @@ export default function AuthModal({
       // The handleAuth function from Store.js needs to be awaited
       // and we need to check its return value or catch its errors.
       // For now, let's assume it throws on failure.
-      await handleAuth();
+      await handleAuth(e);
     } catch (err) {
       // This will now show the actual error message from the backend if available
       const errorMessage = err.response?.data?.message || err.message || 'Authentication failed. Please try again.';
