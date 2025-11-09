@@ -191,8 +191,7 @@ export default function AuthPage() {
           <form onSubmit={handleLogin} className="space-y-4">
             {/* Login fields */}
             <InputField name="email" type="email" placeholder="your@email.com" value={formData.email} onChange={handleInputChange} Icon={Mail} required />
-            <InputField name="password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={formData.password} onChange={handleInputChange} Icon={Lock} required showPasswordToggle={{ showPassword, setShowPassword }} />
-            <div className="text-sm text-right"><button type="button" onClick={() => setAuthMode('forgotPassword')} className="font-medium text-blue-600 hover:text-blue-500">Forgot password?</button></div>
+            <InputField name="password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={formData.password} onChange={handleInputChange} Icon={Lock} required showPasswordToggle={{ showPassword, setShowPassword }} />            <div className="text-sm text-right"><Link to="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">Forgot password?</Link></div>
             <button type="submit" disabled={loading} className="w-full btn-primary">{loading ? 'Logging in...' : 'Login'}</button>
           </form>
         );
@@ -254,7 +253,7 @@ export default function AuthPage() {
             <p className="text-gray-600">
               {authMode === 'login' && "Don't have an account? "}
               {authMode === 'register' && 'Already have an account? '}
-              {(authMode === 'forgotPassword' || authMode === 'resetPassword') && 'Remembered your password? '}
+              {(authMode === 'forgotPassword' || authMode === 'resetPassword') && 'Remember your password? '}
               <Link
                 to={authMode === 'login' ? '/register' : '/login'}
                 className="text-blue-600 font-semibold hover:text-blue-700"
