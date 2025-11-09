@@ -5,7 +5,6 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import './App.css';
 
 function App() {
-  const [showAuth, setShowAuth] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   // Check if user is logged in
@@ -22,7 +21,6 @@ function App() {
           element={
             <Store 
               isLoggedIn={isLoggedIn} 
-              setShowAuth={setShowAuth} 
             />
           } 
         />
