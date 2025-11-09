@@ -110,7 +110,7 @@ export default function Store() {
 
   const handleCheckout = async () => {
     if (!user) {
-      navigate('/auth');
+      navigate('/login');
       return;
     }
 
@@ -189,7 +189,7 @@ export default function Store() {
                 </div>
               )}
               {!user && (
-                <Link to="/auth" className="p-2 hover:bg-gray-100 rounded-full">
+                <Link to="/login" className="p-2 hover:bg-gray-100 rounded-full">
                   <User size={24} />
                 </Link>)}
             </div>

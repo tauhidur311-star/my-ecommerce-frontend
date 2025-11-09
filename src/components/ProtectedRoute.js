@@ -6,8 +6,8 @@ const ProtectedRoute = ({ children }) => {
 
   // Check if user exists and if their role is 'admin'
   if (!user || user.role !== 'admin') {
-    // If not an admin, redirect to the home page
-    return <Navigate to="/" replace />;
+    // If not an admin, redirect to the auth page
+    return <Navigate to="/login" replace />;
   }
 
   return children;
