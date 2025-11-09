@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { User, MapPin, Phone, Save, ArrowLeft } from 'lucide-react';
+import { User, MapPin, Save, ArrowLeft } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 
 const bangladeshDivisions = [
