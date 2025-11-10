@@ -9,6 +9,7 @@ import Silk from '../../components/Silk';
 import OrderManagement from '../../components/OrderManagement';
 import AdvancedAnalytics from '../../components/AdvancedAnalytics';
 import useKeyboardShortcuts from '../../hooks/useKeyboardShortcuts';
+import DarkModeToggle from '../../components/DarkModeToggle';
 // import '../../styles/mobile-responsive.css';
 
 const IMGBB_API_KEY = 'YOUR_API_KEY_HERE'; // Replace with your ImageBB API key
@@ -542,10 +543,24 @@ export default function AdminDashboard() {
                 <StoreIcon size={20} />
                 <span>View Store</span>
               </Link>
-              <button onClick={() => setShowForm(true)} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+              <button 
+                onClick={() => setShowForm(true)} 
+                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                title="Add New Product (Ctrl+N)"
+              >
                 <Plus size={20} />
                 Add New Product
               </button>
+              
+              <button
+                onClick={showShortcutsHelp}
+                className="flex items-center gap-2 px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+                title="Keyboard Shortcuts (Ctrl+?)"
+              >
+                ⌨️
+              </button>
+              
+              <DarkModeToggle />
             </div>
           </div>
         </div>
