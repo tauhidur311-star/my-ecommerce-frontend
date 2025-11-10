@@ -31,7 +31,7 @@ const OrderManagement = ({ isAdmin = false }) => {
 
   useEffect(() => {
     loadOrders();
-  }, [statusFilter, dateFilter]);
+  }, [statusFilter, dateFilter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadOrders = async () => {
     setLoading(true);
@@ -60,7 +60,7 @@ const OrderManagement = ({ isAdmin = false }) => {
         
         if (dateFilter !== 'all') {
           const now = new Date();
-          const filterDate = new Date();
+          let filterDate = new Date();
           
           switch (dateFilter) {
             case 'today':
