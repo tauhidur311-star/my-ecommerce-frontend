@@ -4,6 +4,8 @@ import Store from './pages/store/Store';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AuthPage from './pages/auth/AuthPage';
 import UserDashboard from './pages/dashboard/UserDashboard';
+import AboutPage from './pages/store/AboutPage';
+import ContactPage from './pages/store/ContactPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
@@ -16,6 +18,8 @@ function App() {
           element={<Store />} 
         />
         <Route path="/login" element={<AuthPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="/register" element={<AuthPage />} />
         <Route 
           path="/dashboard"

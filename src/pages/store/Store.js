@@ -1,14 +1,15 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
-import { ShoppingCart, Heart, User, LogOut, Shield } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import SearchFilters from '../../components/SearchFilters';
 import ProductSkeleton from '../../components/ProductSkeleton';
 import ZoomableImage from '../../components/ZoomableImage';
 import Silk from '../../components/Silk';
+import Navbar from '../../components/Navbar'; // Import the new Navbar
 
 const ProductModal = lazy(() => import('../../components/ProductModal'));
 const CartSidebar = lazy(() => import('../../components/CartSidebar'));
+const AuthModal = lazy(() => import('../../components/AuthModal'));
 
 export default function Store() {
   const navigate = useNavigate();
@@ -20,12 +21,20 @@ export default function Store() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedSize, setSelectedSize] = useState('');
   const [user, setUser] = useState(null);
-  const [isCartHovered, setIsCartHovered] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('featured'); // 'featured', 'price-asc', 'price-desc'
+  const [showAuth, setShowAuth] = useState(false);
+  const [authMode, setAuthMode] = useState('login');
+  const [authForm, setAuthForm] = useState({ name: '', email: '', password: '' });
+
+  const handleLoginSuccess = (loggedInUser) => {
+    setUser(loggedInUser);
+    setShowAuth(false);
+    toast.success(`Welcome, ${loggedInUser.name}!`);
+  };
 
   // Load products
   useEffect(() => {
@@ -176,6 +185,11 @@ export default function Store() {
     }
   }, []);
 
+  const handleAuth = () => {
+    setShowAuth(true);
+    setAuthMode('login');
+  };
+
   // Wrap lazy-loaded components with Suspense
   return (
     <div className="min-h-screen">
@@ -190,67 +204,13 @@ export default function Store() {
       </div>
 
       {/* Navigation */}
-      <nav className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-gray-800">Fashion Store</h1>
-            <div className="flex items-center gap-4">
-              <button className="p-2 hover:bg-gray-100 rounded-full relative">
-                <Heart size={24} />
-              </button>
-              <div 
-                className="relative"
-                onMouseEnter={() => setIsCartHovered(true)}
-                onMouseLeave={() => setIsCartHovered(false)}
-              >
-                <button 
-                  className="p-2 hover:bg-gray-100 rounded-full relative"
-                  onClick={() => setShowCart(true)}
-                >
-                  <ShoppingCart size={24} />
-                  {cart.length > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
-                      {cart.length}
-                    </span>
-                  )}
-                </button>
-                {isCartHovered && cart.length > 0 && (
-                  <CartHoverPreview cart={cart} cartTotal={cartTotal} />
-                )}
-              </div>
-              {user && (
-                <>
-                  {user.role === 'admin' && (
-                    <Link 
-                      to={location.pathname === '/admin' ? '/' : '/admin'} 
-                      className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                    >
-                      <Shield size={20} />
-                      <span>{location.pathname === '/admin' ? 'View Store' : 'View Admin'}</span>
-                    </Link>
-                  )}
-                <div className="flex items-center gap-4">
-                  <Link to="/dashboard" className="p-2 hover:bg-gray-100 rounded-full" title="My Dashboard">
-                    <User size={24} />
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
-                  >
-                    <LogOut size={20} />
-                    <span>Logout</span>
-                  </button>
-                </div>
-                </>
-              )}
-              {!user && (
-                <Link to="/login" className="p-2 hover:bg-gray-100 rounded-full">
-                  <User size={24} />
-                </Link>)}
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navbar
+        user={user}
+        cartCount={cart.length}
+        onLogout={() => setShowLogoutConfirm(true)}
+        onLogin={handleAuth}
+        onCartClick={() => setShowCart(true)}
+      />
 
       <SearchFilters
         searchQuery={searchQuery}
@@ -263,7 +223,7 @@ export default function Store() {
       />
 
       {/* Products Grid */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 pt-28">
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {[...Array(8)].map((_, i) => (
@@ -343,6 +303,20 @@ export default function Store() {
         )}
       </Suspense>
 
+      <Suspense fallback={<div>Loading...</div>}>
+        <AuthModal
+          showAuth={showAuth}
+          setShowAuth={setShowAuth}
+          handleAuth={() => {}} // This can be expanded later
+          authMode={authMode}
+          setAuthMode={setAuthMode}
+          authForm={authForm}
+          setAuthForm={setAuthForm}
+          onLoginSuccess={handleLoginSuccess}
+        />
+      </Suspense>
+
+
       {showLogoutConfirm && (
         <LogoutConfirmationDialog
           onConfirm={confirmLogout}
@@ -406,33 +380,6 @@ const LogoutConfirmationDialog = ({ onConfirm, onCancel }) => {
             Logout
           </button>
         </div>
-      </div>
-    </div>
-  );
-};
-
-// Add this new component for the cart hover preview
-const CartHoverPreview = ({ cart, cartTotal }) => {
-  return (
-    <div className="absolute top-full right-0 mt-2 w-72 bg-white rounded-lg shadow-xl z-50 p-4 border border-gray-200">
-      <h3 className="text-lg font-semibold text-gray-800 mb-3 border-b pb-2">Cart Summary</h3>
-      <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
-        {cart.map(item => (
-          <div key={`${item.id}-${item.selectedSize}`} className="flex justify-between items-center text-sm">
-            <div className="flex-grow pr-2">
-              <p className="font-medium text-gray-700 truncate">{item.name}</p>
-              <p className="text-xs text-gray-500">Size: {item.selectedSize}</p>
-            </div>
-            <div className="flex-shrink-0 text-right">
-              <p className="text-gray-800">x{item.quantity}</p>
-              <p className="font-semibold">৳{item.price * item.quantity}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="border-t mt-3 pt-3 flex justify-between items-center font-bold text-lg">
-        <span>Total:</span>
-        <span>৳{cartTotal}</span>
       </div>
     </div>
   );
