@@ -7,6 +7,7 @@ import EnhancedProductCard from '../../components/EnhancedProductCard';
 import QuickViewModal from '../../components/QuickViewModal';
 import { ProductGridSkeleton } from '../../components/EnhancedProductSkeleton';
 import { useWishlist } from '../../hooks/useWishlist';
+import { APIService } from '../../services/api';
 import '../../styles/animations.css';
 
 const ProductModal = lazy(() => import('../../components/ProductModal'));
@@ -69,13 +70,59 @@ export default function Store() {
   const loadProducts = async () => {
     try {
       setIsLoading(true);
-      // Simulate API call delay for better UX
-      await new Promise(resolve => setTimeout(resolve, 800));
       
+      // Load products from backend API instead of localStorage
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/products`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const products = data.products || data.data || data;
+        
+        // Enhance products with additional properties
+        const enhancedProducts = products.map(product => ({
+          ...product,
+          id: product._id || product.id, // Ensure we have an id field
+          rating: product.rating || product.averageRating || null,
+          sold: product.sold || product.totalSales || null,
+          isNew: product.isNew || false,
+          stock: product.stock || 0,
+          discount: product.discount || 0,
+          showSoldNumbers: product.showSoldNumbers !== false // Default to true unless explicitly disabled
+        }));
+        
+        setProducts(enhancedProducts);
+        setFilteredProducts(enhancedProducts);
+      } else {
+        // Fallback to localStorage if API fails
+        console.warn('Failed to load from API, falling back to localStorage');
+        const localProducts = localStorage.getItem('admin-products');
+        if (localProducts) {
+          const parsedProducts = JSON.parse(localProducts);
+          const enhancedProducts = parsedProducts.map(product => ({
+            ...product,
+            rating: product.rating || null,
+            sold: product.sold || null,
+            isNew: product.isNew || false,
+            stock: product.stock || 0,
+            discount: product.discount || null,
+            showSoldNumbers: product.showSoldNumbers !== false
+          }));
+          setProducts(enhancedProducts);
+          setFilteredProducts(enhancedProducts);
+        }
+      }
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error loading products:', error);
+      // Fallback to localStorage on network error
       const localProducts = localStorage.getItem('admin-products');
       if (localProducts) {
         const parsedProducts = JSON.parse(localProducts);
-        // Use products as they are without fake data
         const enhancedProducts = parsedProducts.map(product => ({
           ...product,
           rating: product.rating || null,
@@ -83,14 +130,11 @@ export default function Store() {
           isNew: product.isNew || false,
           stock: product.stock || 0,
           discount: product.discount || null,
-          showSoldNumbers: product.showSoldNumbers !== false // Default to true unless explicitly disabled
+          showSoldNumbers: product.showSoldNumbers !== false
         }));
         setProducts(enhancedProducts);
         setFilteredProducts(enhancedProducts);
       }
-      setIsLoading(false);
-    } catch (error) {
-      console.error('Error loading products:', error);
       setIsLoading(false);
     }
   };
