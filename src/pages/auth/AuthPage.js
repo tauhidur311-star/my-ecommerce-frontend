@@ -149,9 +149,9 @@ export default function AuthPage() {
             <InputField name="name" type="text" placeholder="John Doe" value={formData.name} onChange={handleInputChange} Icon={User} required />
             <InputField name="email" type="email" placeholder="your@email.com" value={formData.email} onChange={handleInputChange} Icon={Mail} required />
             <InputField name="phone" type="tel" placeholder="+880 1XXX-XXXXXX" value={formData.phone} onChange={handleInputChange} Icon={Phone} />
-            <InputField name="password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={formData.password} onChange={handleInputChange} Icon={Lock} required showPasswordToggle={{ showPassword, setShowPassword }} />
+            <InputField name="password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={formData.password} onChange={handleInputChange} Icon={Lock} required showPasswordToggle={{ showPassword, setShowPassword }}/>
             <InputField name="confirmPassword" type="password" placeholder="••••••••" value={formData.confirmPassword} onChange={handleInputChange} Icon={Lock} required />
-            <button type="submit" disabled={loading} className="w-full btn-primary">{loading ? 'Creating Account...' : 'Create Account'}</button>
+            <button type="submit" disabled={loading} className="w-full text-white font-semibold py-3 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-all duration-300">{loading ? 'Creating Account...' : 'Create Account'}</button>
           </form>
         );
       case 'forgotPassword':
@@ -159,16 +159,16 @@ export default function AuthPage() {
           <form onSubmit={handleResetPassword} className="space-y-4">
             <p className="text-sm text-gray-600">Enter your email to receive a password reset OTP.</p>
             <InputField name="email" type="email" placeholder="your@email.com" value={formData.email} onChange={handleInputChange} Icon={Mail} required />
-            <button type="submit" disabled={loading} className="w-full btn-primary">{loading ? 'Sending...' : 'Send OTP'}</button>
+            <button type="submit" disabled={loading} className="w-full text-white font-semibold py-3 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-all duration-300">{loading ? 'Sending...' : 'Send OTP'}</button>
           </form>
         );
       case 'resetPassword':
         return (
           <form onSubmit={handleResetPassword} className="space-y-4">
             <InputField name="email" type="email" value={formData.email} Icon={Mail} readOnly />
-            <InputField name="otp" type="text" placeholder="123456" value={formData.otp} onChange={handleInputChange} Icon={Lock} required />
+            <InputField name="otp" type="text" placeholder="123456" value={formData.otp} onChange={handleInputChange} Icon={Lock} required/>
             <InputField name="password" type="password" placeholder="New Password" value={formData.password} onChange={handleInputChange} Icon={Lock} required />
-            <button type="submit" disabled={loading} className="w-full btn-primary">{loading ? 'Resetting...' : 'Reset Password'}</button>
+            <button type="submit" disabled={loading} className="w-full text-white font-semibold py-3 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-all duration-300">{loading ? 'Resetting...' : 'Reset Password'}</button>
           </form>
         );
       default: // login
@@ -176,8 +176,8 @@ export default function AuthPage() {
           <form onSubmit={handleLogin} className="space-y-4">
             {/* Login fields */}
             <InputField name="email" type="email" placeholder="your@email.com" value={formData.email} onChange={handleInputChange} Icon={Mail} required />
-            <InputField name="password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={formData.password} onChange={handleInputChange} Icon={Lock} required showPasswordToggle={{ showPassword, setShowPassword }} />            <div className="text-sm text-right"><Link to="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">Forgot password?</Link></div>
-            <button type="submit" disabled={loading} className="w-full btn-primary">{loading ? 'Logging in...' : 'Login'}</button>
+            <InputField name="password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={formData.password} onChange={handleInputChange} Icon={Lock} required showPasswordToggle={{ showPassword, setShowPassword }}/>            <div className="text-sm text-right"><Link to="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">Forgot password?</Link></div>
+            <button type="submit" disabled={loading} className="w-full text-white font-semibold py-3 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-all duration-300">{loading ? 'Logging in...' : 'Login'}</button>
           </form>
         );
     }
