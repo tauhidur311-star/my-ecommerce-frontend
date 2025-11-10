@@ -116,55 +116,56 @@ export default function Store() {
   };
 
   const handleCheckout = async () => {
+    // If the user is not logged in, redirect them to the login page first.
     if (!user) {
       navigate('/login');
       return;
     }
 
-    // --- Checkout Validation ---
+    // --- All logic that requires a user is now safely inside this block ---
+    // First, validate that the user's profile is complete.
     const requiredFields = ['name', 'address', 'phone', 'province'];
     const missingFields = requiredFields.filter(field => !user[field]);
 
     if (missingFields.length > 0) {
       toast.error('Please complete your profile before checking out.');
-      // Redirect to the dashboard to complete profile
-      navigate('/dashboard');
-      return;
-    }
-    // --- End Validation ---
-
-    try {
-      await fetch(`${process.env.REACT_APP_API_URL}/api/orders`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }, body: JSON.stringify({
-        items: cart.map(item => ({
-          productId: item.id,
-          quantity: item.quantity,
-          size: item.selectedSize,
-        })),
-        shippingAddress: {
-          name: user.name,
-          phone: user.phone,
-          address: user.address,
-          city: user.province, // Using province as the city
-          zipCode: ''
-        },
-        paymentMethod: 'cod'
-      })});
-      
-      // Clear cart after successful order
-      setCart([]);
-      localStorage.removeItem('cart');
-      
-      alert('Order placed successfully!');
-      setShowCart(false);
-    } catch (error) {
-      console.error('Failed to place order', error);
+      navigate('/dashboard'); // Redirect to the dashboard to complete profile.
+    } else {
+      // If the profile is complete, proceed to create the order.
+      try {
+        await fetch(`${process.env.REACT_APP_API_URL}/api/orders`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }, body: JSON.stringify({
+          items: cart.map(item => ({
+            productId: item.id,
+            quantity: item.quantity,
+            size: item.selectedSize,
+          })),
+          shippingAddress: {
+            name: user.name,
+            phone: user.phone,
+            address: user.address,
+            city: user.province, // Using province as the city
+            zipCode: ''
+          },
+          paymentMethod: 'cod'
+        })});
+        
+        // Clear cart after successful order
+        setCart([]);
+        localStorage.removeItem('cart');
+        
+        alert('Order placed successfully!');
+        setShowCart(false);
+      } catch (error) {
+        console.error('Failed to place order', error);
+        toast.error('There was an issue placing your order.');
+      }
     }
   };
 
   // Add token restoration on component mount
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (token) {      
+    if (token) {
       const savedUser = localStorage.getItem('user');
       if (savedUser) {
         setUser(JSON.parse(savedUser));
