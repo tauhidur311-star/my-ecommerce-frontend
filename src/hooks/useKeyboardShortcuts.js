@@ -26,10 +26,6 @@ const useKeyboardShortcuts = ({
       { keys: 'Ctrl + ?', action: 'Show This Help' }
     ];
 
-    const helpContent = shortcuts
-      .map(shortcut => `${shortcut.keys}: ${shortcut.action}`)
-      .join('\n');
-
     // Create a custom toast with longer duration for shortcuts help
     toast(
       (t) => (
@@ -155,6 +151,10 @@ const useKeyboardShortcuts = ({
             showShortcutsHelp();
           }
           break;
+          
+        default:
+          // No action for other keys
+          break;
       }
     }
 
@@ -186,6 +186,10 @@ const useKeyboardShortcuts = ({
           if (currentIndexRight < tabsRight.length - 1) {
             onToggleTab(tabsRight[currentIndexRight + 1]);
           }
+          break;
+          
+        default:
+          // No action for other arrow keys
           break;
       }
     }

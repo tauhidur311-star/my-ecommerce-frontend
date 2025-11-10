@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   TrendingUp, TrendingDown, DollarSign, Users, Package, 
-  ShoppingCart, Eye, Download, Calendar, Filter, BarChart3 
+  ShoppingCart, Eye, Download, BarChart3 
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -12,7 +12,7 @@ const AdvancedAnalytics = () => {
 
   useEffect(() => {
     loadAnalyticsData();
-  }, [timeRange]);
+  }, [timeRange]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadAnalyticsData = async () => {
     setLoading(true);
