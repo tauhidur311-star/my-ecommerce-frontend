@@ -118,7 +118,7 @@ const NotificationPanel = ({ isOpen, onClose }) => {
                   onClick={markAllAsRead}
                   className="flex items-center gap-1 px-3 py-1 text-xs bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                 >
-                  <MarkAsRead size={14} />
+                  <Check size={14} />
                   Mark all read
                 </button>
               )}

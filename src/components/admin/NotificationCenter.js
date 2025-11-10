@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Bell, AlertCircle, CheckCircle, Info, 
-  X, Trash2, MarkAsRead, Send, Users,
+  X, Trash2, Check, Send, Users,
   Package, TrendingUp, Settings, Clock
 } from 'lucide-react';
 import toast from 'react-hot-toast';
