@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Settings, ShoppingCart, X, Menu, LogIn, LogOut, User, Info, Mail } from 'lucide-react';
+import { Search, Settings, ShoppingCart, X, Menu, LogIn, LogOut, User, Info, Mail, Shield } from 'lucide-react';
 import NavbarDropdown from './NavbarDropdown';
 
 // Mock configuration - in a real app, this would be fetched from an API
@@ -48,6 +48,11 @@ const Navbar = ({ user, cartCount, onLogout, onLogin, onCartClick }) => {
           <Link to="/dashboard" className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-200 hover:bg-white/10">
             <User size={16} /> Dashboard
           </Link>
+          {user.role === 'admin' && (
+            <Link to="/admin" className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-200 hover:bg-white/10">
+              <Shield size={16} /> Admin Dashboard
+            </Link>
+          )}
           <button onClick={onLogout} className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-red-400 hover:bg-white/10">
             <LogOut size={16} /> Logout
           </button>

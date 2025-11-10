@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Plus, Edit2, Trash2, Save, X, Upload, Package, Grid, Tag, List, Store as StoreIcon, Expand, Loader2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, Upload, Package, Grid, Tag, List, Store as StoreIcon, Expand, Loader2, Settings } from 'lucide-react';
 import ImageCropper from '../../components/ImageCropper';
 import Silk from '../../components/Silk';
 
@@ -97,6 +97,16 @@ export default function AdminDashboard() {
   const [editingImage, setEditingImage] = useState({ url: '', index: -1, originalWidth: 0, originalHeight: 0 });
   const [resizeScale, setResizeScale] = useState(100);
   const [isResizing, setIsResizing] = useState(false);
+  const [storeSettings, setStoreSettings] = useState({
+    logoUrl: '',
+    brandName: '',
+    links: [],
+    settingsMenu: {
+      about: { text: '', href: '/about' },
+      contact: { text: '', href: '/contact' }
+    }
+  });
+  const [activeTab, setActiveTab] = useState('products'); // 'products' or 'settings'
 
   // Load products from storage
   useEffect(() => {
@@ -111,8 +121,22 @@ export default function AdminDashboard() {
         setProducts([]);
       }
     };
+    const loadSettings = async () => {
+      try {
+        const result = await window.storage.get('store-settings');
+        if (result) {
+          setStoreSettings(JSON.parse(result.value));
+        } else {
+          // Set default if not found
+          setStoreSettings({ logoUrl: 'https://raw.githubusercontent.com/user-attachments/assets/5363c127-4f63-421c-a283-1b39332ae28c/react-bits-logo.svg', brandName: 'React Bits', links: [{ text: 'Products', href: '/' }], settingsMenu: { about: { text: 'About Us', href: '/about' }, contact: { text: 'Contact Us', href: '/contact' } } });
+        }
+      } catch (error) {
+        console.error('Error loading settings:', error);
+      }
+    };
 
     loadProducts();
+    loadSettings();
   }, []);
 
   const saveProducts = async (updatedProducts) => {
@@ -122,6 +146,16 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error('Error saving products:', error);
       alert('Failed to save products');
+    }
+  };
+
+  const handleSettingsSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await window.storage.set('store-settings', JSON.stringify(storeSettings));
+      toast.success('Store settings updated successfully!');
+    } catch (error) {
+      toast.error('Failed to save settings.');
     }
   };
 

@@ -1,7 +1,6 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import SearchFilters from '../../components/SearchFilters';
 import ProductSkeleton from '../../components/ProductSkeleton';
 import ZoomableImage from '../../components/ZoomableImage';
 import Silk from '../../components/Silk';
@@ -205,16 +204,6 @@ export default function Store() {
         onLogout={() => setShowLogoutConfirm(true)}
         onLogin={handleAuth}
         onCartClick={() => setShowCart(true)}
-      />
-
-      <SearchFilters
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        selectedCategory={selectedCategory}
-        setSelectedCategory={setSelectedCategory}
-        sortBy={sortBy}
-        setSortBy={setSortBy}
-        products={products}
       />
 
       {/* Products Grid */}
