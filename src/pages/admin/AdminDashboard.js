@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Edit2, Trash2, Save, X, Upload, Package, Grid, Tag, List, Store as StoreIcon } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, Upload, Package, Grid, Tag, List, Store as StoreIcon, Image as ImageIcon, Resize } from 'lucide-react';
 import ImageCropper from '../../components/ImageCropper';
 
 const IMGBB_API_KEY = 'YOUR_API_KEY_HERE'; // Replace with your ImageBB API key
@@ -83,7 +83,7 @@ export default function AdminDashboard() {
     description: '',
     price: '',
     category: 'casual',
-    image: '',
+    images: [], // Changed from image: '' to images: []
     inStock: true,
     stock: 0,
     sizes: [],
@@ -91,9 +91,9 @@ export default function AdminDashboard() {
   });
   const [showImageCropper, setShowImageCropper] = useState(false);
   const [tempImage, setTempImage] = useState(null);
-  const [imageSize, setImageSize] = useState({ width: 800, height: 600 });
   const [showImageEditor, setShowImageEditor] = useState(false);
-  const [tempImageUrl, setTempImageUrl] = useState('');
+  const [editingImage, setEditingImage] = useState({ url: '', index: -1, originalWidth: 0, originalHeight: 0 });
+  const [resizeScale, setResizeScale] = useState(100);
 
   // Load products from storage
   useEffect(() => {
@@ -151,19 +151,21 @@ export default function AdminDashboard() {
     const { name, type, files } = e.target;
 
     if (type === 'file') {
-      const file = files[0];
-      if (file) {
-        try {
-          validateFile(file); // Use validateFile here
-          setFormData(prev => ({ ...prev, imageLoading: true }));
-          
-          const imageUrl = await uploadToImageBB(file); // Use uploadToImageBB here
-          setShowImageCropper(true);
-          setTempImage(imageUrl);
-        } catch (error) {
-          alert(error.message);
-          setFormData(prev => ({ ...prev, imageLoading: false }));
-        }
+      if (files.length > 0) {
+        setFormData(prev => ({ ...prev, imageLoading: true }));
+        const uploadPromises = Array.from(files).map(file => {
+          try {
+            validateFile(file);
+            return uploadToImageBB(file);
+          } catch (error) {
+            toast.error(`Error with ${file.name}: ${error.message}`);
+            return Promise.resolve(null);
+          }
+        });
+
+        const urls = (await Promise.all(uploadPromises)).filter(Boolean);
+        setFormData(prev => ({ ...prev, images: [...prev.images, ...urls], imageLoading: false }));
+        toast.success(`${urls.length} image(s) uploaded!`);
       }
     } else {
       setFormData(prev => ({
@@ -195,11 +197,7 @@ export default function AdminDashboard() {
       const data = await response.json();
       
       if (data.success) {
-        setFormData(prev => ({
-          ...prev,
-          image: data.data.url,
-          imageLoading: false
-        }));
+        setFormData(prev => ({ ...prev, images: [...prev.images, data.data.url], imageLoading: false }));
       }
     } catch (error) {
       console.error('Error processing image:', error);
@@ -222,7 +220,7 @@ export default function AdminDashboard() {
     try {
       const productToSave = {
         ...formData,
-        id: editingProduct ? editingProduct.id : Date.now(),
+        id: editingProduct ? editingProduct.id : Date.now().toString(),
         price: parseFloat(formData.price),
         stock: parseInt(formData.stock) || 0,
         createdAt: editingProduct ? editingProduct.createdAt : new Date().toISOString()
@@ -262,7 +260,7 @@ export default function AdminDashboard() {
       description: product.description || '',
       price: product.price,
       category: product.category,
-      image: product.image,
+      images: product.images || [],
       inStock: product.inStock,
       stock: product.stock,
       sizes: product.sizes || [],
@@ -285,7 +283,7 @@ export default function AdminDashboard() {
       description: '',
       price: '',
       category: 'casual',
-      image: '',
+      images: [],
       inStock: true,
       stock: 0,
       sizes: [], // Will now store array of size codes: ['S', 'M', 'L', etc.]
@@ -332,42 +330,73 @@ export default function AdminDashboard() {
 
   // Add this new function after validateFile
   const handleImageUrl = async (url) => {
-    try {
-      setTempImageUrl(url);
-      setShowImageEditor(true);
-    } catch (error) {
-      console.error('Error loading image:', error);
-      alert('Failed to load image from URL');
+    if (url && url.trim() !== '') {
+      setFormData(prev => ({ ...prev, images: [...prev.images, url.trim()] }));
     }
   };
 
-  // Add this function to handle image resizing
-  const handleImageResize = async () => {
-    try {
-      const img = new Image();
-      img.crossOrigin = 'Anonymous';
-      
-      await new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = reject;
-        img.src = tempImageUrl;
+  const openImageEditor = (imageUrl, index) => {
+    const img = new Image();
+    img.onload = () => {
+      setEditingImage({
+        url: imageUrl,
+        index: index,
+        originalWidth: img.width,
+        originalHeight: img.height,
+        width: img.width,
+        height: img.height,
       });
+      setResizeScale(100);
+      setShowImageEditor(true);
+    };
+    img.onerror = () => {
+      toast.error("Could not load image to resize.");
+    };
+    img.src = imageUrl;
+  };
 
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      
-      canvas.width = imageSize.width;
-      canvas.height = imageSize.height;
-      
-      ctx.drawImage(img, 0, 0, imageSize.width, imageSize.height);
-      
-      const resizedImageUrl = canvas.toDataURL('image/jpeg', 0.9);
-      setFormData(prev => ({ ...prev, image: resizedImageUrl }));
+  const handleScaleChange = (e) => {
+    const scale = e.target.value;
+    setResizeScale(scale);
+    setEditingImage(prev => ({
+      ...prev,
+      width: Math.round(prev.originalWidth * (scale / 100)),
+      height: Math.round(prev.originalHeight * (scale / 100)),
+    }));
+  };
+
+  const handleDimensionChange = (e) => {
+    const { name, value } = e.target;
+    const newDim = parseInt(value, 10) || 0;
+    const otherDim = name === 'width' ? 'height' : 'width';
+    const ratio = editingImage.originalHeight / editingImage.originalWidth;
+
+    setEditingImage(prev => ({
+      ...prev,
+      [name]: newDim,
+      [otherDim]: Math.round(name === 'width' ? newDim * ratio : newDim / ratio),
+    }));
+    // This is tricky, scale slider won't be perfectly in sync if user types manually
+  };
+
+  const handleApplyResize = () => {
+    const { url, width, height } = editingImage;
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.crossOrigin = "Anonymous";
+    img.onload = () => {
+      canvas.width = width;
+      canvas.height = height;
+      ctx.drawImage(img, 0, 0, width, height);
+      const resizedImageUrl = canvas.toDataURL('image/jpeg');
+      const newImages = [...formData.images];
+      newImages[editingImage.index] = resizedImageUrl;
+      setFormData(prev => ({ ...prev, images: newImages }));
       setShowImageEditor(false);
-    } catch (error) {
-      console.error('Error resizing image:', error);
-      alert('Failed to resize image');
-    }
+      toast.success('Image resized!');
+    };
+    img.src = url;
   };
 
   return (
@@ -649,23 +678,35 @@ export default function AdminDashboard() {
                   Product Image
                 </label>
                 <div className="space-y-4">
-                  {/* Image Preview */}
-                  {formData.image && (
-                    <div className="relative w-full">
-                      <img
-                        src={formData.image}
-                        alt="Preview"
-                        className="w-full h-48 object-cover rounded-lg"
-                      />
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setFormData(prev => ({ ...prev, image: '' }));
-                        }}
-                        className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full"
-                      >
-                        <X size={16} />
-                      </button>
+                  {/* Image Gallery Preview */}
+                  {formData.images.length > 0 && (
+                    <div className="grid grid-cols-3 gap-4">
+                      {formData.images.map((img, index) => (
+                        <div key={index} className="relative group">
+                          <img src={img} alt={`Preview ${index + 1}`} className="w-full h-32 object-cover rounded-lg border" />
+                          <div className="absolute top-1 right-1 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newImages = formData.images.filter((_, i) => i !== index);
+                                setFormData(prev => ({ ...prev, images: newImages }));
+                              }}
+                              className="bg-red-500 text-white p-1 rounded-full shadow-md hover:bg-red-600"
+                              title="Remove Image"
+                            >
+                              <X size={14} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => openImageEditor(img, index)}
+                              className="bg-blue-500 text-white p-1 rounded-full shadow-md hover:bg-blue-600"
+                              title="Resize Image"
+                            >
+                              <Resize size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
 
@@ -681,7 +722,7 @@ export default function AdminDashboard() {
                           <input
                             type="file"
                             name="image"
-                            accept="image/*"
+                            accept="image/*" multiple
                             onChange={handleInputChange}
                             className="hidden"
                             id="imageInput"
@@ -698,7 +739,10 @@ export default function AdminDashboard() {
                             type="url"
                             placeholder="Or paste image URL here"
                             className="flex-1 px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                            onBlur={(e) => handleImageUrl(e.target.value)}
+                            onBlur={(e) => {
+                              handleImageUrl(e.target.value);
+                              e.target.value = ''; // Clear after adding
+                            }}
                             onKeyPress={(e) => {
                               if (e.key === 'Enter') {
                                 e.preventDefault();
@@ -810,42 +854,49 @@ export default function AdminDashboard() {
       {/* Image Resizer Editor - Add this section */}
       {showImageEditor && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full m-4">
+          <div className="bg-white rounded-lg p-6 max-w-3xl w-full m-4">
             <h3 className="text-lg font-bold mb-4">Adjust Image Size</h3>
             
             <div className="space-y-4">
-              <div className="flex gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Width</label>
-                  <input
-                    type="number"
-                    value={imageSize.width}
-                    onChange={(e) => setImageSize(prev => ({ ...prev, width: Number(e.target.value) }))
-                    }
-                    className="w-full px-3 py-2 border rounded-lg"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Height</label>
-                  <input
-                    type="number"
-                    value={imageSize.height}
-                    onChange={(e) => setImageSize(prev => ({ ...prev, height: Number(e.target.value) }))
-                    }
-                    className="w-full px-3 py-2 border rounded-lg"
-                  />
-                </div>
-              </div>
-              
-              <div className="border rounded-lg p-2">
+              <div className="border rounded-lg p-2 bg-gray-100 flex justify-center items-center" style={{ minHeight: '300px' }}>
                 <img
-                  src={tempImageUrl}
+                  src={editingImage.url}
                   alt="Preview"
-                  className="max-w-full h-auto"
-                  style={{ maxHeight: '400px', objectFit: 'contain' }}
+                  className="max-w-full max-h-full"
+                  style={{ maxHeight: '50vh', objectFit: 'contain' }}
                 />
               </div>
               
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Scale ({resizeScale}%)</label>
+                  <input
+                    type="range"
+                    min="10"
+                    max="200"
+                    value={resizeScale}
+                    onChange={handleScaleChange}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700">Width</label>
+                    <input
+                      type="number" name="width" value={editingImage.width} onChange={handleDimensionChange}
+                      className="w-full px-2 py-1 border rounded-lg text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700">Height</label>
+                    <input
+                      type="number" name="height" value={editingImage.height} onChange={handleDimensionChange}
+                      className="w-full px-2 py-1 border rounded-lg text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+
               <div className="flex justify-end gap-2">
                 <button
                   type="button"
@@ -856,7 +907,7 @@ export default function AdminDashboard() {
                 </button>
                 <button
                   type="button"
-                  onClick={handleImageResize}
+                  onClick={handleApplyResize}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
                   Apply
