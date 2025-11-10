@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Plus, Edit2, Trash2, Save, X, Upload, Package, Grid, Tag, List, Store as StoreIcon, Image as ImageIcon, Resize } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, Upload, Package, Grid, Tag, List, Store as StoreIcon, Image as ImageIcon, Expand } from 'lucide-react';
 import ImageCropper from '../../components/ImageCropper';
 
 const IMGBB_API_KEY = 'YOUR_API_KEY_HERE'; // Replace with your ImageBB API key
@@ -703,7 +703,7 @@ export default function AdminDashboard() {
                               className="bg-blue-500 text-white p-1 rounded-full shadow-md hover:bg-blue-600"
                               title="Resize Image"
                             >
-                              <Resize size={14} />
+                              <Expand size={14} />
                             </button>
                           </div>
                         </div>
