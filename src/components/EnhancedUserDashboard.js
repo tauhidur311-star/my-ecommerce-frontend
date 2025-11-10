@@ -137,7 +137,16 @@ export default function EnhancedUserDashboard() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar />
+        <Navbar 
+          user={null}
+          cart={[]}
+          onLogout={() => {}}
+          onLogin={() => {}}
+          onCartClick={() => {}}
+          onCheckout={() => {}}
+          onSearch={() => {}}
+          products={[]}
+        />
         <div className="pt-28 flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -150,7 +159,16 @@ export default function EnhancedUserDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      <Navbar 
+        user={null}
+        cart={[]}
+        onLogout={() => {}}
+        onLogin={() => {}}
+        onCartClick={() => {}}
+        onCheckout={() => {}}
+        onSearch={() => {}}
+        products={[]}
+      />
       <Toaster position="bottom-center" />
       
       <div className="container mx-auto px-4 py-8 pt-28">

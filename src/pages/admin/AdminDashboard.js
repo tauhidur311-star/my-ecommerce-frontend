@@ -89,7 +89,10 @@ export default function AdminDashboard() {
     inStock: true,
     stock: 0,
     sizes: [],
-    colors: []
+    colors: [],
+    sold: 0,
+    showSoldNumbers: true,
+    rating: null
   });
   const [showImageCropper, setShowImageCropper] = useState(false);
   const [tempImage, setTempImage] = useState(null);

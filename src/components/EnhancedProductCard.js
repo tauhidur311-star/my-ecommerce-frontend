@@ -142,7 +142,7 @@ export default function EnhancedProductCard({
         </div>
 
         {/* Sales Info */}
-        {product.sold && (
+        {(product.sold && product.showSoldNumbers) && (
           <div className="flex items-center gap-2 mb-3">
             <div className="flex items-center gap-1">
               <Star size={14} className="text-green-500" />
@@ -150,22 +150,24 @@ export default function EnhancedProductCard({
                 {product.sold} sold
               </span>
             </div>
-            {product.rating && (
-              <div className="flex items-center gap-1">
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star 
-                      key={i} 
-                      size={12} 
-                      className={`${i < Math.floor(product.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
-                    />
-                  ))}
-                </div>
-                <span className="text-xs text-gray-500">
-                  {product.rating}
-                </span>
-              </div>
-            )}
+          </div>
+        )}
+        
+        {/* Rating Info */}
+        {product.rating && (
+          <div className="flex items-center gap-1 mb-3">
+            <div className="flex">
+              {[...Array(5)].map((_, i) => (
+                <Star 
+                  key={i} 
+                  size={14} 
+                  className={`${i < Math.floor(product.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
+                />
+              ))}
+            </div>
+            <span className="text-sm text-gray-500 ml-1">
+              {product.rating}
+            </span>
           </div>
         )}
 

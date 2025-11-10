@@ -75,14 +75,15 @@ export default function Store() {
       const localProducts = localStorage.getItem('admin-products');
       if (localProducts) {
         const parsedProducts = JSON.parse(localProducts);
-        // Enhance products with additional properties for better UX
+        // Use products as they are without fake data
         const enhancedProducts = parsedProducts.map(product => ({
           ...product,
-          rating: product.rating || (Math.random() * 2 + 3).toFixed(1), // Random rating 3-5
-          sold: product.sold || Math.floor(Math.random() * 500 + 10), // Random sold numbers 10-510
-          isNew: product.isNew || Math.random() > 0.8, // 20% chance of being new
-          stock: product.stock || Math.floor(Math.random() * 20 + 1), // Random stock 1-20
-          discount: product.discount || (Math.random() > 0.7 ? Math.floor(Math.random() * 30 + 10) : null)
+          rating: product.rating || null,
+          sold: product.sold || null,
+          isNew: product.isNew || false,
+          stock: product.stock || 0,
+          discount: product.discount || null,
+          showSoldNumbers: product.showSoldNumbers !== false // Default to true unless explicitly disabled
         }));
         setProducts(enhancedProducts);
         setFilteredProducts(enhancedProducts);
@@ -395,7 +396,7 @@ export default function Store() {
                   key={product.id}
                   product={product}
                   index={index}
-                  onProductClick={setSelectedProduct}
+                  onProductClick={handleQuickView}
                   onQuickView={handleQuickView}
                   onAddToWishlist={handleWishlistToggle}
                   isWishlisted={isInWishlist(product.id)}

@@ -61,7 +61,7 @@ export default function EnhancedSearchModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center pt-20">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 animate-scale-in">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 animate-scale-in border border-gray-200">
         {/* Header */}
         <div className="flex items-center gap-4 p-6 border-b border-gray-200">
           <div className="relative flex-1">
@@ -75,9 +75,11 @@ export default function EnhancedSearchModal({
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   handleSearch(query);
+                } else if (e.key === 'Escape') {
+                  onClose();
                 }
               }}
-              className="w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors bg-gray-50 focus:bg-white"
+              className="w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors bg-gradient-to-r from-gray-50 to-blue-50 focus:from-white focus:to-white shadow-inner"
             />
           </div>
           <button
@@ -176,10 +178,21 @@ export default function EnhancedSearchModal({
         </div>
 
         {/* Footer */}
-        <div className="p-4 bg-gray-50 rounded-b-2xl">
-          <div className="flex items-center justify-between text-sm text-gray-500">
-            <span>Press Enter to search</span>
-            <span>ESC to close</span>
+        <div className="p-4 bg-gradient-to-r from-gray-50 to-blue-50 rounded-b-2xl border-t border-gray-100">
+          <div className="flex items-center justify-between text-sm text-gray-600">
+            <div className="flex items-center gap-4">
+              <span className="flex items-center gap-1">
+                <kbd className="px-2 py-1 bg-white rounded border text-xs font-mono">↵</kbd>
+                Search
+              </span>
+              <span className="flex items-center gap-1">
+                <kbd className="px-2 py-1 bg-white rounded border text-xs font-mono">ESC</kbd>
+                Close
+              </span>
+            </div>
+            <span className="text-xs text-gray-500">
+              {products.length} products available
+            </span>
           </div>
         </div>
       </div>
