@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { User, MapPin, Save, ArrowLeft } from 'lucide-react';
+import { User, MapPin, Save, ArrowLeft, Package, Heart, Settings, Bell } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
+import OrderManagement from '../../components/OrderManagement';
+import WishlistManager from '../../components/WishlistManager';
 
 const bangladeshDivisions = [
   'Barisal',
@@ -22,6 +24,8 @@ export default function UserDashboard() {
     province: ''
   });
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('profile');
+  const [orders, setOrders] = useState([]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -133,56 +137,189 @@ export default function UserDashboard() {
     );
   }
 
+  const menuItems = [
+    { id: 'profile', title: 'Profile', icon: User },
+    { id: 'orders', title: 'Orders', icon: Package },
+    { id: 'wishlist', title: 'Wishlist', icon: Heart },
+    { id: 'settings', title: 'Settings', icon: Settings }
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
       <Toaster position="bottom-center" />
-      <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-6 sm:p-8 relative">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">My Dashboard</h1>
-          <Link to="/" className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-semibold">
+      
+      {/* Enhanced Header */}
+      <div className="max-w-6xl mx-auto mb-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">My Dashboard</h1>
+            <p className="text-gray-600 mt-1">Manage your account and track your orders</p>
+          </div>
+          <Link to="/" className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">
             <ArrowLeft size={18} />
             Back to Store
           </Link>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-              <input type="text" name="name" id="name" value={userData.name} onChange={handleInputChange} className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg" />
+      </div>
+
+      <div className="max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Sidebar Navigation */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl shadow-sm p-6 sticky top-8">
+              <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+                <Settings size={20} className="text-blue-600" />
+                Menu
+              </h2>
+              <nav className="space-y-2">
+                {menuItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
+                      activeTab === item.id
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : 'text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    <item.icon size={18} />
+                    <span className="font-medium">{item.title}</span>
+                  </button>
+                ))}
+              </nav>
             </div>
           </div>
-          <div>
-            <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">Billing Address</label>
-            <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-              <input type="text" name="address" id="address" value={userData.address} onChange={handleInputChange} className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg" />
+
+          {/* Main Content */}
+          <div className="lg:col-span-3">
+            <div className="bg-white rounded-xl shadow-sm p-6 min-h-[600px]">
+              {activeTab === 'profile' && (
+                <div>
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
+                      <User size={20} className="text-white" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900">Profile Settings</h2>
+                  </div>
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                        <div className="relative">
+                          <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                          <input 
+                            type="text" 
+                            name="name" 
+                            id="name" 
+                            value={userData.name} 
+                            onChange={handleInputChange} 
+                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                            placeholder="Enter your full name"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">Contact Number</label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                            <span>🇧🇩</span>
+                            <span className="ml-2">+880</span>
+                          </div>
+                          <input 
+                            type="tel" 
+                            name="phone" 
+                            id="phone" 
+                            value={userData.phone} 
+                            onChange={handleInputChange} 
+                            className="w-full pl-24 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                            placeholder="1XXXXXXXXX" 
+                            maxLength="11" 
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">Billing Address</label>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-3 text-gray-400" size={20} />
+                        <textarea 
+                          name="address" 
+                          id="address" 
+                          value={userData.address} 
+                          onChange={handleInputChange} 
+                          rows="3"
+                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                          placeholder="Enter your full address"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label htmlFor="province" className="block text-sm font-medium text-gray-700 mb-2">Province / Region</label>
+                      <select 
+                        name="province" 
+                        id="province" 
+                        value={userData.province} 
+                        onChange={handleInputChange} 
+                        className="w-full py-3 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                      >
+                        <option value="">Select a Division</option>
+                        {bangladeshDivisions.map(division => (
+                          <option key={division} value={division}>{division}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <button 
+                      type="submit" 
+                      disabled={loading} 
+                      className="w-full flex justify-center items-center gap-2 py-3 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                    >
+                      <Save size={20} />
+                      {loading ? 'Saving...' : 'Save Changes'}
+                    </button>
+                  </form>
+                </div>
+              )}
+
+              {activeTab === 'orders' && (
+                <div>
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center">
+                      <Package size={20} className="text-white" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900">Order History</h2>
+                  </div>
+                  <OrderManagement isAdmin={false} />
+                </div>
+              )}
+
+              {activeTab === 'wishlist' && (
+                <div>
+                  <WishlistManager isModal={false} />
+                </div>
+              )}
+
+              {activeTab === 'settings' && (
+                <div>
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center">
+                      <Settings size={20} className="text-white" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900">Account Settings</h2>
+                  </div>
+                  <div className="text-center py-12">
+                    <Settings size={48} className="mx-auto text-gray-400 mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">Settings Coming Soon</h3>
+                    <p className="text-gray-600">Additional account settings will be available in a future update.</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-          <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
-                <span>🇧🇩</span>
-                <span className="ml-2">+880</span>
-              </div>
-              <input type="tel" name="phone" id="phone" value={userData.phone} onChange={handleInputChange} className="w-full pl-24 pr-4 py-2 border border-gray-300 rounded-lg" placeholder="1XXXXXXXXX" maxLength="11" />
-            </div>
-          </div>
-          <div>
-            <label htmlFor="province" className="block text-sm font-medium text-gray-700 mb-1">Province / Region</label>
-            <select name="province" id="province" value={userData.province} onChange={handleInputChange} className="w-full py-2 px-3 border border-gray-300 rounded-lg bg-white">
-              <option value="">Select a Division</option>
-              {bangladeshDivisions.map(division => (
-                <option key={division} value={division}>{division}</option>
-              ))}
-            </select>
-          </div>
-          <button type="submit" disabled={loading} className="w-full flex justify-center items-center gap-2 py-3 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50">
-            <Save size={20} />
-            {loading ? 'Saving...' : 'Save Changes'}
-          </button>
-        </form>
+        </div>
       </div>
     </div>
   );
