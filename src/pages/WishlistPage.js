@@ -17,7 +17,6 @@ export default function WishlistPage() {
         const localProducts = localStorage.getItem('admin-products');
         if (localProducts) {
           const parsedProducts = JSON.parse(localProducts);
-          setProducts(parsedProducts);
           
           // Filter products that are in wishlist
           const wishlistItems = parsedProducts.filter(product => 
