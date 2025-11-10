@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Bell, Package, ShoppingCart, AlertCircle, CheckCircle, Info, X } from 'lucide-react';
+import { Bell, Package, AlertCircle, CheckCircle, Info, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const NotificationContext = createContext();

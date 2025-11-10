@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Package, AlertTriangle, TrendingUp, TrendingDown, Search, 
-  Filter, Download, RefreshCw, Plus, Edit2, BarChart3, Eye, 
-  ShoppingCart, Clock, CheckCircle, XCircle 
+  Download, RefreshCw, Edit2, BarChart3, Eye, 
+  CheckCircle, XCircle 
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useNotifications } from '../contexts/NotificationContext';
@@ -27,11 +27,11 @@ const InventoryManagement = () => {
 
   useEffect(() => {
     applyFilters();
-  }, [products, searchTerm, stockFilter, categoryFilter, sortBy]);
+  }, [products, searchTerm, stockFilter, categoryFilter, sortBy]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     checkLowStockAlerts();
-  }, [products, lowStockThreshold]);
+  }, [products, lowStockThreshold]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadProducts = async () => {
     setLoading(true);

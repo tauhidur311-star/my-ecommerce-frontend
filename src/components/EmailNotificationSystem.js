@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Mail, Send, Settings, Users, Package, ShoppingCart, 
-  Bell, Check, X, Edit2, Trash2, Eye, Calendar, Clock,
-  AlertCircle, CheckCircle, Info, Plus
+  Bell, X, Edit2, Trash2, Clock,
+  AlertCircle, CheckCircle, Plus
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -10,14 +10,14 @@ const EmailNotificationSystem = () => {
   const [activeTab, setActiveTab] = useState('templates');
   const [emailTemplates, setEmailTemplates] = useState([]);
   const [emailSettings, setEmailSettings] = useState({});
-  const [emailQueue, setEmailQueue] = useState([]);
+  // const [emailQueue, setEmailQueue] = useState([]);
   const [emailHistory, setEmailHistory] = useState([]);
   const [showTemplateForm, setShowTemplateForm] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState(null);
 
   useEffect(() => {
     loadEmailData();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadEmailData = () => {
     try {
