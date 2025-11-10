@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Plus, Edit2, Trash2, Save, X, Upload, Package, Grid, Tag, List, Store as StoreIcon, Expand, Loader2 } from 'lucide-react';
 import ImageCropper from '../../components/ImageCropper';
+import Silk from '../../components/Silk';
 
 const IMGBB_API_KEY = 'YOUR_API_KEY_HERE'; // Replace with your ImageBB API key
 const IMGBB_API_URL = 'https://api.imgbb.com/1/upload';
@@ -416,7 +417,17 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen">
+      <div className="fixed inset-0 -z-10">
+        <Silk
+          speed={3}
+          scale={1}
+          color="#D1D5DB"
+          noiseIntensity={1}
+          rotation={0.1}
+        />
+      </div>
+
       {/* Header */}
       <header className="bg-white shadow-md sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4">

@@ -5,6 +5,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import SearchFilters from '../../components/SearchFilters';
 import ProductSkeleton from '../../components/ProductSkeleton';
 import ZoomableImage from '../../components/ZoomableImage';
+import Silk from '../../components/Silk';
 
 const ProductModal = lazy(() => import('../../components/ProductModal'));
 const CartSidebar = lazy(() => import('../../components/CartSidebar'));
@@ -177,7 +178,17 @@ export default function Store() {
 
   // Wrap lazy-loaded components with Suspense
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
+      <div className="fixed inset-0 -z-10">
+        <Silk
+          speed={2}
+          scale={1.2}
+          color="#E5E7EB"
+          noiseIntensity={0.5}
+          rotation={0}
+        />
+      </div>
+
       {/* Navigation */}
       <nav className="bg-white shadow-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
