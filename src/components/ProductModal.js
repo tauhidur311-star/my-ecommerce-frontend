@@ -1,5 +1,5 @@
-import { useRef, useEffect } from 'react';
-import { X } from 'lucide-react';
+import React, { useRef, useEffect, useState } from 'react';
+import { X, Loader2 } from 'lucide-react';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 
 export default function ProductModal({
@@ -10,6 +10,7 @@ export default function ProductModal({
   addToCart,
   isAddingToCart
 }) {
+  const [mainImage, setMainImage] = useState((product.images && product.images[0]) || 'https://via.placeholder.com/400');
   const modalRef = useRef(null);
 
   // Handle click outside modal
@@ -65,11 +66,7 @@ export default function ProductModal({
                       wrapperClass="!w-full !h-full"
                       contentClass="!w-full !h-full"
                     >
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-full object-contain"
-                      />
+                      <img src={mainImage} alt={product.name} className="w-full h-full object-contain" />
                     </TransformComponent>
                     <div className="absolute bottom-4 right-4 flex gap-2">
                       <button
@@ -95,6 +92,19 @@ export default function ProductModal({
                 )}
               </TransformWrapper>
             </div>
+            {product.images && product.images.length > 1 && (
+              <div className="flex justify-center gap-2">
+                {product.images.map((img, index) => (
+                  <div
+                    key={index}
+                    className={`w-16 h-16 rounded-md cursor-pointer border-2 ${mainImage === img ? 'border-blue-500' : 'border-transparent'}`}
+                    onClick={() => setMainImage(img)}
+                  >
+                    <img src={img} alt={`Thumbnail ${index + 1}`} className="w-full h-full object-cover rounded" />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="max-w-2xl mx-auto">
@@ -124,8 +134,9 @@ export default function ProductModal({
               <button
                 onClick={() => addToCart(product, selectedSize)}
                 disabled={isAddingToCart || !selectedSize}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2"
               >
+                {isAddingToCart && <Loader2 className="animate-spin" size={20} />}
                 {isAddingToCart ? 'Adding...' : 'Add to Cart'}
               </button>
             </div>
