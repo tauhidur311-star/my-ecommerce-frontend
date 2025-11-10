@@ -7,7 +7,6 @@ import EnhancedProductCard from '../../components/EnhancedProductCard';
 import QuickViewModal from '../../components/QuickViewModal';
 import { ProductGridSkeleton } from '../../components/EnhancedProductSkeleton';
 import { useWishlist } from '../../hooks/useWishlist';
-import { APIService } from '../../services/api';
 import '../../styles/animations.css';
 
 const ProductModal = lazy(() => import('../../components/ProductModal'));
