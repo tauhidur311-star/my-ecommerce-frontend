@@ -8,6 +8,7 @@ import Silk from '../../components/Silk';
 // import { Input, Textarea, Select, Checkbox } from '../../components/ui/FormField';
 import OrderManagement from '../../components/OrderManagement';
 import AdvancedAnalytics from '../../components/AdvancedAnalytics';
+import useKeyboardShortcuts from '../../hooks/useKeyboardShortcuts';
 // import '../../styles/mobile-responsive.css';
 
 const IMGBB_API_KEY = 'YOUR_API_KEY_HERE'; // Replace with your ImageBB API key
@@ -119,6 +120,33 @@ export default function AdminDashboard() {
   // const [formErrors, setFormErrors] = useState({});
   // const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   // const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Keyboard shortcuts integration
+  const { showShortcutsHelp } = useKeyboardShortcuts({
+    onNewProduct: () => setShowForm(!showForm),
+    onSaveProduct: () => {
+      if (showForm) {
+        const form = document.querySelector('form');
+        if (form) form.requestSubmit();
+      }
+    },
+    onSearch: () => {
+      const searchInput = document.querySelector('input[type="search"], input[placeholder*="search" i]');
+      if (searchInput) searchInput.focus();
+    },
+    onToggleTab: (tab) => setActiveTab(tab),
+    onExportData: () => {
+      // Export current data as CSV
+      const dataToExport = activeTab === 'products' ? products : [];
+      const csvContent = generateCSV(dataToExport);
+      downloadCSV(csvContent, `${activeTab}-export.csv`);
+    },
+    onRefresh: () => {
+      window.location.reload();
+    },
+    isFormOpen: showForm,
+    currentTab: activeTab
+  });
 
   // Load products from storage
   useEffect(() => {
@@ -347,6 +375,32 @@ export default function AdminDashboard() {
   // Add a helper function to format price with Taka sign
   const formatPrice = (price) => {
     return `৳${price}`;
+  };
+
+  // CSV export functionality for keyboard shortcut
+  const generateCSV = (data) => {
+    if (data.length === 0) return '';
+    
+    const headers = Object.keys(data[0]).join(',');
+    const rows = data.map(item => 
+      Object.values(item).map(value => 
+        typeof value === 'string' ? `"${value.replace(/"/g, '""')}"` : value
+      ).join(',')
+    );
+    
+    return [headers, ...rows].join('\n');
+  };
+
+  const downloadCSV = (content, filename) => {
+    const blob = new Blob([content], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
   };
 
   // Add file validation
