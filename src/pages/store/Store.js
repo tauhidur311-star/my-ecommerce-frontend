@@ -142,9 +142,9 @@ export default function Store() {
         })),
         shippingAddress: {
           name: user.name,
-          phone: user.phone || '',
-          address: '',
-          city: '',
+          phone: user.phone,
+          address: user.address,
+          city: user.province, // Using province as the city
           zipCode: ''
         },
         paymentMethod: 'cod'
