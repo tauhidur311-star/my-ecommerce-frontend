@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { Heart, Package } from 'lucide-react';
+import { Heart } from 'lucide-react';
 
 const WishlistPage = React.lazy(() => import('../pages/WishlistPage'));
 

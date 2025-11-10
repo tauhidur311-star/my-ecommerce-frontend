@@ -9,7 +9,6 @@ export default function WishlistPage() {
   const { wishlist, removeFromWishlist, clearWishlist } = useWishlist();
   const [wishlistProducts, setWishlistProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [products, setProducts] = useState([]);
 
   useEffect(() => {
     // Load all products to match with wishlist IDs
@@ -19,7 +18,6 @@ export default function WishlistPage() {
         const localProducts = localStorage.getItem('admin-products');
         if (localProducts) {
           const parsedProducts = JSON.parse(localProducts);
-          setProducts(parsedProducts);
           
           // Filter products that are in wishlist
           const wishlistItems = parsedProducts.filter(product => 
@@ -48,7 +46,6 @@ export default function WishlistPage() {
               discount: null
             }
           ];
-          setProducts(sampleProducts);
           localStorage.setItem('admin-products', JSON.stringify(sampleProducts));
           
           // If wishlist has items, filter the sample products
