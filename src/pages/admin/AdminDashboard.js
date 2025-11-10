@@ -352,10 +352,12 @@ export default function AdminDashboard() {
           ? `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/products/${editingProduct.id || editingProduct._id}`
           : `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/products`;
         
+        const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+        
         const response = await fetch(apiEndpoint, {
           method: editingProduct ? 'PUT' : 'POST',
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('accessToken') || localStorage.getItem('token')}`,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(productToSave),
