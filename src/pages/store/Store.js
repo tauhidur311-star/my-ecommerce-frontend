@@ -1,10 +1,14 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import ProductSkeleton from '../../components/ProductSkeleton';
-import ZoomableImage from '../../components/ZoomableImage';
 import Silk from '../../components/Silk';
-import Navbar from '../../components/Navbar'; // Import the new Navbar
+import Navbar from '../../components/Navbar';
+import EnhancedProductCard from '../../components/EnhancedProductCard';
+import StoreFilters from '../../components/StoreFilters';
+import QuickViewModal from '../../components/QuickViewModal';
+import { ProductGridSkeleton, FilterSkeleton } from '../../components/EnhancedProductSkeleton';
+import { useWishlist } from '../../hooks/useWishlist';
+import '../../styles/animations.css';
 
 const ProductModal = lazy(() => import('../../components/ProductModal'));
 const CartSidebar = lazy(() => import('../../components/CartSidebar'));
@@ -25,6 +29,22 @@ export default function Store() {
   const [showAuth, setShowAuth] = useState(false);
   const [authMode, setAuthMode] = useState('login');
   const [authForm, setAuthForm] = useState({ name: '', email: '', password: '' });
+  
+  // Enhanced store state
+  const [showQuickView, setShowQuickView] = useState(false);
+  const [quickViewProduct, setQuickViewProduct] = useState(null);
+  const [sortBy, setSortBy] = useState('featured');
+  const [filters, setFilters] = useState({
+    category: 'all',
+    minPrice: 0,
+    maxPrice: 10000,
+    inStock: false,
+    onSale: false
+  });
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  
+  // Wishlist hook
+  const { wishlist, toggleWishlist, isInWishlist } = useWishlist();
 
   const handleLoginSuccess = (loggedInUser) => {
     setUser(loggedInUser);
@@ -46,14 +66,27 @@ export default function Store() {
   }, []);
 
 
-  // Update the loadProducts function
+  // Enhanced product loading with filtering
   const loadProducts = async () => {
     try {
-      // First try to load from local storage
+      setIsLoading(true);
+      // Simulate API call delay for better UX
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
       const localProducts = localStorage.getItem('admin-products');
       if (localProducts) {
         const parsedProducts = JSON.parse(localProducts);
-        setProducts(parsedProducts);
+        // Enhance products with additional properties for better UX
+        const enhancedProducts = parsedProducts.map(product => ({
+          ...product,
+          rating: product.rating || (Math.random() * 2 + 3).toFixed(1), // Random rating 3-5
+          reviews: product.reviews || Math.floor(Math.random() * 100 + 10), // Random reviews
+          isNew: product.isNew || Math.random() > 0.8, // 20% chance of being new
+          stock: product.stock || Math.floor(Math.random() * 20 + 1), // Random stock 1-20
+          discount: product.discount || (Math.random() > 0.7 ? Math.floor(Math.random() * 30 + 10) : null)
+        }));
+        setProducts(enhancedProducts);
+        setFilteredProducts(enhancedProducts);
       }
       setIsLoading(false);
     } catch (error) {
@@ -231,6 +264,97 @@ export default function Store() {
     }
   };
 
+  // Enhanced filtering and sorting logic
+  const applyFiltersAndSort = (products, searchQuery, filters, sortBy) => {
+    let filtered = [...products];
+
+    // Search filter
+    if (searchQuery) {
+      filtered = filtered.filter(product =>
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Category filter
+    if (filters.category !== 'all') {
+      filtered = filtered.filter(product => 
+        product.category?.toLowerCase() === filters.category.toLowerCase()
+      );
+    }
+
+    // Price filter
+    filtered = filtered.filter(product => 
+      product.price >= filters.minPrice && product.price <= filters.maxPrice
+    );
+
+    // Stock filter
+    if (filters.inStock) {
+      filtered = filtered.filter(product => product.stock > 0);
+    }
+
+    // Sale filter
+    if (filters.onSale) {
+      filtered = filtered.filter(product => product.discount > 0);
+    }
+
+    // Sorting
+    switch (sortBy) {
+      case 'price-low':
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case 'price-high':
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      case 'newest':
+        filtered.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+        break;
+      case 'popular':
+        filtered.sort((a, b) => (b.reviews || 0) - (a.reviews || 0));
+        break;
+      case 'rating':
+        filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        break;
+      default:
+        // Featured - no sorting needed
+        break;
+    }
+
+    return filtered;
+  };
+
+  // Update filtered products when products, search, filters, or sort change
+  useEffect(() => {
+    const filtered = applyFiltersAndSort(products, searchQuery, filters, sortBy);
+    setFilteredProducts(filtered);
+  }, [products, searchQuery, filters, sortBy]);
+
+  // Enhanced handlers
+  const handleQuickView = (product) => {
+    setQuickViewProduct(product);
+    setShowQuickView(true);
+  };
+
+  const handleWishlistToggle = (productId) => {
+    toggleWishlist(productId);
+    toast.success(
+      isInWishlist(productId) 
+        ? 'Removed from wishlist' 
+        : 'Added to wishlist'
+    );
+  };
+
+  const handleFilter = (newFilters) => {
+    setFilters(newFilters);
+  };
+
+  const handleSort = (newSortBy) => {
+    setSortBy(newSortBy);
+  };
+
+  // Get unique categories for filter
+  const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
+
   // Wrap lazy-loaded components with Suspense
   return (
     <div className="min-h-screen">
@@ -255,51 +379,68 @@ export default function Store() {
         onSearch={setSearchQuery}
       />
 
-      {/* Products Grid */}
+      {/* Enhanced Store Content */}
       <div className="container mx-auto px-4 py-8 pt-28">
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {[...Array(8)].map((_, i) => (
-              <ProductSkeleton key={i} />
-            ))}
-          </div>
+          <>
+            <FilterSkeleton />
+            <ProductGridSkeleton count={8} />
+          </>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {products
-              .filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
-              .map(product => (
-              <div 
-                key={product.id} 
-                className="bg-white rounded-lg shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition"
-                onClick={() => setSelectedProduct(product)}
-              >
-                <ZoomableImage
-                  src={(product.images && product.images[0]) || 'https://via.placeholder.com/300'}
-                  alt={product.name}
-                />
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold">{product.name}</h3>
-                  <p className="text-sm text-gray-500 mt-1 line-clamp-2">{product.description}</p>
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="text-xl font-bold">৳{product.price}</span>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedProduct(product);
-                      }}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                    >
-                      View Details
-                    </button>
-                  </div>
+          <>
+            {/* Enhanced Filters */}
+            <StoreFilters
+              products={products}
+              onFilter={handleFilter}
+              onSort={handleSort}
+              searchQuery={searchQuery}
+              onSearch={setSearchQuery}
+              categories={categories}
+              priceRange={[0, Math.max(...products.map(p => p.price || 0))]}
+            />
+
+            {/* Results Summary */}
+            <div className="flex items-center justify-between mb-6 text-sm text-gray-600">
+              <span>
+                Showing {filteredProducts.length} of {products.length} products
+                {searchQuery && ` for "${searchQuery}"`}
+              </span>
+              {filteredProducts.length === 0 && !isLoading && (
+                <div className="text-center w-full">
+                  <p className="text-gray-500">No products found. Try adjusting your filters.</p>
                 </div>
+              )}
+            </div>
+
+            {/* Enhanced Products Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredProducts.map((product, index) => (
+                <EnhancedProductCard
+                  key={product.id}
+                  product={product}
+                  index={index}
+                  onProductClick={setSelectedProduct}
+                  onQuickView={handleQuickView}
+                  onAddToWishlist={handleWishlistToggle}
+                  isWishlisted={isInWishlist(product.id)}
+                />
+              ))}
+            </div>
+
+            {/* Load More / Pagination could go here */}
+            {filteredProducts.length > 12 && (
+              <div className="text-center mt-12">
+                <button className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105">
+                  Load More Products
+                </button>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </div>
 
       {/* Wrap lazy-loaded components with Suspense */}
+      {/* Enhanced Modals */}
       <Suspense fallback={<div>Loading...</div>}>
         {selectedProduct && (
           <ProductModal
@@ -312,6 +453,18 @@ export default function Store() {
           />
         )}
       </Suspense>
+
+      {/* Quick View Modal */}
+      {showQuickView && quickViewProduct && (
+        <QuickViewModal
+          product={quickViewProduct}
+          onClose={() => setShowQuickView(false)}
+          onAddToCart={(product, size, quantity) => addToCart(product, size)}
+          onAddToWishlist={handleWishlistToggle}
+          isAddingToCart={isAddingToCart}
+          isWishlisted={isInWishlist(quickViewProduct.id)}
+        />
+      )}
 
       <Suspense fallback={<div>Loading...</div>}>
         {showCart && (
