@@ -1,10 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { APIService } from '../../services/api';
-import { useSocket } from '../../hooks/useSocket';
-import NotificationBell from '../../components/NotificationBell';
-import PaymentModal from '../../components/PaymentModal';
-import socketService from '../../services/socketService';
-import { toast } from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   User, MapPin, Save, ArrowLeft, Package, Heart, 
