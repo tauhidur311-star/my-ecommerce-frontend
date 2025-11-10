@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Store from './pages/store/Store';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AuthPage from './pages/auth/AuthPage';
-import EnhancedUserDashboard from './components/EnhancedUserDashboard';
+import UserDashboard from './pages/dashboard/UserDashboard';
 import LazyWishlistPage from './components/LazyWishlistPage';
 import AboutPage from './pages/store/AboutPage';
 import ContactPage from './pages/store/ContactPage';
@@ -26,7 +26,7 @@ function App() {
           path="/dashboard"
           element={
             <AuthenticatedRoute>
-              <EnhancedUserDashboard />
+              <UserDashboard />
             </AuthenticatedRoute>
           }
         />
