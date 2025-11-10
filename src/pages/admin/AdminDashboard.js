@@ -10,6 +10,8 @@ import OrderManagement from '../../components/OrderManagement';
 import AdvancedAnalytics from '../../components/AdvancedAnalytics';
 import useKeyboardShortcuts from '../../hooks/useKeyboardShortcuts';
 import DarkModeToggle from '../../components/DarkModeToggle';
+import NotificationProvider from '../../contexts/NotificationContext';
+import NotificationBell from '../../components/NotificationBell';
 // import '../../styles/mobile-responsive.css';
 
 const IMGBB_API_KEY = 'YOUR_API_KEY_HERE'; // Replace with your ImageBB API key
@@ -518,7 +520,8 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen">
+    <NotificationProvider>
+      <div className="min-h-screen">
       <div className="fixed inset-0 -z-10">
         <Silk
           speed={6.5}
@@ -560,6 +563,7 @@ export default function AdminDashboard() {
                 ⌨️
               </button>
               
+              <NotificationBell />
               <DarkModeToggle />
             </div>
           </div>
@@ -1147,6 +1151,7 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </NotificationProvider>
   );
 }
