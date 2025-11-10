@@ -18,6 +18,7 @@ export default function Store() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedSize, setSelectedSize] = useState('');
   const [user, setUser] = useState(null);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -101,14 +102,17 @@ export default function Store() {
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   const handleLogout = () => {
-    if (window.confirm('Are you sure you want to log out?')) {
-      setUser(null);
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      setCart([]);
-      localStorage.removeItem('cart');
-      toast.success('You have been logged out.');
-    }
+    setShowLogoutConfirm(true);
+  };
+
+  const confirmLogout = () => {
+    setUser(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setCart([]);
+    localStorage.removeItem('cart');
+    toast.success('You have been logged out.');
+    setShowLogoutConfirm(false);
   };
 
   const handleCheckout = async () => {
@@ -305,6 +309,13 @@ export default function Store() {
         )}
       </Suspense>
 
+      {showLogoutConfirm && (
+        <LogoutConfirmationDialog
+          onConfirm={confirmLogout}
+          onCancel={() => setShowLogoutConfirm(false)}
+        />
+      )}
+
       <BackToTop />
       <Toaster position="bottom-center" />
     </div>
@@ -338,4 +349,30 @@ const BackToTop = () => {
       </svg>
     </button>
   ) : null;
+};
+
+// Add this new component for the logout confirmation dialog
+const LogoutConfirmationDialog = ({ onConfirm, onCancel }) => {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-60 z-[100] flex justify-center items-center p-4">
+      <div className="bg-white p-6 sm:p-8 rounded-xl shadow-2xl text-center max-w-sm w-full">
+        <h2 className="text-xl font-bold mb-4 text-gray-800">Confirm Logout</h2>
+        <p className="text-gray-600 mb-8">Are you sure you want to log out?</p>
+        <div className="flex justify-center gap-4">
+          <button
+            onClick={onCancel}
+            className="px-6 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 font-semibold transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className="px-6 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 font-semibold transition-colors"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
