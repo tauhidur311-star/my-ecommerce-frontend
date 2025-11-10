@@ -9,17 +9,50 @@ export default function WishlistPage() {
   const { wishlist, removeFromWishlist, clearWishlist } = useWishlist();
   const [wishlistProducts, setWishlistProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState([]);
 
   useEffect(() => {
     // Load all products to match with wishlist IDs
-    const loadProducts = () => {
+    const loadProducts = async () => {
       try {
+        setLoading(true);
         const localProducts = localStorage.getItem('admin-products');
         if (localProducts) {
           const parsedProducts = JSON.parse(localProducts);
+          setProducts(parsedProducts);
           
           // Filter products that are in wishlist
           const wishlistItems = parsedProducts.filter(product => 
+            wishlist.includes(product.id)
+          );
+          setWishlistProducts(wishlistItems);
+        } else {
+          // Create some sample products if none exist
+          const sampleProducts = [
+            {
+              id: 1,
+              name: "Sample Product 1",
+              price: 1500,
+              images: ["https://via.placeholder.com/300"],
+              description: "This is a sample product for demonstration",
+              stock: 10,
+              discount: 20
+            },
+            {
+              id: 2,
+              name: "Sample Product 2", 
+              price: 2500,
+              images: ["https://via.placeholder.com/300"],
+              description: "Another sample product",
+              stock: 5,
+              discount: null
+            }
+          ];
+          setProducts(sampleProducts);
+          localStorage.setItem('admin-products', JSON.stringify(sampleProducts));
+          
+          // If wishlist has items, filter the sample products
+          const wishlistItems = sampleProducts.filter(product => 
             wishlist.includes(product.id)
           );
           setWishlistProducts(wishlistItems);
@@ -94,10 +127,16 @@ export default function WishlistPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-red-50">
+      {/* Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-32 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-red-600/20 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-32 w-96 h-96 bg-gradient-to-tr from-red-400/20 to-pink-600/20 rounded-full blur-3xl"></div>
+      </div>
+      
       <Navbar />
       
-      <div className="container mx-auto px-4 py-8 pt-28">
+      <div className="container mx-auto px-4 py-8 pt-28 relative z-10">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
