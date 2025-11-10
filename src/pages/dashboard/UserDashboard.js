@@ -8,6 +8,8 @@ import { toast, Toaster } from 'react-hot-toast';
 import Navbar from '../../components/Navbar';
 import NotificationBell from '../../components/NotificationBell';
 import { useSocket } from '../../hooks/useSocket';
+import { useAuth } from '../../hooks/useAuth';
+import enhancedApiService from '../../services/enhancedApi';
 
 const bangladeshDivisions = [
   'Barisal',
@@ -22,6 +24,7 @@ const bangladeshDivisions = [
 
 export default function UserDashboard() {
   const navigate = useNavigate();
+  const { user: authUser, isAuthenticated, isLoading: authLoading, logout } = useAuth();
   const [userData, setUserData] = useState({
     name: '',
     address: '',
@@ -39,8 +42,11 @@ export default function UserDashboard() {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) {
+      // If auth is still loading, wait
+      if (authLoading) return;
+      
+      // If not authenticated, redirect to login
+      if (!isAuthenticated) {
         setLoading(false);
         toast.error('You must be logged in to view this page.');
         navigate('/login');
@@ -48,33 +54,37 @@ export default function UserDashboard() {
       }
 
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/users/profile`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch user data.');
+        setLoading(true);
+        
+        // Use enhanced API service which handles token refresh automatically
+        const response = await enhancedApiService.request('/users/profile');
+        
+        if (response.success && response.user) {
+          setUser(response.user);
+          setUserData({
+            name: response.user.name || '',
+            address: response.user.address || '',
+            phone: response.user.phone || '',
+            province: response.user.province || ''
+          });
+        } else {
+          throw new Error(response.error || 'Failed to fetch user data');
         }
-
-        const data = await response.json();
-        setUser(data.user);
-        setUserData({
-          name: data.user.name || '',
-          address: data.user.address || '',
-          phone: data.user.phone || '',
-          province: data.user.province || ''
-        });
       } catch (error) {
-        toast.error(error.message);
+        console.error('Error fetching user data:', error);
+        toast.error(error.message || 'Failed to load user data');
+        
+        // If it's an authentication error, the enhanced API will handle logout
+        if (error.message.includes('Authentication') || error.message.includes('token')) {
+          navigate('/login');
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchUserData();
-  }, [navigate]);
+  }, [navigate, isAuthenticated, authLoading]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -108,32 +118,27 @@ export default function UserDashboard() {
       return;
     }
 
-    const token = localStorage.getItem('token');
-
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/users/profile`, {
+      // Use enhanced API service which handles token refresh automatically
+      const response = await enhancedApiService.request('/users/profile', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(userData)
+        body: userData
       });
 
-      const data = await response.json();
+      if (response.success && response.user) {
+        // Update user data in local storage
+        const localUser = JSON.parse(localStorage.getItem('user') || '{}');
+        const updatedUser = { ...localUser, ...response.user };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUser(prev => ({ ...prev, ...response.user }));
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to update profile.');
+        toast.success('Profile updated successfully!');
+      } else {
+        throw new Error(response.error || 'Failed to update profile.');
       }
-
-      // Update user data in local storage
-      const localUser = JSON.parse(localStorage.getItem('user'));
-      localStorage.setItem('user', JSON.stringify({ ...localUser, ...data.user }));
-      setUser(prev => ({ ...prev, ...data.user }));
-
-      toast.success('Profile updated successfully!');
     } catch (error) {
-      toast.error(error.message);
+      console.error('Error updating profile:', error);
+      toast.error(error.message || 'Failed to update profile');
     } finally {
       setSaving(false);
     }
@@ -162,12 +167,7 @@ export default function UserDashboard() {
         <Navbar 
           user={user}
           cart={[]}
-          onLogout={() => {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            navigate('/login');
-            toast.success('Logged out successfully');
-          }}
+          onLogout={logout}
           onLogin={() => {}}
           onCartClick={() => {}}
           onCheckout={() => {}}
@@ -189,12 +189,7 @@ export default function UserDashboard() {
       <Navbar 
         user={user}
         cart={[]}
-        onLogout={() => {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          navigate('/login');
-          toast.success('Logged out successfully');
-        }}
+        onLogout={logout}
         onLogin={() => {}}
         onCartClick={() => {}}
         onCheckout={() => {}}
