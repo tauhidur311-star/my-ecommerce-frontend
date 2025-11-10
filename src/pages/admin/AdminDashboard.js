@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Plus, Edit2, Trash2, Save, X, Upload, Package, Grid, Tag, List, Store as StoreIcon, Expand } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, Upload, Package, Grid, Tag, List, Store as StoreIcon, Expand, Loader2 } from 'lucide-react';
 import ImageCropper from '../../components/ImageCropper';
 
 const IMGBB_API_KEY = 'YOUR_API_KEY_HERE'; // Replace with your ImageBB API key
@@ -95,6 +95,7 @@ export default function AdminDashboard() {
   const [showImageEditor, setShowImageEditor] = useState(false);
   const [editingImage, setEditingImage] = useState({ url: '', index: -1, originalWidth: 0, originalHeight: 0 });
   const [resizeScale, setResizeScale] = useState(100);
+  const [isResizing, setIsResizing] = useState(false);
 
   // Load products from storage
   useEffect(() => {
@@ -380,24 +381,38 @@ export default function AdminDashboard() {
     // This is tricky, scale slider won't be perfectly in sync if user types manually
   };
 
-  const handleApplyResize = () => {
+  const handleApplyResize = async () => {
+    setIsResizing(true);
     const { url, width, height } = editingImage;
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const img = new Image();
     img.crossOrigin = "Anonymous";
-    img.onload = () => {
-      canvas.width = width;
-      canvas.height = height;
-      ctx.drawImage(img, 0, 0, width, height);
-      const resizedImageUrl = canvas.toDataURL('image/jpeg');
-      const newImages = [...formData.images];
-      newImages[editingImage.index] = resizedImageUrl;
-      setFormData(prev => ({ ...prev, images: newImages }));
-      setShowImageEditor(false);
-      toast.success('Image resized!');
-    };
-    img.src = url;
+
+    try {
+      // Use a proxy to get around CORS issues for external URLs
+      const response = await fetch(`https://images.weserv.nl/?url=${encodeURIComponent(url)}`);
+      const blob = await response.blob();
+      img.src = URL.createObjectURL(blob);
+
+      img.onload = () => {
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(async (resizedBlob) => {
+          const newUrl = await uploadToImageBB(resizedBlob);
+          const newImages = [...formData.images];
+          newImages[editingImage.index] = newUrl;
+          setFormData(prev => ({ ...prev, images: newImages }));
+          setShowImageEditor(false);
+          toast.success('Image resized and re-uploaded!');
+          setIsResizing(false);
+        }, 'image/jpeg');
+      };
+    } catch (error) {
+      toast.error('Failed to resize image. Please try again.');
+      setIsResizing(false);
+    }
   };
 
   return (
@@ -425,7 +440,7 @@ export default function AdminDashboard() {
       </header>
 
       {/* Stats */}
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto px-4 py-6 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
@@ -516,7 +531,7 @@ export default function AdminDashboard() {
                     <tr key={product.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4">
                         <img
-                          src={product.image || 'https://via.placeholder.com/100'}
+                          src={(product.images && product.images[0]) || 'https://via.placeholder.com/100'}
                           alt={product.name}
                           className="w-16 h-16 object-cover rounded"
                         />
@@ -712,7 +727,7 @@ export default function AdminDashboard() {
                   )}
 
                   {/* Upload Options */}
-                  {!formData.image && (
+                  {formData.images.length < 5 && ( // Limit to 5 images for example
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* File Upload */}
                       <div>
@@ -847,7 +862,7 @@ export default function AdminDashboard() {
       {/* Image Cropper Component - Add this section */}
       {showImageCropper && (
         <ImageCropper
-          image={tempImage}
+          image={tempImage} freeform={true}
           onCropComplete={handleCropComplete}
         />
       )}
@@ -908,10 +923,11 @@ export default function AdminDashboard() {
                 </button>
                 <button
                   type="button"
-                  onClick={handleApplyResize}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  onClick={handleApplyResize} disabled={isResizing}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 disabled:bg-blue-400"
                 >
-                  Apply
+                  {isResizing && <Loader2 className="animate-spin" size={18} />}
+                  {isResizing ? 'Applying...' : 'Apply'}
                 </button>
               </div>
             </div>

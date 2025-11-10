@@ -279,7 +279,7 @@ export default function Store() {
                 onClick={() => setSelectedProduct(product)}
               >
                 <ZoomableImage
-                  src={product.image || 'https://via.placeholder.com/300'}
+                  src={(product.images && product.images[0]) || 'https://via.placeholder.com/300'}
                   alt={product.name}
                 />
                 <div className="p-4">
