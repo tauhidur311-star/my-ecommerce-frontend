@@ -363,8 +363,12 @@ export default function AdminDashboard() {
           body: JSON.stringify(productToSave),
         });
         
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        
         if (response.ok) {
           const savedProduct = await response.json();
+          console.log('Saved product:', savedProduct);
           const backendProduct = savedProduct.product || savedProduct.data || savedProduct;
           
           if (editingProduct) {
@@ -386,12 +390,29 @@ export default function AdminDashboard() {
           throw new Error('API request failed');
         }
       } catch (apiError) {
-        console.warn('API save failed, falling back to localStorage:', apiError);
+        console.error('API save failed:', apiError);
+        
+        // Log detailed error information
+        console.error('Error details:', {
+          message: apiError.message,
+          stack: apiError.stack,
+          response: apiError.response
+        });
+        
+        // Try to get response body if available
+        if (apiError.response) {
+          try {
+            const errorBody = await apiError.response.text();
+            console.error('Response body:', errorBody);
+          } catch (e) {
+            console.error('Could not read response body:', e);
+          }
+        }
         
         // Fallback to localStorage
         await window.storage.set('admin-products', JSON.stringify(updatedProducts));
         setProducts(updatedProducts);
-        alert((editingProduct ? 'Product updated' : 'Product added') + ' locally (API unavailable)');
+        alert((editingProduct ? 'Product updated' : 'Product added') + ' locally (API unavailable). Check console for details.');
       }
       
       // Reset form
