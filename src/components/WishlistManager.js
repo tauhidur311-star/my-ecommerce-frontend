@@ -1,5 +1,6 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
-import { Heart, ShoppingCart, Trash2, Eye, Star } from 'lucide-react';
+import { Heart, ShoppingCart, Eye, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const WishlistManager = ({ isModal = false, onClose = null }) => {

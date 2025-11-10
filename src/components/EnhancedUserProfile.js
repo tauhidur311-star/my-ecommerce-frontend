@@ -1,7 +1,7 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { 
-  User, MapPin, CreditCard, Save, Plus, Edit2, Trash2, 
-  Phone, Mail, Calendar, Shield, Eye, EyeOff, Check, X 
+  User, MapPin, CreditCard, Plus, Check 
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 

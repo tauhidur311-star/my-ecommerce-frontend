@@ -6,9 +6,6 @@ import {
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import Navbar from '../../components/Navbar';
-import OrderManagement from '../../components/OrderManagement';
-import WishlistManager from '../../components/WishlistManager';
-import EnhancedUserProfile from '../../components/EnhancedUserProfile';
 
 const bangladeshDivisions = [
   'Barisal',
@@ -33,9 +30,7 @@ export default function UserDashboard() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
-  const [orders, setOrders] = useState([]);
-  const [addresses, setAddresses] = useState([]);
-  const [paymentMethods, setPaymentMethods] = useState([]);
+  const [orders] = useState([]);
 
   useEffect(() => {
     const fetchUserData = async () => {
