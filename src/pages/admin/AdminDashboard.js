@@ -13,6 +13,7 @@ import DarkModeToggle from '../../components/DarkModeToggle';
 import NotificationProvider from '../../contexts/NotificationContext';
 import NotificationBell from '../../components/NotificationBell';
 import InventoryManagement from '../../components/InventoryManagement';
+import EmailNotificationSystem from '../../components/EmailNotificationSystem';
 // import '../../styles/mobile-responsive.css';
 
 const IMGBB_API_KEY = 'YOUR_API_KEY_HERE'; // Replace with your ImageBB API key
@@ -666,6 +667,17 @@ export default function AdminDashboard() {
                 Inventory
               </button>
               <button 
+                onClick={() => setActiveTab('emails')} 
+                className={`tab-button px-4 py-3 font-semibold text-sm whitespace-nowrap transition-colors duration-200 ${
+                  activeTab === 'emails' 
+                    ? 'border-b-2 border-blue-600 text-blue-600' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <Upload className="w-4 h-4 mr-2 inline" />
+                Emails
+              </button>
+              <button 
                 onClick={() => setActiveTab('settings')} 
                 className={`tab-button px-4 py-3 font-semibold text-sm whitespace-nowrap transition-colors duration-200 ${
                   activeTab === 'settings' 
@@ -694,6 +706,12 @@ export default function AdminDashboard() {
         {activeTab === 'inventory' && (
           <div>
             <InventoryManagement />
+          </div>
+        )}
+
+        {activeTab === 'emails' && (
+          <div>
+            <EmailNotificationSystem />
           </div>
         )}
 
