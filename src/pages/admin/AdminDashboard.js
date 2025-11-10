@@ -153,17 +153,44 @@ export default function AdminDashboard() {
     currentTab: activeTab
   });
 
-  // Load products from storage
+  // Load products from backend API
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const result = await window.storage.get('admin-products');
-        if (result) {
-          setProducts(JSON.parse(result.value));
+        // Try to load from backend API first
+        const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/products`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('accessToken') || localStorage.getItem('token')}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          const products = data.products || data.data || data;
+          setProducts(products);
+          
+          // Also save to localStorage as backup
+          await window.storage.set('admin-products', JSON.stringify(products));
+        } else {
+          // Fallback to localStorage
+          const result = await window.storage.get('admin-products');
+          if (result) {
+            setProducts(JSON.parse(result.value));
+          }
         }
       } catch (error) {
         console.error('Error loading products:', error);
-        setProducts([]);
+        // Fallback to localStorage on error
+        try {
+          const result = await window.storage.get('admin-products');
+          if (result) {
+            setProducts(JSON.parse(result.value));
+          }
+        } catch (storageError) {
+          console.error('Storage error:', storageError);
+          setProducts([]);
+        }
       }
     };
     const loadSettings = async () => {
@@ -319,16 +346,54 @@ export default function AdminDashboard() {
         updatedProducts = [...products, productToSave];
       }
 
-      // Save to storage
-      await window.storage.set('admin-products', JSON.stringify(updatedProducts));
-      
-      // Update local state
-      setProducts(updatedProducts);
+      // Try to save to backend API first
+      try {
+        const apiEndpoint = editingProduct 
+          ? `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/products/${editingProduct.id || editingProduct._id}`
+          : `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/products`;
+        
+        const response = await fetch(apiEndpoint, {
+          method: editingProduct ? 'PUT' : 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('accessToken') || localStorage.getItem('token')}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(productToSave),
+        });
+        
+        if (response.ok) {
+          const savedProduct = await response.json();
+          const backendProduct = savedProduct.product || savedProduct.data || savedProduct;
+          
+          if (editingProduct) {
+            // Update existing product
+            const updatedProducts = products.map(p => 
+              (p.id === editingProduct.id || p._id === editingProduct._id) ? backendProduct : p
+            );
+            setProducts(updatedProducts);
+            await window.storage.set('admin-products', JSON.stringify(updatedProducts));
+          } else {
+            // Add new product
+            const updatedProducts = [...products, backendProduct];
+            setProducts(updatedProducts);
+            await window.storage.set('admin-products', JSON.stringify(updatedProducts));
+          }
+          
+          alert(editingProduct ? 'Product updated successfully!' : 'Product added successfully!');
+        } else {
+          throw new Error('API request failed');
+        }
+      } catch (apiError) {
+        console.warn('API save failed, falling back to localStorage:', apiError);
+        
+        // Fallback to localStorage
+        await window.storage.set('admin-products', JSON.stringify(updatedProducts));
+        setProducts(updatedProducts);
+        alert((editingProduct ? 'Product updated' : 'Product added') + ' locally (API unavailable)');
+      }
       
       // Reset form
       resetForm();
-      
-      alert(editingProduct ? 'Product updated successfully!' : 'Product added successfully!');
     } catch (error) {
       console.error('Storage error:', error);
       alert(`Failed to save product: ${error.message}`);
