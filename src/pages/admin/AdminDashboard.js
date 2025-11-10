@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
-import { Plus, Edit2, Trash2, Save, X, Upload, Package, Grid, Tag, List, Store as StoreIcon, Expand, Loader2, Menu, Bell, Search } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, Upload, Package, Grid, Tag, List, Store as StoreIcon, Expand, Loader2 } from 'lucide-react';
 import ImageCropper from '../../components/ImageCropper';
 import Silk from '../../components/Silk';
-import { LoadingButton, SmartLoader, OverlayLoader } from '../../components/LoadingStates';
-import { Input, Textarea, Select, Checkbox } from '../../components/ui/FormField';
+// import { LoadingButton, SmartLoader, OverlayLoader } from '../../components/LoadingStates';
+// import { Input, Textarea, Select, Checkbox } from '../../components/ui/FormField';
 // import '../../styles/mobile-responsive.css';
 
 const IMGBB_API_KEY = 'YOUR_API_KEY_HERE'; // Replace with your ImageBB API key

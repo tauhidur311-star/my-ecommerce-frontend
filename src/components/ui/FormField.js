@@ -329,9 +329,11 @@ export const Checkbox = ({
   );
 };
 
-export default {
+const FormField = {
   Input,
   Textarea,
   Select,
   Checkbox
 };
+
+export default FormField;

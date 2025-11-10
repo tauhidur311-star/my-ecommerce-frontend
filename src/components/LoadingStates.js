@@ -1,5 +1,5 @@
 import React from 'react';
-import { Loader2, Package, BarChart3, Users, ShoppingCart } from 'lucide-react';
+import { Loader2, Package } from 'lucide-react';
 
 // Spinner Component
 export const Spinner = ({ size = 'md', color = 'blue' }) => {
@@ -246,7 +246,7 @@ export const SmartLoader = ({
   }
 };
 
-export default {
+const LoadingStates = {
   Spinner,
   LoadingButton,
   CardSkeleton,
@@ -259,3 +259,5 @@ export default {
   DashboardLoader,
   SmartLoader
 };
+
+export default LoadingStates;
