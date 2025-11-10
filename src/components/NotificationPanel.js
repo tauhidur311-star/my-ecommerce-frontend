@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   Bell, Package, ShoppingCart, AlertCircle, CheckCircle, Info, 
-  X, Trash2, MarkAsRead, Clock 
+  X, Trash2, Check, Clock 
 } from 'lucide-react';
 import { useNotifications } from '../contexts/NotificationContext';
 
