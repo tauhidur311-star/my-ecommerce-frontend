@@ -420,11 +420,11 @@ export default function AdminDashboard() {
     <div className="min-h-screen">
       <div className="fixed inset-0 -z-10">
         <Silk
-          speed={3}
+          speed={6.5}
           scale={1}
-          color="#D1D5DB"
-          noiseIntensity={1}
-          rotation={0.1}
+          color="#3612c0"
+          noiseIntensity={1.0}
+          rotation={0.76}
         />
       </div>
 
