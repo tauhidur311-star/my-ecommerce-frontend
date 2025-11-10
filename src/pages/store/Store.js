@@ -331,7 +331,7 @@ export default function Store() {
         <AuthModal
           showAuth={showAuth}
           setShowAuth={setShowAuth}
-          handleAuth={() => {}} // This can be expanded later
+          handleAuth={handleAuth}
           authMode={authMode}
           setAuthMode={setAuthMode}
           authForm={authForm}
