@@ -18,6 +18,7 @@ export default function Store() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedSize, setSelectedSize] = useState('');
   const [user, setUser] = useState(null);
+  const [isCartHovered, setIsCartHovered] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -185,17 +186,26 @@ export default function Store() {
               <button className="p-2 hover:bg-gray-100 rounded-full relative">
                 <Heart size={24} />
               </button>
-              <button 
-                className="p-2 hover:bg-gray-100 rounded-full relative"
-                onClick={() => setShowCart(true)}
+              <div 
+                className="relative"
+                onMouseEnter={() => setIsCartHovered(true)}
+                onMouseLeave={() => setIsCartHovered(false)}
               >
-                <ShoppingCart size={24} />
-                {cart.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
-                    {cart.length}
-                  </span>
+                <button 
+                  className="p-2 hover:bg-gray-100 rounded-full relative"
+                  onClick={() => setShowCart(true)}
+                >
+                  <ShoppingCart size={24} />
+                  {cart.length > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                      {cart.length}
+                    </span>
+                  )}
+                </button>
+                {isCartHovered && cart.length > 0 && (
+                  <CartHoverPreview cart={cart} cartTotal={cartTotal} />
                 )}
-              </button>
+              </div>
               {user && (
                 <div className="flex items-center gap-4">
                   <Link to="/dashboard" className="p-2 hover:bg-gray-100 rounded-full" title="My Dashboard">
@@ -373,6 +383,33 @@ const LogoutConfirmationDialog = ({ onConfirm, onCancel }) => {
             Logout
           </button>
         </div>
+      </div>
+    </div>
+  );
+};
+
+// Add this new component for the cart hover preview
+const CartHoverPreview = ({ cart, cartTotal }) => {
+  return (
+    <div className="absolute top-full right-0 mt-2 w-72 bg-white rounded-lg shadow-xl z-50 p-4 border border-gray-200">
+      <h3 className="text-lg font-semibold text-gray-800 mb-3 border-b pb-2">Cart Summary</h3>
+      <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
+        {cart.map(item => (
+          <div key={`${item.id}-${item.selectedSize}`} className="flex justify-between items-center text-sm">
+            <div className="flex-grow pr-2">
+              <p className="font-medium text-gray-700 truncate">{item.name}</p>
+              <p className="text-xs text-gray-500">Size: {item.selectedSize}</p>
+            </div>
+            <div className="flex-shrink-0 text-right">
+              <p className="text-gray-800">x{item.quantity}</p>
+              <p className="font-semibold">৳{item.price * item.quantity}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="border-t mt-3 pt-3 flex justify-between items-center font-bold text-lg">
+        <span>Total:</span>
+        <span>৳{cartTotal}</span>
       </div>
     </div>
   );
