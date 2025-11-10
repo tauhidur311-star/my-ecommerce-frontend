@@ -228,6 +228,7 @@ export default function AuthPage() {
             </form>
           );
         }
+        break;
       case 'resetPassword':
         return (
           <form onSubmit={handleResetPassword} className="space-y-4">
