@@ -44,7 +44,7 @@ export default function Store() {
   const [filteredProducts, setFilteredProducts] = useState([]);
   
   // Wishlist hook
-  const { wishlist, toggleWishlist, isInWishlist } = useWishlist();
+  const { toggleWishlist, isInWishlist } = useWishlist();
 
   const handleLoginSuccess = (loggedInUser) => {
     setUser(loggedInUser);

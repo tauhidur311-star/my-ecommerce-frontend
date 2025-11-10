@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown, Filter, X, Search, SlidersHorizontal } from 'lucide-react';
+import { ChevronDown, X, Search, SlidersHorizontal } from 'lucide-react';
 
 export default function StoreFilters({
   products,
