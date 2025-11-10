@@ -33,9 +33,9 @@ export default function Store() {
   const loadProducts = async () => {
     try {
       // First try to load from local storage
-      const localProducts = await window.storage.get('admin-products');
-      if (localProducts && localProducts.value) {
-        const parsedProducts = JSON.parse(localProducts.value);
+      const localProducts = localStorage.getItem('admin-products');
+      if (localProducts) {
+        const parsedProducts = JSON.parse(localProducts);
         setProducts(parsedProducts);
       }
       setIsLoading(false);
