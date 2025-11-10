@@ -531,110 +531,142 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Products Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="px-6 py-4 border-b">
-            <h2 className="text-xl font-bold">Products List</h2>
+        {/* Tab Navigation */}
+        <div className="mb-6 border-b border-gray-200">
+          <div className="flex -mb-px">
+            <button onClick={() => setActiveTab('products')} className={`px-4 py-3 font-semibold text-sm ${activeTab === 'products' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}>Products</button>
+            <button onClick={() => setActiveTab('settings')} className={`px-4 py-3 font-semibold text-sm ${activeTab === 'settings' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}>Store Settings</button>
           </div>
-          
-          {products.length === 0 ? (
-            <div className="text-center py-12">
-              <Package size={64} className="mx-auto text-gray-300 mb-4" />
-              <p className="text-gray-500 text-lg">No products yet</p>
-              <p className="text-gray-400 text-sm">Click "Add New Product" to get started</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Image
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Product
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Category
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Price
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Stock
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {products.map(product => (
-                    <tr key={product.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4">
-                        <img
-                          src={(product.images && product.images[0]) || 'https://via.placeholder.com/100'}
-                          alt={product.name}
-                          className="w-16 h-16 object-cover rounded"
-                        />
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                        <div className="text-sm text-gray-500 line-clamp-1">{product.description}</div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                          {product.category}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-900 font-semibold">
-                        {formatPrice(product.price)}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        {product.stock} units
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          product.inStock 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {product.inStock ? 'In Stock' : 'Out of Stock'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm font-medium space-x-2">
-                        <button
-                          onClick={() => handleEdit(product)}
-                          className="text-blue-600 hover:text-blue-900"
-                        >
-                          <Edit2 size={18} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(product.id)}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-wrap gap-1">
-                          {product.sizes.map(size => (
-                            <span key={size} className="px-2 py-1 text-xs bg-gray-100 rounded-full">
-                              {size}
-                            </span>
-                          ))}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
         </div>
+
+        {activeTab === 'products' && (
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="px-6 py-4 border-b">
+              <h2 className="text-xl font-bold">Products List</h2>
+            </div>
+            
+            {products.length === 0 ? (
+              <div className="text-center py-12">
+                <Package size={64} className="mx-auto text-gray-300 mb-4" />
+                <p className="text-gray-500 text-lg">No products yet</p>
+                <p className="text-gray-400 text-sm">Click "Add New Product" to get started</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Image
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Product
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Category
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Price
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Stock
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {products.map(product => (
+                      <tr key={product.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4">
+                          <img
+                            src={(product.images && product.images[0]) || 'https://via.placeholder.com/100'}
+                            alt={product.name}
+                            className="w-16 h-16 object-cover rounded"
+                          />
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                          <div className="text-sm text-gray-500 line-clamp-1">{product.description}</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                            {product.category}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-900 font-semibold">
+                          {formatPrice(product.price)}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-900">
+                          {product.stock} units
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            product.inStock 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-red-100 text-red-800'
+                          }`}>
+                            {product.inStock ? 'In Stock' : 'Out of Stock'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm font-medium space-x-2">
+                          <button
+                            onClick={() => handleEdit(product)}
+                            className="text-blue-600 hover:text-blue-900"
+                          >
+                            <Edit2 size={18} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(product.id)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'settings' && (
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="px-6 py-4 border-b">
+              <h2 className="text-xl font-bold">Store Settings</h2>
+            </div>
+            <form onSubmit={handleSettingsSubmit} className="p-6 space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Brand Name</label>
+                <input type="text" value={storeSettings.brandName} onChange={(e) => setStoreSettings(s => ({ ...s, brandName: e.target.value }))} className="w-full px-4 py-2 border border-gray-300 rounded-lg" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Logo URL</label>
+                <input type="text" value={storeSettings.logoUrl} onChange={(e) => setStoreSettings(s => ({ ...s, logoUrl: e.target.value }))} className="w-full px-4 py-2 border border-gray-300 rounded-lg" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">"About Us" Link Text</label>
+                <input type="text" value={storeSettings.settingsMenu.about.text} onChange={(e) => setStoreSettings(s => ({ ...s, settingsMenu: { ...s.settingsMenu, about: { ...s.settingsMenu.about, text: e.target.value } } }))} className="w-full px-4 py-2 border border-gray-300 rounded-lg" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">"Contact Us" Link Text</label>
+                <input type="text" value={storeSettings.settingsMenu.contact.text} onChange={(e) => setStoreSettings(s => ({ ...s, settingsMenu: { ...s.settingsMenu, contact: { ...s.settingsMenu.contact, text: e.target.value } } }))} className="w-full px-4 py-2 border border-gray-300 rounded-lg" />
+              </div>
+              <div className="flex justify-end">
+                <button type="submit" className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                  <Save size={20} />
+                  Save Settings
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
       </div>
 
       {/* Add/Edit Product Modal */}
