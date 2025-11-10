@@ -10,7 +10,7 @@ import {
   User, MapPin, Save, ArrowLeft, Package, Heart, 
   ShoppingCart, Settings, Bell, Shield, CreditCard, MapPin as AddressIcon 
 } from 'lucide-react';
-import toast, { Toaster } from 'react-hot-toast';
+import { toast, Toaster } from 'react-hot-toast';
 import Navbar from '../../components/Navbar';
 import NotificationBell from '../../components/NotificationBell';
 import { useSocket } from '../../hooks/useSocket';

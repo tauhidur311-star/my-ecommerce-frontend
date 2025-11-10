@@ -50,383 +50,356 @@ class APIService {
         return await response.text();
       }
     } catch (error) {
-      console.error(`API Error (${endpoint}):`, error);
+      console.error(`API Error [${endpoint}]:`, error);
       throw error;
     }
   }
 
-  // Authentication APIs
-  async login(credentials) {
-    return this.makeRequest('/auth/admin/login', {
-      method: 'POST',
-      body: JSON.stringify(credentials),
-    });
+  // Enhanced request method with automatic token refresh
+  async request(endpoint, options = {}) {
+    let token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+    
+    const defaultHeaders = {
+      'Content-Type': 'application/json',
+    };
+
+    if (token) {
+      defaultHeaders.Authorization = `Bearer ${token}`;
+    }
+
+    const config = {
+      ...options,
+      headers: {
+        ...defaultHeaders,
+        ...options.headers,
+      },
+    };
+
+    try {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+      
+      // If token expired, try to refresh
+      if (response.status === 401 && token) {
+        const newToken = await this.refreshToken();
+        if (newToken) {
+          // Retry request with new token
+          config.headers.Authorization = `Bearer ${newToken}`;
+          const retryResponse = await fetch(`${API_BASE_URL}${endpoint}`, config);
+          
+          if (!retryResponse.ok) {
+            const errorData = await retryResponse.json().catch(() => ({
+              error: `HTTP ${retryResponse.status}: ${retryResponse.statusText}`,
+            }));
+            throw new Error(errorData.error || `HTTP ${retryResponse.status}`);
+          }
+          
+          return await retryResponse.json();
+        } else {
+          // Refresh failed, redirect to login
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('token');
+          window.location.href = '/auth';
+          throw new Error('Authentication expired');
+        }
+      }
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({
+          error: `HTTP ${response.status}: ${response.statusText}`,
+        }));
+        throw new Error(errorData.error || `HTTP ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('API request failed:', error);
+      throw error;
+    }
   }
 
-  async logout() {
-    const result = await this.makeRequest('/auth/logout', { method: 'POST' });
-    this.token = null;
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('token');
-    return result;
+  // Token refresh method
+  async refreshToken() {
+    try {
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (!refreshToken) return null;
+
+      const response = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('accessToken', data.tokens.accessToken);
+        localStorage.setItem('refreshToken', data.tokens.refreshToken);
+        return data.tokens.accessToken;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      return null;
+    }
   }
 
-  async verifyToken() {
-    return this.makeRequest('/auth/verify', { method: 'GET' });
-  }
-
-  // Products APIs
+  // Product endpoints
   async getProducts(params = {}) {
     const queryString = new URLSearchParams(params).toString();
-    const endpoint = queryString ? `/admin/products?${queryString}` : '/admin/products';
-    return this.makeRequest(endpoint);
+    return this.makeRequest(`/products${queryString ? `?${queryString}` : ''}`);
   }
 
   async getProduct(id) {
-    return this.makeRequest(`/admin/products/${id}`);
+    return this.makeRequest(`/products/${id}`);
   }
 
   async createProduct(productData) {
-    return this.makeRequest('/admin/products', {
+    return this.makeRequest('/products', {
       method: 'POST',
       body: JSON.stringify(productData),
     });
   }
 
   async updateProduct(id, productData) {
-    return this.makeRequest(`/admin/products/${id}`, {
+    return this.makeRequest(`/products/${id}`, {
       method: 'PUT',
       body: JSON.stringify(productData),
     });
   }
 
   async deleteProduct(id) {
-    return this.makeRequest(`/admin/products/${id}`, { method: 'DELETE' });
-  }
-
-  async bulkUpdateProducts(updates) {
-    return this.makeRequest('/admin/products/bulk', {
-      method: 'PUT',
-      body: JSON.stringify(updates),
+    return this.makeRequest(`/products/${id}`, {
+      method: 'DELETE',
     });
   }
 
-  // Orders APIs
+  // User endpoints
+  async getProfile() {
+    return this.makeRequest('/users/profile');
+  }
+
+  async updateProfile(userData) {
+    return this.makeRequest('/users/profile', {
+      method: 'PUT',
+      body: JSON.stringify(userData),
+    });
+  }
+
+  // Order endpoints
   async getOrders(params = {}) {
     const queryString = new URLSearchParams(params).toString();
-    const endpoint = queryString ? `/admin/orders?${queryString}` : '/admin/orders';
-    return this.makeRequest(endpoint);
+    return this.makeRequest(`/orders${queryString ? `?${queryString}` : ''}`);
   }
 
-  async getOrder(id) {
-    return this.makeRequest(`/admin/orders/${id}`);
-  }
-
-  async updateOrderStatus(id, status) {
-    return this.makeRequest(`/admin/orders/${id}/status`, {
-      method: 'PUT',
-      body: JSON.stringify({ status }),
-    });
-  }
-
-  async getOrderStats(dateRange = '30days') {
-    return this.makeRequest(`/admin/orders/stats?range=${dateRange}`);
-  }
-
-  // Customers APIs
-  async getCustomers(params = {}) {
-    const queryString = new URLSearchParams(params).toString();
-    const endpoint = queryString ? `/admin/customers?${queryString}` : '/admin/customers';
-    return this.makeRequest(endpoint);
-  }
-
-  async getCustomer(id) {
-    return this.makeRequest(`/admin/customers/${id}`);
-  }
-
-  async getCustomerOrders(id) {
-    return this.makeRequest(`/admin/customers/${id}/orders`);
-  }
-
-  async updateCustomer(id, customerData) {
-    return this.makeRequest(`/admin/customers/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(customerData),
-    });
-  }
-
-  // Analytics APIs
-  async getAnalytics(dateRange = '30days') {
-    return this.makeRequest(`/admin/analytics?range=${dateRange}`);
-  }
-
-  async getSalesAnalytics(params = {}) {
-    const queryString = new URLSearchParams(params).toString();
-    const endpoint = queryString ? `/admin/analytics/sales?${queryString}` : '/admin/analytics/sales';
-    return this.makeRequest(endpoint);
-  }
-
-  async getCustomerAnalytics(params = {}) {
-    const queryString = new URLSearchParams(params).toString();
-    const endpoint = queryString ? `/admin/analytics/customers?${queryString}` : '/admin/analytics/customers';
-    return this.makeRequest(endpoint);
-  }
-
-  async getProductAnalytics(params = {}) {
-    const queryString = new URLSearchParams(params).toString();
-    const endpoint = queryString ? `/admin/analytics/products?${queryString}` : '/admin/analytics/products';
-    return this.makeRequest(endpoint);
-  }
-
-  // Settings APIs
-  async getSettings() {
-    return this.makeRequest('/admin/settings');
-  }
-
-  async updateSettings(settings) {
-    return this.makeRequest('/admin/settings', {
-      method: 'PUT',
-      body: JSON.stringify(settings),
-    });
-  }
-
-  // Notifications APIs
-  async getNotifications() {
-    return this.makeRequest('/admin/notifications');
-  }
-
-  async markNotificationRead(id) {
-    return this.makeRequest(`/admin/notifications/${id}/read`, { method: 'PUT' });
-  }
-
-  async createNotification(notification) {
-    return this.makeRequest('/admin/notifications', {
+  async createOrder(orderData) {
+    return this.makeRequest('/orders', {
       method: 'POST',
-      body: JSON.stringify(notification),
+      body: JSON.stringify(orderData),
     });
   }
 
-  // Fallback methods for localStorage compatibility
-  async getFromStorage(key) {
-    try {
-      // Try API first
-      const response = await this.makeRequest(`/admin/data/${key}`);
-      return response;
-    } catch (error) {
-      console.warn('API unavailable, falling back to localStorage:', error);
-      // Fallback to localStorage
-      const data = localStorage.getItem(key);
-      return data ? JSON.parse(data) : null;
-    }
+  async getOrderById(id) {
+    return this.makeRequest(`/orders/${id}`);
   }
 
-  async saveToStorage(key, data) {
-    try {
-      // Try API first
-      await this.makeRequest(`/admin/data/${key}`, {
-        method: 'PUT',
-        body: JSON.stringify({ data }),
-      });
-    } catch (error) {
-      console.warn('API unavailable, falling back to localStorage:', error);
-      // Fallback to localStorage
-      localStorage.setItem(key, JSON.stringify(data));
-    }
+  async updateOrder(id, orderData) {
+    return this.makeRequest(`/orders/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(orderData),
+    });
   }
 
-  // Image upload
-  async uploadImage(file, folder = 'products') {
-    const formData = new FormData();
-    formData.append('image', file);
-    formData.append('folder', folder);
-
-    try {
-      const response = await fetch(`${this.baseURL}/admin/upload`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.token}`,
-        },
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error('Upload failed');
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Image upload error:', error);
-      throw error;
-    }
+  async cancelOrder(id) {
+    return this.makeRequest(`/orders/${id}/cancel`, {
+      method: 'POST',
+    });
   }
-}
 
-// Create singleton instance
-const apiService = new APIService();
+  // Analytics endpoints
+  async getAnalytics(endpoint) {
+    return this.makeRequest(`/analytics/${endpoint}`);
+  }
 
-// Export both the class and instance
-export default apiService;
+  async getOverviewData() {
+    return this.makeRequest('/analytics/overview');
+  }
+
+  async getProductAnalytics() {
+    return this.makeRequest('/analytics/products');
+  }
+
+  async getSalesAnalytics() {
+    return this.makeRequest('/analytics/sales');
+  }
+
+  async getUserAnalytics() {
+    return this.makeRequest('/analytics/users');
+  }
+
   // ===== NEW ENHANCED API METHODS =====
 
   // Notifications API
   async getNotifications(page = 1, limit = 20) {
     return this.request(`/notifications?page=${page}&limit=${limit}`);
-  },
+  }
 
   async getUnreadNotificationCount() {
     return this.request('/notifications/unread-count');
-  },
+  }
 
   async markNotificationAsRead(notificationId) {
     return this.request(`/notifications/${notificationId}/read`, {
       method: 'PATCH',
     });
-  },
+  }
 
   async markAllNotificationsAsRead() {
     return this.request('/notifications/mark-all-read', {
       method: 'PATCH',
     });
-  },
+  }
 
   async getNotificationPreferences() {
     return this.request('/notifications/preferences');
-  },
+  }
 
   async updateNotificationPreferences(preferences) {
     return this.request('/notifications/preferences', {
       method: 'PUT',
       body: JSON.stringify(preferences),
     });
-  },
+  }
 
   // Cart API
   async getCart() {
     return this.request('/cart');
-  },
+  }
 
   async addToCart(productId, quantity = 1, options = {}) {
     return this.request('/cart/items', {
       method: 'POST',
       body: JSON.stringify({ productId, quantity, ...options }),
     });
-  },
+  }
 
   async updateCartItem(productId, quantity, options = {}) {
     return this.request(`/cart/items/${productId}`, {
       method: 'PUT',
       body: JSON.stringify({ quantity, ...options }),
     });
-  },
+  }
 
   async removeFromCart(productId, options = {}) {
     const params = new URLSearchParams(options);
     return this.request(`/cart/items/${productId}?${params}`, {
       method: 'DELETE',
     });
-  },
+  }
 
   async clearCart() {
     return this.request('/cart', {
       method: 'DELETE',
     });
-  },
+  }
 
   async applyCoupon(couponCode) {
     return this.request('/cart/coupon', {
       method: 'POST',
       body: JSON.stringify({ couponCode }),
     });
-  },
+  }
 
   async removeCoupon(code) {
     return this.request(`/cart/coupon/${code}`, {
       method: 'DELETE',
     });
-  },
+  }
 
   async getCartSummary() {
     return this.request('/cart/summary');
-  },
+  }
 
   async syncCart() {
     return this.request('/cart/sync', {
       method: 'POST',
     });
-  },
+  }
 
   // Payment API
   async getPaymentMethods(amount) {
     return this.request(`/payments/methods?amount=${amount}`);
-  },
+  }
 
   async calculatePaymentFee(paymentMethod, amount) {
     return this.request('/payments/calculate-fee', {
       method: 'POST',
       body: JSON.stringify({ paymentMethod, amount }),
     });
-  },
+  }
 
   async createStripePaymentIntent(amount, orderId) {
     return this.request('/payments/stripe/create-intent', {
       method: 'POST',
       body: JSON.stringify({ amount, orderId }),
     });
-  },
+  }
 
   async initiateMobileBankingPayment(paymentMethod, amount, orderId, mobileNumber) {
     return this.request('/payments/mobile-banking/initiate', {
       method: 'POST',
       body: JSON.stringify({ paymentMethod, amount, orderId, mobileNumber }),
     });
-  },
+  }
 
   async confirmMobileBankingPayment(transactionId, userTransactionId) {
     return this.request('/payments/mobile-banking/confirm', {
       method: 'POST',
       body: JSON.stringify({ transactionId, userTransactionId }),
     });
-  },
+  }
 
   async confirmCODOrder(orderId) {
     return this.request('/payments/cod/confirm', {
       method: 'POST',
       body: JSON.stringify({ orderId }),
     });
-  },
+  }
 
   async getPaymentHistory(page = 1, limit = 10) {
     return this.request(`/payments/history?page=${page}&limit=${limit}`);
-  },
+  }
 
   // Advanced Search API
   async searchProducts(params) {
     const searchParams = new URLSearchParams(params);
     return this.request(`/search/products?${searchParams}`);
-  },
+  }
 
   async getSearchSuggestions(query, limit = 10) {
     return this.request(`/search/suggestions?q=${encodeURIComponent(query)}&limit=${limit}`);
-  },
+  }
 
   async getPopularSearches() {
     return this.request('/search/popular');
-  },
+  }
 
   async getSearchFilters(category = '') {
     return this.request(`/search/filters${category ? `?category=${category}` : ''}`);
-  },
+  }
 
   async getSimilarProducts(productId, limit = 8) {
     return this.request(`/search/similar/${productId}?limit=${limit}`);
-  },
+  }
 
   async trackSearch(query, resultCount, filters = {}) {
     return this.request('/search/track', {
       method: 'POST',
       body: JSON.stringify({ query, resultCount, filters }),
     });
-  },
+  }
 
   // File Upload API
   async uploadImage(file, folder = 'general') {
@@ -443,7 +416,7 @@ export default apiService;
       },
       body: formData,
     }).then(response => response.json());
-  },
+  }
 
   async uploadAvatar(file) {
     const formData = new FormData();
@@ -458,58 +431,59 @@ export default apiService;
       },
       body: formData,
     }).then(response => response.json());
-  },
+  }
 
   // Enhanced User API
   async getUserProfile() {
     return this.request('/users/profile');
-  },
+  }
 
   async updateUserProfile(profileData) {
     return this.request('/users/profile', {
       method: 'PUT',
       body: JSON.stringify(profileData),
     });
-  },
+  }
 
   async getUserOrders(page = 1, limit = 10) {
     return this.request(`/users/orders?page=${page}&limit=${limit}`);
-  },
+  }
 
   // Categories API
   async getCategories(flat = false) {
     return this.request(`/categories${flat ? '?flat=true' : ''}`);
-  },
+  }
 
   async getCategoryBySlug(slug) {
     return this.request(`/categories/${slug}`);
-  },
+  }
 
   // Admin API (for admin users)
   async getAdminDashboard(period = '30') {
     return this.request(`/admin/dashboard?period=${period}`);
-  },
+  }
 
   async getAdminUsers(params = {}) {
     const searchParams = new URLSearchParams(params);
     return this.request(`/admin/users?${searchParams}`);
-  },
+  }
 
   async getAdminOrders(params = {}) {
     const searchParams = new URLSearchParams(params);
     return this.request(`/admin/orders?${searchParams}`);
-  },
+  }
 
   async updateOrderStatus(orderId, status) {
     return this.request(`/admin/orders/${orderId}/status`, {
       method: 'PATCH',
       body: JSON.stringify({ status }),
     });
-  },
+  }
+}
 
-  async getSalesAnalytics(period = '30', groupBy = 'day') {
-    return this.request(`/admin/analytics/sales?period=${period}&groupBy=${groupBy}`);
-  },
-};
+// Create and export a singleton instance
+const apiService = new APIService();
 
-export { APIService };
+// Export both the class and instance
+export default apiService;
+export { APIService, apiService };
