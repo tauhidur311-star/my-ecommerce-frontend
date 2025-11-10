@@ -60,9 +60,26 @@ export default function AuthModal({
   };
 
   const handleOTPVerification = async (otp) => {
-    setAuthForm({ ...authForm, otp });
-    setForgotPasswordStep('newPassword');
+    setIsLoading(true);
     setError(null);
+    try {
+      // Verify OTP with backend first
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: authForm.email, otp })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Invalid OTP.');
+      
+      // If verification successful, store OTP and proceed
+      setAuthForm({ ...authForm, otp });
+      setForgotPasswordStep('newPassword');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleResetPassword = async (e) => {

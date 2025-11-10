@@ -144,9 +144,27 @@ export default function AuthPage() {
   };
 
   const handleOTPVerification = async (otp) => {
-    setFormData({ ...formData, otp });
-    setForgotPasswordStep('newPassword');
-    setMessage({ type: 'success', text: 'OTP verified! Please enter your new password.' });
+    setLoading(true);
+    setMessage({ type: '', text: '' });
+    try {
+      // Verify OTP with backend first
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email, otp })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Invalid OTP.');
+      
+      // If verification successful, store OTP and proceed
+      setFormData({ ...formData, otp });
+      setForgotPasswordStep('newPassword');
+      setMessage({ type: 'success', text: 'OTP verified! Please enter your new password.' });
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleResetPassword = async (e) => {
