@@ -1,7 +1,7 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
-import { ShoppingCart, Heart, User, LogOut } from 'lucide-react';
+import { ShoppingCart, Heart, User, LogOut, Shield } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import SearchFilters from '../../components/SearchFilters';
 import ProductSkeleton from '../../components/ProductSkeleton';
 import ZoomableImage from '../../components/ZoomableImage';
@@ -11,6 +11,7 @@ const CartSidebar = lazy(() => import('../../components/CartSidebar'));
 
 export default function Store() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [cart, setCart] = useState([]);
@@ -207,6 +208,16 @@ export default function Store() {
                 )}
               </div>
               {user && (
+                <>
+                  {user.role === 'admin' && (
+                    <Link 
+                      to={location.pathname === '/admin' ? '/' : '/admin'} 
+                      className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                    >
+                      <Shield size={20} />
+                      <span>{location.pathname === '/admin' ? 'View Store' : 'View Admin'}</span>
+                    </Link>
+                  )}
                 <div className="flex items-center gap-4">
                   <Link to="/dashboard" className="p-2 hover:bg-gray-100 rounded-full" title="My Dashboard">
                     <User size={24} />
@@ -219,6 +230,7 @@ export default function Store() {
                     <span>Logout</span>
                   </button>
                 </div>
+                </>
               )}
               {!user && (
                 <Link to="/login" className="p-2 hover:bg-gray-100 rounded-full">
