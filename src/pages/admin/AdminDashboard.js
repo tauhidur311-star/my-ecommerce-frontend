@@ -7,6 +7,7 @@ import Silk from '../../components/Silk';
 // import { LoadingButton, SmartLoader, OverlayLoader } from '../../components/LoadingStates';
 // import { Input, Textarea, Select, Checkbox } from '../../components/ui/FormField';
 import OrderManagement from '../../components/OrderManagement';
+import AdvancedAnalytics from '../../components/AdvancedAnalytics';
 // import '../../styles/mobile-responsive.css';
 
 const IMGBB_API_KEY = 'YOUR_API_KEY_HERE'; // Replace with your ImageBB API key
@@ -569,6 +570,17 @@ export default function AdminDashboard() {
                 Orders
               </button>
               <button 
+                onClick={() => setActiveTab('analytics')} 
+                className={`tab-button px-4 py-3 font-semibold text-sm whitespace-nowrap transition-colors duration-200 ${
+                  activeTab === 'analytics' 
+                    ? 'border-b-2 border-blue-600 text-blue-600' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <Grid className="w-4 h-4 mr-2 inline" />
+                Analytics
+              </button>
+              <button 
                 onClick={() => setActiveTab('settings')} 
                 className={`tab-button px-4 py-3 font-semibold text-sm whitespace-nowrap transition-colors duration-200 ${
                   activeTab === 'settings' 
@@ -585,6 +597,12 @@ export default function AdminDashboard() {
         {activeTab === 'orders' && (
           <div>
             <OrderManagement isAdmin={true} />
+          </div>
+        )}
+
+        {activeTab === 'analytics' && (
+          <div>
+            <AdvancedAnalytics />
           </div>
         )}
 
