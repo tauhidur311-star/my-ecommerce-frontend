@@ -32,8 +32,8 @@ export default function Store() {
   // Enhanced store state
   const [showQuickView, setShowQuickView] = useState(false);
   const [quickViewProduct, setQuickViewProduct] = useState(null);
-  const [sortBy, setSortBy] = useState('featured');
-  const [filters, setFilters] = useState({
+  const [sortBy] = useState('featured');
+  const [filters] = useState({
     category: 'all',
     minPrice: 0,
     maxPrice: 10000,
