@@ -121,8 +121,15 @@ export default function AuthModal({
       const data = await res.json();
 
       if (res.ok) {
-        // Store token and user data from our backend
-        localStorage.setItem('token', data.token);
+        // Store tokens properly for the enhanced API service
+        if (data.tokens) {
+          localStorage.setItem('accessToken', data.tokens.accessToken);
+          localStorage.setItem('refreshToken', data.tokens.refreshToken);
+        } else if (data.token) {
+          // Fallback for old token format
+          localStorage.setItem('accessToken', data.token);
+          localStorage.setItem('token', data.token);
+        }
         localStorage.setItem('user', JSON.stringify(data.user));
 
         if (onLoginSuccess) {

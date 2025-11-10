@@ -233,7 +233,7 @@ export default function Store() {
     } else {
       // If the profile is complete, proceed to create the order.
       try {
-        await fetch(`${process.env.REACT_APP_API_URL}/api/orders`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }, body: JSON.stringify({
+        await fetch(`${process.env.REACT_APP_API_URL}/api/orders`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('accessToken') || localStorage.getItem('token')}` }, body: JSON.stringify({
           items: cart.map(item => ({
             productId: item.id,
             quantity: item.quantity,
@@ -264,7 +264,7 @@ export default function Store() {
 
   // Add token restoration on component mount
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
     if (token) {
       const savedUser = localStorage.getItem('user');
       if (savedUser) {
@@ -296,8 +296,15 @@ export default function Store() {
         throw new Error(data.error || `${authMode} failed`);
       }
       
-      // Store token and user data
-      localStorage.setItem('token', data.token);
+      // Store tokens properly for the enhanced API service
+      if (data.tokens) {
+        localStorage.setItem('accessToken', data.tokens.accessToken);
+        localStorage.setItem('refreshToken', data.tokens.refreshToken);
+      } else if (data.token) {
+        // Fallback for old token format
+        localStorage.setItem('accessToken', data.token);
+        localStorage.setItem('token', data.token);
+      }
       localStorage.setItem('user', JSON.stringify(data.user));
       
       handleLoginSuccess(data.user);
