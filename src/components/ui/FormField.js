@@ -1,14 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Eye, EyeOff, AlertCircle, CheckCircle, Info } from 'lucide-react';
-// import { validateField } from '../../utils/validation';
 
-// Base Input Component with validation
+// Base Input Component
 export const Input = ({
   label,
   name,
   value,
   onChange,
-  validation,
   type = 'text',
   placeholder,
   disabled = false,
@@ -17,42 +15,14 @@ export const Input = ({
   error,
   success,
   helpText,
-  showValidation = true,
-  validateOnBlur = true,
-  validateOnChange = false,
   ...props
 }) => {
-  const [localError, setLocalError] = useState('');
-  const [touched, setTouched] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const isPassword = type === 'password';
   const inputType = isPassword && showPassword ? 'text' : type;
-  const hasError = error || localError;
+  const hasError = error;
   const hasSuccess = success && !hasError;
-
-  useEffect(() => {
-    if (validateOnChange && touched && validation && showValidation) {
-      const validationError = validateField(name, value, validation);
-      setLocalError(validationError || '');
-    }
-  }, [value, validateOnChange, touched, validation, name, showValidation]);
-
-  const handleBlur = () => {
-    setTouched(true);
-    if (validateOnBlur && validation && showValidation) {
-      const validationError = validateField(name, value, validation);
-      setLocalError(validationError || '');
-    }
-  };
-
-  const handleChange = (e) => {
-    onChange(e);
-    if (validateOnChange && touched && validation && showValidation) {
-      const validationError = validateField(name, value, validation);
-      setLocalError(validationError || '');
-    }
-  };
 
   return (
     <div className={`space-y-2 ${className}`}>
@@ -68,8 +38,7 @@ export const Input = ({
           type={inputType}
           name={name}
           value={value || ''}
-          onChange={handleChange}
-          onBlur={handleBlur}
+          onChange={onChange}
           placeholder={placeholder}
           disabled={disabled}
           className={`
@@ -114,7 +83,7 @@ export const Input = ({
           {hasError && (
             <p className="text-red-600 flex items-center">
               <AlertCircle className="w-4 h-4 mr-1 flex-shrink-0" />
-              {error || localError}
+              {error}
             </p>
           )}
           {helpText && !hasError && (
@@ -135,7 +104,6 @@ export const Textarea = ({
   name,
   value,
   onChange,
-  validation,
   placeholder,
   disabled = false,
   required = false,
@@ -144,42 +112,13 @@ export const Textarea = ({
   success,
   helpText,
   rows = 4,
-  showValidation = true,
-  validateOnBlur = true,
-  validateOnChange = false,
   maxLength,
   showCharCount = false,
   ...props
 }) => {
-  const [localError, setLocalError] = useState('');
-  const [touched, setTouched] = useState(false);
-
-  const hasError = error || localError;
+  const hasError = error;
   const hasSuccess = success && !hasError;
   const charCount = value ? value.length : 0;
-
-  useEffect(() => {
-    if (validateOnChange && touched && validation && showValidation) {
-      const validationError = validateField(name, value, validation);
-      setLocalError(validationError || '');
-    }
-  }, [value, validateOnChange, touched, validation, name, showValidation]);
-
-  const handleBlur = () => {
-    setTouched(true);
-    if (validateOnBlur && validation && showValidation) {
-      const validationError = validateField(name, value, validation);
-      setLocalError(validationError || '');
-    }
-  };
-
-  const handleChange = (e) => {
-    onChange(e);
-    if (validateOnChange && touched && validation && showValidation) {
-      const validationError = validateField(name, value, validation);
-      setLocalError(validationError || '');
-    }
-  };
 
   return (
     <div className={`space-y-2 ${className}`}>
@@ -194,8 +133,7 @@ export const Textarea = ({
         <textarea
           name={name}
           value={value || ''}
-          onChange={handleChange}
-          onBlur={handleBlur}
+          onChange={onChange}
           placeholder={placeholder}
           disabled={disabled}
           rows={rows}
@@ -219,7 +157,7 @@ export const Textarea = ({
           {hasError && (
             <p className="text-red-600 text-sm flex items-center">
               <AlertCircle className="w-4 h-4 mr-1 flex-shrink-0" />
-              {error || localError}
+              {error}
             </p>
           )}
           {helpText && !hasError && (
@@ -253,7 +191,6 @@ export const Select = ({
   value,
   onChange,
   options = [],
-  validation,
   placeholder = 'Select an option',
   disabled = false,
   required = false,
@@ -261,31 +198,10 @@ export const Select = ({
   error,
   success,
   helpText,
-  showValidation = true,
-  validateOnBlur = true,
   ...props
 }) => {
-  const [localError, setLocalError] = useState('');
-  const [touched, setTouched] = useState(false);
-
-  const hasError = error || localError;
+  const hasError = error;
   const hasSuccess = success && !hasError;
-
-  const handleBlur = () => {
-    setTouched(true);
-    if (validateOnBlur && validation && showValidation) {
-      const validationError = validateField(name, value, validation);
-      setLocalError(validationError || '');
-    }
-  };
-
-  const handleChange = (e) => {
-    onChange(e);
-    if (touched && validation && showValidation) {
-      const validationError = validateField(name, e.target.value, validation);
-      setLocalError(validationError || '');
-    }
-  };
 
   return (
     <div className={`space-y-2 ${className}`}>
@@ -300,8 +216,7 @@ export const Select = ({
         <select
           name={name}
           value={value || ''}
-          onChange={handleChange}
-          onBlur={handleBlur}
+          onChange={onChange}
           disabled={disabled}
           className={`
             w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:border-transparent transition-colors duration-200 appearance-none bg-white
@@ -338,7 +253,7 @@ export const Select = ({
           {hasError && (
             <p className="text-red-600 flex items-center">
               <AlertCircle className="w-4 h-4 mr-1 flex-shrink-0" />
-              {error || localError}
+              {error}
             </p>
           )}
           {helpText && !hasError && (
