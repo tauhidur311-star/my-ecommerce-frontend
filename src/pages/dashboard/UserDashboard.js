@@ -1,4 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { APIService } from '../../services/api';
+import { useSocket } from '../../hooks/useSocket';
+import NotificationBell from '../../components/NotificationBell';
+import PaymentModal from '../../components/PaymentModal';
+import socketService from '../../services/socketService';
+import { toast } from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   User, MapPin, Save, ArrowLeft, Package, Heart, 
@@ -6,6 +12,8 @@ import {
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import Navbar from '../../components/Navbar';
+import NotificationBell from '../../components/NotificationBell';
+import { useSocket } from '../../hooks/useSocket';
 
 const bangladeshDivisions = [
   'Barisal',
@@ -31,6 +39,9 @@ export default function UserDashboard() {
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
   const [orders] = useState([]);
+  
+  // Initialize socket connection for real-time features
+  const { isConnected } = useSocket();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -220,13 +231,26 @@ export default function UserDashboard() {
               </div>
             </div>
           </div>
-          <Link 
-            to="/" 
-            className="flex items-center gap-2 px-6 py-3 bg-white/80 backdrop-blur-sm border border-gray-200/50 rounded-xl hover:bg-white hover:shadow-lg transition-all duration-300 group"
-          >
-            <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-            Back to Store
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link 
+              to="/" 
+              className="flex items-center gap-2 px-6 py-3 bg-white/80 backdrop-blur-sm border border-gray-200/50 rounded-xl hover:bg-white hover:shadow-lg transition-all duration-300 group"
+            >
+              <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+              Back to Store
+            </Link>
+            
+            {/* Real-time Notification Bell */}
+            <NotificationBell />
+            
+            {/* Socket Connection Status */}
+            {isConnected && (
+              <div className="flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-200 rounded-lg">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-xs text-green-700 font-medium">Live Updates</span>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Stats Cards */}

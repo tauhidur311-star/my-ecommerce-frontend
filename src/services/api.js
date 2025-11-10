@@ -266,4 +266,250 @@ const apiService = new APIService();
 
 // Export both the class and instance
 export default apiService;
+  // ===== NEW ENHANCED API METHODS =====
+
+  // Notifications API
+  async getNotifications(page = 1, limit = 20) {
+    return this.request(`/notifications?page=${page}&limit=${limit}`);
+  },
+
+  async getUnreadNotificationCount() {
+    return this.request('/notifications/unread-count');
+  },
+
+  async markNotificationAsRead(notificationId) {
+    return this.request(`/notifications/${notificationId}/read`, {
+      method: 'PATCH',
+    });
+  },
+
+  async markAllNotificationsAsRead() {
+    return this.request('/notifications/mark-all-read', {
+      method: 'PATCH',
+    });
+  },
+
+  async getNotificationPreferences() {
+    return this.request('/notifications/preferences');
+  },
+
+  async updateNotificationPreferences(preferences) {
+    return this.request('/notifications/preferences', {
+      method: 'PUT',
+      body: JSON.stringify(preferences),
+    });
+  },
+
+  // Cart API
+  async getCart() {
+    return this.request('/cart');
+  },
+
+  async addToCart(productId, quantity = 1, options = {}) {
+    return this.request('/cart/items', {
+      method: 'POST',
+      body: JSON.stringify({ productId, quantity, ...options }),
+    });
+  },
+
+  async updateCartItem(productId, quantity, options = {}) {
+    return this.request(`/cart/items/${productId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ quantity, ...options }),
+    });
+  },
+
+  async removeFromCart(productId, options = {}) {
+    const params = new URLSearchParams(options);
+    return this.request(`/cart/items/${productId}?${params}`, {
+      method: 'DELETE',
+    });
+  },
+
+  async clearCart() {
+    return this.request('/cart', {
+      method: 'DELETE',
+    });
+  },
+
+  async applyCoupon(couponCode) {
+    return this.request('/cart/coupon', {
+      method: 'POST',
+      body: JSON.stringify({ couponCode }),
+    });
+  },
+
+  async removeCoupon(code) {
+    return this.request(`/cart/coupon/${code}`, {
+      method: 'DELETE',
+    });
+  },
+
+  async getCartSummary() {
+    return this.request('/cart/summary');
+  },
+
+  async syncCart() {
+    return this.request('/cart/sync', {
+      method: 'POST',
+    });
+  },
+
+  // Payment API
+  async getPaymentMethods(amount) {
+    return this.request(`/payments/methods?amount=${amount}`);
+  },
+
+  async calculatePaymentFee(paymentMethod, amount) {
+    return this.request('/payments/calculate-fee', {
+      method: 'POST',
+      body: JSON.stringify({ paymentMethod, amount }),
+    });
+  },
+
+  async createStripePaymentIntent(amount, orderId) {
+    return this.request('/payments/stripe/create-intent', {
+      method: 'POST',
+      body: JSON.stringify({ amount, orderId }),
+    });
+  },
+
+  async initiateMobileBankingPayment(paymentMethod, amount, orderId, mobileNumber) {
+    return this.request('/payments/mobile-banking/initiate', {
+      method: 'POST',
+      body: JSON.stringify({ paymentMethod, amount, orderId, mobileNumber }),
+    });
+  },
+
+  async confirmMobileBankingPayment(transactionId, userTransactionId) {
+    return this.request('/payments/mobile-banking/confirm', {
+      method: 'POST',
+      body: JSON.stringify({ transactionId, userTransactionId }),
+    });
+  },
+
+  async confirmCODOrder(orderId) {
+    return this.request('/payments/cod/confirm', {
+      method: 'POST',
+      body: JSON.stringify({ orderId }),
+    });
+  },
+
+  async getPaymentHistory(page = 1, limit = 10) {
+    return this.request(`/payments/history?page=${page}&limit=${limit}`);
+  },
+
+  // Advanced Search API
+  async searchProducts(params) {
+    const searchParams = new URLSearchParams(params);
+    return this.request(`/search/products?${searchParams}`);
+  },
+
+  async getSearchSuggestions(query, limit = 10) {
+    return this.request(`/search/suggestions?q=${encodeURIComponent(query)}&limit=${limit}`);
+  },
+
+  async getPopularSearches() {
+    return this.request('/search/popular');
+  },
+
+  async getSearchFilters(category = '') {
+    return this.request(`/search/filters${category ? `?category=${category}` : ''}`);
+  },
+
+  async getSimilarProducts(productId, limit = 8) {
+    return this.request(`/search/similar/${productId}?limit=${limit}`);
+  },
+
+  async trackSearch(query, resultCount, filters = {}) {
+    return this.request('/search/track', {
+      method: 'POST',
+      body: JSON.stringify({ query, resultCount, filters }),
+    });
+  },
+
+  // File Upload API
+  async uploadImage(file, folder = 'general') {
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('folder', folder);
+
+    const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+    
+    return fetch(`${API_BASE_URL}/upload/image`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+    }).then(response => response.json());
+  },
+
+  async uploadAvatar(file) {
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+    
+    return fetch(`${API_BASE_URL}/upload/avatar`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+    }).then(response => response.json());
+  },
+
+  // Enhanced User API
+  async getUserProfile() {
+    return this.request('/users/profile');
+  },
+
+  async updateUserProfile(profileData) {
+    return this.request('/users/profile', {
+      method: 'PUT',
+      body: JSON.stringify(profileData),
+    });
+  },
+
+  async getUserOrders(page = 1, limit = 10) {
+    return this.request(`/users/orders?page=${page}&limit=${limit}`);
+  },
+
+  // Categories API
+  async getCategories(flat = false) {
+    return this.request(`/categories${flat ? '?flat=true' : ''}`);
+  },
+
+  async getCategoryBySlug(slug) {
+    return this.request(`/categories/${slug}`);
+  },
+
+  // Admin API (for admin users)
+  async getAdminDashboard(period = '30') {
+    return this.request(`/admin/dashboard?period=${period}`);
+  },
+
+  async getAdminUsers(params = {}) {
+    const searchParams = new URLSearchParams(params);
+    return this.request(`/admin/users?${searchParams}`);
+  },
+
+  async getAdminOrders(params = {}) {
+    const searchParams = new URLSearchParams(params);
+    return this.request(`/admin/orders?${searchParams}`);
+  },
+
+  async updateOrderStatus(orderId, status) {
+    return this.request(`/admin/orders/${orderId}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    });
+  },
+
+  async getSalesAnalytics(period = '30', groupBy = 'day') {
+    return this.request(`/admin/analytics/sales?period=${period}&groupBy=${groupBy}`);
+  },
+};
+
 export { APIService };
