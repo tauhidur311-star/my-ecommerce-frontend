@@ -343,16 +343,6 @@ export default function Store() {
     );
   };
 
-  const handleFilter = (newFilters) => {
-    setFilters(newFilters);
-  };
-
-  const handleSort = (newSortBy) => {
-    setSortBy(newSortBy);
-  };
-
-  // Get unique categories for filter
-  const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
 
   // Wrap lazy-loaded components with Suspense
   return (

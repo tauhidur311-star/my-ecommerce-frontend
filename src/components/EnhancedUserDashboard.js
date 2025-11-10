@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   User, MapPin, Save, ArrowLeft, Package, Heart, 
-  ShoppingCart, Settings, Bell, CreditCard, Shield 
+  ShoppingCart, Settings, Bell, Shield 
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import Navbar from './Navbar';

@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { X, Loader2, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import { X, Loader2 } from 'lucide-react';
 
 export default function ProductModal({
   product,

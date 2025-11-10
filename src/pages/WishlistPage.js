@@ -6,8 +6,7 @@ import toast from 'react-hot-toast';
 import Navbar from '../components/Navbar';
 
 export default function WishlistPage() {
-  const { wishlist, removeFromWishlist, clearWishlist, isInWishlist } = useWishlist();
-  const [products, setProducts] = useState([]);
+  const { wishlist, removeFromWishlist, clearWishlist } = useWishlist();
   const [wishlistProducts, setWishlistProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
