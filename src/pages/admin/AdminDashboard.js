@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
-import { Plus, Edit2, Trash2, Save, X, Upload, Package, Grid, Tag, List, Store as StoreIcon, Expand, Loader2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, Upload, Package, Grid, Tag, List, Store as StoreIcon, Expand, Loader2, Menu, Bell, Search } from 'lucide-react';
 import ImageCropper from '../../components/ImageCropper';
 import Silk from '../../components/Silk';
+import ErrorBoundary from '../../components/ErrorBoundary';
+import { LoadingButton, SmartLoader, OverlayLoader } from '../../components/LoadingStates';
+import { Input, Textarea, Select, Checkbox } from '../../components/ui/FormField';
+import { validateForm, validateField, productValidation, storeValidation } from '../../utils/validation';
+import '../../styles/mobile-responsive.css';
 
 const IMGBB_API_KEY = 'YOUR_API_KEY_HERE'; // Replace with your ImageBB API key
 const IMGBB_API_URL = 'https://api.imgbb.com/1/upload';
@@ -110,6 +115,10 @@ export default function AdminDashboard() {
     }
   });
   const [activeTab, setActiveTab] = useState('products'); // 'products' or 'settings'
+  const [loading, setLoading] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Load products from storage
   useEffect(() => {
@@ -535,13 +544,39 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="mb-6 border-b border-gray-200">
-          <div className="flex -mb-px">
-            <button onClick={() => setActiveTab('products')} className={`px-4 py-3 font-semibold text-sm ${activeTab === 'products' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}>Products</button>
-            <button onClick={() => setActiveTab('settings')} className={`px-4 py-3 font-semibold text-sm ${activeTab === 'settings' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}>Store Settings</button>
+          {/* Enhanced Tab Navigation */}
+          <div className="tab-navigation mb-6 border-b border-gray-200 bg-white rounded-lg shadow-sm">
+            <div className="flex px-4 sm:px-6 overflow-x-auto scrollbar-hide">
+              <button 
+                onClick={() => {
+                  setActiveTab('products');
+                  setIsMobileMenuOpen(false);
+                }} 
+                className={`tab-button px-4 py-3 font-semibold text-sm whitespace-nowrap transition-colors duration-200 ${
+                  activeTab === 'products' 
+                    ? 'border-b-2 border-blue-600 text-blue-600' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <Package className="w-4 h-4 mr-2 inline" />
+                Products
+              </button>
+              <button 
+                onClick={() => {
+                  setActiveTab('settings');
+                  setIsMobileMenuOpen(false);
+                }} 
+                className={`tab-button px-4 py-3 font-semibold text-sm whitespace-nowrap transition-colors duration-200 ${
+                  activeTab === 'settings' 
+                    ? 'border-b-2 border-blue-600 text-blue-600' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <StoreIcon className="w-4 h-4 mr-2 inline" />
+                Store Settings
+              </button>
+            </div>
           </div>
-        </div>
 
         {activeTab === 'products' && (
           <div className="bg-white rounded-lg shadow overflow-hidden">
