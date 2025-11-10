@@ -4,6 +4,7 @@ import { User, MapPin, Save, ArrowLeft, Package, Heart, Settings, Bell } from 'l
 import toast, { Toaster } from 'react-hot-toast';
 import OrderManagement from '../../components/OrderManagement';
 import WishlistManager from '../../components/WishlistManager';
+import EnhancedUserProfile from '../../components/EnhancedUserProfile';
 
 const bangladeshDivisions = [
   'Barisal',
@@ -139,9 +140,9 @@ export default function UserDashboard() {
 
   const menuItems = [
     { id: 'profile', title: 'Profile', icon: User },
+    { id: 'enhanced-profile', title: 'Account Settings', icon: Settings },
     { id: 'orders', title: 'Orders', icon: Package },
-    { id: 'wishlist', title: 'Wishlist', icon: Heart },
-    { id: 'settings', title: 'Settings', icon: Settings }
+    { id: 'wishlist', title: 'Wishlist', icon: Heart }
   ];
 
   return (
@@ -302,19 +303,9 @@ export default function UserDashboard() {
                 </div>
               )}
 
-              {activeTab === 'settings' && (
+              {activeTab === 'enhanced-profile' && (
                 <div>
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center">
-                      <Settings size={20} className="text-white" />
-                    </div>
-                    <h2 className="text-2xl font-bold text-gray-900">Account Settings</h2>
-                  </div>
-                  <div className="text-center py-12">
-                    <Settings size={48} className="mx-auto text-gray-400 mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Settings Coming Soon</h3>
-                    <p className="text-gray-600">Additional account settings will be available in a future update.</p>
-                  </div>
+                  <EnhancedUserProfile />
                 </div>
               )}
             </div>
