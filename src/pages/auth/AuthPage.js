@@ -3,7 +3,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { User, Mail, Lock, Eye, EyeOff, Phone, AlertCircle, CheckCircle } from 'lucide-react';
 import { GoogleLogin } from '@react-oauth/google';
 import toast, { Toaster } from 'react-hot-toast';
-import { OTPForm } from '../../components/OTPForm';
+import { EnhancedOTPForm } from '../../components/EnhancedOTPForm';
 
 export default function AuthPage() {
   const navigate = useNavigate();
@@ -217,10 +217,12 @@ export default function AuthPage() {
           return (
             <div className="space-y-4">
               <p className="text-sm text-gray-600">Enter the 6-digit OTP sent to {formData.email}</p>
-              <OTPForm 
+              <EnhancedOTPForm 
                 onSubmit={handleOTPVerification}
+                onResendOTP={handleForgotPassword}
                 isLoading={loading}
                 error={message.type === 'error' ? message.text : null}
+                email={formData.email}
               />
               <button 
                 onClick={() => {

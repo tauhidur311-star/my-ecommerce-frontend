@@ -197,9 +197,38 @@ export default function Store() {
     }
   }, []);
 
-  const handleAuth = () => {
+  const showAuthModal = () => {
     setShowAuth(true);
     setAuthMode('login');
+  };
+
+  const handleAuth = async (e) => {
+    e.preventDefault();
+    
+    const endpoint = authMode === 'login' ? 'login' : 'register';
+    
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(authForm)
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || `${authMode} failed`);
+      }
+      
+      // Store token and user data
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
+      handleLoginSuccess(data.user);
+      
+    } catch (error) {
+      throw error; // Re-throw to be caught by AuthModal
+    }
   };
 
   // Wrap lazy-loaded components with Suspense
@@ -220,7 +249,7 @@ export default function Store() {
         user={user}
         cart={cart}
         onLogout={() => setShowLogoutConfirm(true)}
-        onLogin={handleAuth}
+        onLogin={showAuthModal}
         onCartClick={() => setShowCart(true)}
         onCheckout={handleCheckout}
         onSearch={setSearchQuery}

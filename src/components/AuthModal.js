@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { GoogleLogin } from '@react-oauth/google';
-import { OTPForm } from './OTPForm';
+import { EnhancedOTPForm } from './EnhancedOTPForm';
 
 export default function AuthModal({ 
   showAuth,
@@ -188,10 +188,12 @@ export default function AuthModal({
           ) : forgotPasswordStep === 'otp' ? (
             <div className="space-y-4">
               <p className="text-sm text-gray-600">Enter the 6-digit OTP sent to {authForm.email}</p>
-              <OTPForm 
+              <EnhancedOTPForm 
                 onSubmit={handleOTPVerification}
+                onResendOTP={handleForgotPassword}
                 isLoading={isLoading}
                 error={error}
+                email={authForm.email}
               />
               <button 
                 onClick={() => {
