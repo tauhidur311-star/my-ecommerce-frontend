@@ -46,10 +46,10 @@ const EmailNotificationSystem = () => {
       }
 
       // Load email queue
-      const queueData = localStorage.getItem('email-queue');
-      if (queueData) {
-        setEmailQueue(JSON.parse(queueData));
-      }
+      // const queueData = localStorage.getItem('email-queue');
+      // if (queueData) {
+      //   setEmailQueue(JSON.parse(queueData));
+      // }
     } catch (error) {
       console.error('Error loading email data:', error);
       toast.error('Failed to load email configuration');
