@@ -18,20 +18,60 @@ const mockNavbarConfig = {
   }
 };
 
-const Navbar = ({ user, cartCount, onLogout, onLogin, onCartClick }) => {
-  const [config] = useState(mockNavbarConfig);
+const CartHoverPreview = ({ cart, cartTotal, onCheckout }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      className="absolute top-full right-0 mt-3 w-80 origin-top-right rounded-xl border border-white/10 bg-black/30 p-4 shadow-lg backdrop-blur-xl"
+    >
+      <h3 className="mb-3 border-b border-white/20 pb-2 text-lg font-semibold text-white">Cart Summary</h3>
+      <div className="max-h-60 space-y-3 overflow-y-auto pr-2">
+        {cart.map(item => (
+          <div key={`${item.id}-${item.selectedSize}`} className="flex items-center justify-between text-sm">
+            <div className="flex-grow pr-2">
+              <p className="font-medium text-gray-200 truncate">{item.name}</p>
+              <p className="text-xs text-gray-400">Size: {item.selectedSize} x{item.quantity}</p>
+            </div>
+            <p className="flex-shrink-0 font-semibold text-white">৳{item.price * item.quantity}</p>
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 border-t border-white/20 pt-4">
+        <div className="mb-4 flex items-center justify-between font-bold text-lg text-white">
+          <span>Total:</span>
+          <span>৳{cartTotal}</span>
+        </div>
+        <button onClick={onCheckout} className="w-full rounded-lg bg-purple-600 py-2 font-semibold text-white transition-colors hover:bg-purple-700">
+          Checkout
+        </button>
+      </div>
+    </motion.div>
+  );
+};
+
+const Navbar = ({ user, cart, onLogout, onLogin, onCartClick, onSearch, onCheckout }) => {
+  const [config, setConfig] = useState(mockNavbarConfig);
   const [isSettingsOpen, setSettingsOpen] = useState(false);
   const [isSearchOpen, setSearchOpen] = useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isCartHovered, setCartHovered] = useState(false);
 
-  // In a real app, you would fetch this config
+  // Load settings from local storage
   useEffect(() => {
-    // const fetchConfig = async () => {
-    //   const response = await fetch('/api/settings/navbar');
-    //   const data = await response.json();
-    //   setConfig(data);
-    // };
-    // fetchConfig();
+    const loadSettings = () => {
+      const savedSettings = localStorage.getItem('store-settings');
+      if (savedSettings) {
+        try {
+          setConfig(JSON.parse(savedSettings));
+        } catch (e) {
+          console.error("Failed to parse store settings", e);
+          setConfig(mockNavbarConfig);
+        }
+      }
+    };
+    loadSettings();
   }, []);
 
   const settingsDropdownItems = (
@@ -69,7 +109,12 @@ const Navbar = ({ user, cartCount, onLogout, onLogin, onCartClick }) => {
     <div className="p-2 text-gray-200">
       <h4 className="px-2 pb-2 text-sm font-medium">Filter Products</h4>
       {/* Your Search/Filter component can go here */}
-      <input type="text" placeholder="Search..." className="w-full rounded-md border-none bg-white/10 px-3 py-2 text-sm placeholder-gray-400 focus:ring-2 focus:ring-purple-500" />
+      <input 
+        type="text" 
+        placeholder="Search..." 
+        onChange={(e) => onSearch(e.target.value)}
+        className="w-full rounded-md border-none bg-white/10 px-3 py-2 text-sm placeholder-gray-400 focus:ring-2 focus:ring-purple-500" 
+      />
     </div>
   );
 
@@ -85,22 +130,25 @@ const Navbar = ({ user, cartCount, onLogout, onLogin, onCartClick }) => {
 
           {/* Right Side: Desktop Menu */}
           <div className="hidden items-center gap-6 text-white md:flex">
-            {config.links.map(link => (
-              link.text === 'Cart' ? (
-                <button key={link.text} onClick={onCartClick} className="relative rounded-full p-2 transition-colors hover:bg-white/10">
+            {config.links.filter(l => l.text !== 'Cart').map(link => (
+              <Link key={link.text} to={link.href} className="rounded-full px-3 py-2 transition-colors hover:bg-white/10">
+                {link.text}
+              </Link>
+            ))}
+            
+            <div className="relative" onMouseEnter={() => setCartHovered(true)} onMouseLeave={() => setCartHovered(false)}>
+              <button onClick={onCartClick} className="relative rounded-full p-2 transition-colors hover:bg-white/10">
                   <ShoppingCart size={20} />
-                  {cartCount > 0 && (
+                {cart.length > 0 && (
                     <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-purple-600 text-xs">
-                      {cartCount}
+                    {cart.length}
                     </span>
                   )}
                 </button>
-              ) : (
-                <Link key={link.text} to={link.href} className="rounded-full px-3 py-2 transition-colors hover:bg-white/10">
-                  {link.text}
-                </Link>
-              )
-            ))}
+              {isCartHovered && cart.length > 0 && (
+                <CartHoverPreview cart={cart} cartTotal={cart.reduce((sum, item) => sum + item.price * item.quantity, 0)} onCheckout={onCheckout} />
+              )}
+            </div>
             
             <div className="relative">
               <button onClick={() => setSearchOpen(!isSearchOpen)} className="rounded-full p-2 transition-colors hover:bg-white/10">
@@ -121,9 +169,9 @@ const Navbar = ({ user, cartCount, onLogout, onLogin, onCartClick }) => {
           <div className="flex items-center gap-2 md:hidden">
             <button onClick={onCartClick} className="relative rounded-full p-2 text-white transition-colors hover:bg-white/10">
               <ShoppingCart size={20} />
-              {cartCount > 0 && (
+              {cart.length > 0 && (
                 <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-purple-600 text-xs">
-                  {cartCount}
+                  {cart.length}
                 </span>
               )}
             </button>

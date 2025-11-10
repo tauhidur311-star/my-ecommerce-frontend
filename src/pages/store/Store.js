@@ -21,6 +21,7 @@ export default function Store() {
   const [user, setUser] = useState(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [showAuth, setShowAuth] = useState(false);
   const [authMode, setAuthMode] = useState('login');
   const [authForm, setAuthForm] = useState({ name: '', email: '', password: '' });
@@ -197,10 +198,12 @@ export default function Store() {
       {/* Navigation */}
       <Navbar
         user={user}
-        cartCount={cart.length}
+        cart={cart}
         onLogout={() => setShowLogoutConfirm(true)}
         onLogin={handleAuth}
         onCartClick={() => setShowCart(true)}
+        onCheckout={handleCheckout}
+        onSearch={setSearchQuery}
       />
 
       {/* Products Grid */}
@@ -213,7 +216,9 @@ export default function Store() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {products.map(product => (
+            {products
+              .filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
+              .map(product => (
               <div 
                 key={product.id} 
                 className="bg-white rounded-lg shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition"
