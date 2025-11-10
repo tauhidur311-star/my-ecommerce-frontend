@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Store from './pages/store/Store';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AuthPage from './pages/auth/AuthPage';
@@ -42,5 +42,17 @@ function App() {
     </Router>
   );
 }
+
+const AuthenticatedRoute = ({ children }) => {
+  const token = localStorage.getItem('token');
+
+  if (!token) {
+    // Redirect them to the /login page, but save the current location they were
+    // trying to go to.
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+};
 
 export default App;
