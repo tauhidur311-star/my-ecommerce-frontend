@@ -213,18 +213,7 @@ export default function Store() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {products
-              .filter(product => {
-                const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-                const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
-                return matchesSearch && matchesCategory;
-              })
-              .sort((a, b) => {
-                if (sortBy === 'price-asc') return a.price - b.price;
-                if (sortBy === 'price-desc') return b.price - a.price;
-                return 0;
-              })
-              .map(product => (
+            {products.map(product => (
               <div 
                 key={product.id} 
                 className="bg-white rounded-lg shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition"
