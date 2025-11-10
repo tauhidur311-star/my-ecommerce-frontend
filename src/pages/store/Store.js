@@ -4,9 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import Silk from '../../components/Silk';
 import Navbar from '../../components/Navbar';
 import EnhancedProductCard from '../../components/EnhancedProductCard';
-import StoreFilters from '../../components/StoreFilters';
 import QuickViewModal from '../../components/QuickViewModal';
-import { ProductGridSkeleton, FilterSkeleton } from '../../components/EnhancedProductSkeleton';
+import { ProductGridSkeleton } from '../../components/EnhancedProductSkeleton';
 import { useWishlist } from '../../hooks/useWishlist';
 import '../../styles/animations.css';
 
@@ -80,7 +79,7 @@ export default function Store() {
         const enhancedProducts = parsedProducts.map(product => ({
           ...product,
           rating: product.rating || (Math.random() * 2 + 3).toFixed(1), // Random rating 3-5
-          reviews: product.reviews || Math.floor(Math.random() * 100 + 10), // Random reviews
+          sold: product.sold || Math.floor(Math.random() * 500 + 10), // Random sold numbers 10-510
           isNew: product.isNew || Math.random() > 0.8, // 20% chance of being new
           stock: product.stock || Math.floor(Math.random() * 20 + 1), // Random stock 1-20
           discount: product.discount || (Math.random() > 0.7 ? Math.floor(Math.random() * 30 + 10) : null)
@@ -310,7 +309,7 @@ export default function Store() {
         filtered.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
         break;
       case 'popular':
-        filtered.sort((a, b) => (b.reviews || 0) - (a.reviews || 0));
+        filtered.sort((a, b) => (b.sold || 0) - (a.sold || 0));
         break;
       case 'rating':
         filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
@@ -377,28 +376,15 @@ export default function Store() {
         onCartClick={() => setShowCart(true)}
         onCheckout={handleCheckout}
         onSearch={setSearchQuery}
+        products={products}
       />
 
       {/* Enhanced Store Content */}
       <div className="container mx-auto px-4 py-8 pt-28">
         {isLoading ? (
-          <>
-            <FilterSkeleton />
-            <ProductGridSkeleton count={8} />
-          </>
+          <ProductGridSkeleton count={8} />
         ) : (
           <>
-            {/* Enhanced Filters */}
-            <StoreFilters
-              products={products}
-              onFilter={handleFilter}
-              onSort={handleSort}
-              searchQuery={searchQuery}
-              onSearch={setSearchQuery}
-              categories={categories}
-              priceRange={[0, Math.max(...products.map(p => p.price || 0))]}
-            />
-
             {/* Results Summary */}
             <div className="flex items-center justify-between mb-6 text-sm text-gray-600">
               <span>

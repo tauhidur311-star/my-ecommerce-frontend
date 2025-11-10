@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { X, Loader2 } from 'lucide-react';
-import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
+import { X, Loader2, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 
 export default function ProductModal({
   product,
@@ -53,44 +52,43 @@ export default function ProductModal({
 
         <div className="p-6">
           <div className="flex justify-center mb-6">
-            <div className="w-full max-w-2xl aspect-square relative">
-              <TransformWrapper
-                initialScale={1}
-                minScale={1}
-                maxScale={3}
-                centerOnInit={true}
-              >
-                {({ zoomIn, zoomOut, resetTransform }) => (
-                  <>
-                    <TransformComponent
-                      wrapperClass="!w-full !h-full"
-                      contentClass="!w-full !h-full"
-                    >
-                      <img src={mainImage} alt={product.name} className="w-full h-full object-contain" />
-                    </TransformComponent>
-                    <div className="absolute bottom-4 right-4 flex gap-2">
-                      <button
-                        onClick={() => zoomIn()}
-                        className="bg-black bg-opacity-50 text-white p-2 rounded-lg"
-                      >
-                        Zoom In
-                      </button>
-                      <button
-                        onClick={() => zoomOut()}
-                        className="bg-black bg-opacity-50 text-white p-2 rounded-lg"
-                      >
-                        Zoom Out
-                      </button>
-                      <button
-                        onClick={() => resetTransform()}
-                        className="bg-black bg-opacity-50 text-white p-2 rounded-lg"
-                      >
-                        Reset
-                      </button>
-                    </div>
-                  </>
-                )}
-              </TransformWrapper>
+            <div className="w-full max-w-2xl aspect-square relative bg-gray-50 rounded-xl overflow-hidden">
+              <div className="w-full h-full relative group">
+                <img 
+                  src={mainImage} 
+                  alt={product.name} 
+                  className="w-full h-full object-contain cursor-zoom-in transition-transform duration-300 hover:scale-105" 
+                  onWheel={(e) => {
+                    e.preventDefault();
+                    const img = e.currentTarget;
+                    const rect = img.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    if (e.deltaY < 0) {
+                      // Zoom in
+                      img.style.transformOrigin = `${x}px ${y}px`;
+                      img.style.transform = 'scale(2)';
+                    } else {
+                      // Zoom out
+                      img.style.transform = 'scale(1)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }}
+                />
+                
+                {/* Zoom Instructions */}
+                <div className="absolute top-4 left-4 bg-black bg-opacity-70 text-white px-3 py-1 rounded-full text-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                  Scroll to zoom
+                </div>
+                
+                {/* Mobile Pinch Instructions */}
+                <div className="absolute top-4 right-4 bg-black bg-opacity-70 text-white px-3 py-1 rounded-full text-sm opacity-0 group-hover:opacity-100 transition-opacity md:hidden">
+                  Pinch to zoom
+                </div>
+              </div>
             </div>
             {product.images && product.images.length > 1 && (
               <div className="flex justify-center gap-2">

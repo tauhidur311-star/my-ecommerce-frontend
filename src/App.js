@@ -3,7 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Store from './pages/store/Store';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AuthPage from './pages/auth/AuthPage';
-import UserDashboard from './pages/dashboard/UserDashboard';
+import EnhancedUserDashboard from './components/EnhancedUserDashboard';
+import WishlistPage from './pages/WishlistPage';
 import AboutPage from './pages/store/AboutPage';
 import ContactPage from './pages/store/ContactPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -25,11 +26,12 @@ function App() {
           path="/dashboard"
           element={
             <AuthenticatedRoute>
-              <UserDashboard />
+              <EnhancedUserDashboard />
             </AuthenticatedRoute>
           }
         />
         <Route path="/forgot-password" element={<AuthPage />} />
+        <Route path="/wishlist" element={<WishlistPage />} />
         <Route 
           path="/admin" 
           element={
