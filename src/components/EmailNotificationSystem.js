@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Mail, Send, Settings, Users, Package, ShoppingCart, 
   Bell, Check, X, Edit2, Trash2, Eye, Calendar, Clock,
-  AlertCircle, CheckCircle, Info
+  AlertCircle, CheckCircle, Info, Plus
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
