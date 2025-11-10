@@ -3,6 +3,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { User, Mail, Lock, Eye, EyeOff, Phone, AlertCircle, CheckCircle } from 'lucide-react';
 import { GoogleLogin } from '@react-oauth/google';
 import toast, { Toaster } from 'react-hot-toast';
+import { OTPForm } from '../../components/OTPForm';
 
 export default function AuthPage() {
   const navigate = useNavigate();
@@ -22,6 +23,8 @@ export default function AuthPage() {
     phone: '',
     otp: ''
   });
+
+  const [forgotPasswordStep, setForgotPasswordStep] = useState('email'); // 'email', 'otp', 'newPassword'
 
   // Redirect if already logged in
   useEffect(() => {
@@ -118,6 +121,34 @@ export default function AuthPage() {
     }
   };
 
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage({ type: '', text: '' });
+    try {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to send OTP.');
+      toast.success('OTP sent to your email! Please check your inbox.');
+      setForgotPasswordStep('otp');
+      setMessage({ type: 'success', text: 'OTP sent to your email! Please check your inbox.' });
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOTPVerification = async (otp) => {
+    setFormData({ ...formData, otp });
+    setForgotPasswordStep('newPassword');
+    setMessage({ type: 'success', text: 'OTP verified! Please enter your new password.' });
+  };
+
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -132,7 +163,8 @@ export default function AuthPage() {
       if (!res.ok) throw new Error(data.error || 'Failed to reset password.');
       toast.success(data.message);
       setAuthMode('login');
-      setFormData({ name: '', email: '', password: '', otp: '' });
+      setForgotPasswordStep('email');
+      setFormData({ name: '', email: '', password: '', confirmPassword: '', phone: '', otp: '' });
     } catch (err) {
       setMessage({ type: 'error', text: err.message });
     } finally {
@@ -155,13 +187,47 @@ export default function AuthPage() {
           </form>
         );
       case 'forgotPassword':
-        return (
-          <form onSubmit={handleResetPassword} className="space-y-4">
-            <p className="text-sm text-gray-600">Enter your email to receive a password reset OTP.</p>
-            <InputField name="email" type="email" placeholder="your@email.com" value={formData.email} onChange={handleInputChange} Icon={Mail} required />
-            <button type="submit" disabled={loading} className="w-full text-white font-semibold py-3 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-all duration-300">{loading ? 'Sending...' : 'Send OTP'}</button>
-          </form>
-        );
+        if (forgotPasswordStep === 'email') {
+          return (
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <p className="text-sm text-gray-600">Enter your email to receive a password reset OTP.</p>
+              <InputField name="email" type="email" placeholder="your@email.com" value={formData.email} onChange={handleInputChange} Icon={Mail} required />
+              <button type="submit" disabled={loading} className="w-full text-white font-semibold py-3 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-all duration-300">{loading ? 'Sending...' : 'Send OTP'}</button>
+            </form>
+          );
+        } else if (forgotPasswordStep === 'otp') {
+          return (
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600">Enter the 6-digit OTP sent to {formData.email}</p>
+              <OTPForm 
+                onSubmit={handleOTPVerification}
+                isLoading={loading}
+                error={message.type === 'error' ? message.text : null}
+              />
+              <button 
+                onClick={() => {
+                  setForgotPasswordStep('email');
+                  setMessage({ type: '', text: '' });
+                }}
+                className="w-full text-blue-600 font-medium hover:text-blue-700 transition-colors"
+              >
+                ← Back to email entry
+              </button>
+            </div>
+          );
+        } else if (forgotPasswordStep === 'newPassword') {
+          return (
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <p className="text-sm text-gray-600">Enter your new password</p>
+              <InputField name="password" type="password" placeholder="New Password" value={formData.password} onChange={handleInputChange} Icon={Lock} required />
+              <InputField name="confirmPassword" type="password" placeholder="Confirm New Password" value={formData.confirmPassword} onChange={handleInputChange} Icon={Lock} required />
+              <button type="submit" disabled={loading || formData.password !== formData.confirmPassword} className="w-full text-white font-semibold py-3 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-all duration-300">{loading ? 'Resetting...' : 'Reset Password'}</button>
+              {formData.password !== formData.confirmPassword && formData.confirmPassword && (
+                <p className="text-sm text-red-600">Passwords do not match</p>
+              )}
+            </form>
+          );
+        }
       case 'resetPassword':
         return (
           <form onSubmit={handleResetPassword} className="space-y-4">
@@ -204,7 +270,11 @@ export default function AuthPage() {
             <h2 className="text-3xl font-bold text-gray-800 mb-2">
               {authMode === 'login' && 'Login'}
               {authMode === 'register' && 'Sign Up'}
-              {authMode === 'forgotPassword' && 'Forgot Password'}
+              {authMode === 'forgotPassword' && (
+                forgotPasswordStep === 'email' ? 'Forgot Password' :
+                forgotPasswordStep === 'otp' ? 'Verify OTP' :
+                'Set New Password'
+              )}
               {authMode === 'resetPassword' && 'Reset Password'}
             </h2>
           </div>

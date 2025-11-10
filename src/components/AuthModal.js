@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { GoogleLogin } from '@react-oauth/google';
+import { OTPForm } from './OTPForm';
 
 export default function AuthModal({ 
   showAuth,
@@ -15,6 +16,7 @@ export default function AuthModal({
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [forgotPasswordStep, setForgotPasswordStep] = useState('email'); // 'email', 'otp', 'newPassword'
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -48,13 +50,19 @@ export default function AuthModal({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to send OTP.');
       
-      toast.success(data.message);
-      setAuthMode('resetPassword');
+      toast.success('OTP sent to your email! Please check your inbox.');
+      setForgotPasswordStep('otp');
     } catch (err) {
       setError(err.message);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleOTPVerification = async (otp) => {
+    setAuthForm({ ...authForm, otp });
+    setForgotPasswordStep('newPassword');
+    setError(null);
   };
 
   const handleResetPassword = async (e) => {
@@ -72,6 +80,7 @@ export default function AuthModal({
 
       toast.success(data.message);
       setAuthMode('login');
+      setForgotPasswordStep('email');
       setAuthForm({ name: '', email: '', password: '', otp: '' });
     } catch (err) {
       setError(err.message);
@@ -122,7 +131,13 @@ export default function AuthModal({
       <div className="bg-white rounded-lg p-8 max-w-md w-full m-4">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">
-            {authMode === 'login' ? 'Login' : authMode === 'register' ? 'Sign Up' : 'Reset Password'}
+            {authMode === 'login' ? 'Login' : 
+             authMode === 'register' ? 'Sign Up' : 
+             authMode === 'forgotPassword' ? (
+               forgotPasswordStep === 'email' ? 'Forgot Password' :
+               forgotPasswordStep === 'otp' ? 'Verify OTP' :
+               'Set New Password'
+             ) : 'Reset Password'}
           </h2>
           <button onClick={() => setShowAuth(false)}>
             <X size={24} />
@@ -136,22 +151,63 @@ export default function AuthModal({
         )}
 
         {authMode === 'forgotPassword' ? (
-          <form onSubmit={handleForgotPassword} className="space-y-4">
-            <p className="text-sm text-gray-600">Enter your email address and we will send you an OTP to reset your password.</p>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Email</label>
-              <input
-                type="email"
-                value={authForm.email}
-                onChange={(e) => setAuthForm({ ...authForm, email: e.target.value })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
-                required
+          forgotPasswordStep === 'email' ? (
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <p className="text-sm text-gray-600">Enter your email address and we will send you an OTP to reset your password.</p>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Email</label>
+                <input
+                  type="email"
+                  value={authForm.email}
+                  onChange={(e) => setAuthForm({ ...authForm, email: e.target.value })}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                  required
+                />
+              </div>
+              <button type="submit" disabled={isLoading} className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50">
+                {isLoading ? 'Sending...' : 'Send OTP'}
+              </button>
+            </form>
+          ) : forgotPasswordStep === 'otp' ? (
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600">Enter the 6-digit OTP sent to {authForm.email}</p>
+              <OTPForm 
+                onSubmit={handleOTPVerification}
+                isLoading={isLoading}
+                error={error}
               />
+              <button 
+                onClick={() => {
+                  setForgotPasswordStep('email');
+                  setError(null);
+                }}
+                className="w-full text-blue-600 font-medium hover:text-blue-700 transition-colors"
+              >
+                ← Back to email entry
+              </button>
             </div>
-            <button type="submit" disabled={isLoading} className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50">
-              {isLoading ? 'Sending...' : 'Send OTP'}
-            </button>
-          </form>
+          ) : (
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <p className="text-sm text-gray-600">Enter your new password</p>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Email</label>
+                <input type="email" value={authForm.email} readOnly className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">New Password</label>
+                <input
+                  type="password"
+                  value={authForm.password}
+                  onChange={(e) => setAuthForm({ ...authForm, password: e.target.value })}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                  required
+                />
+              </div>
+              <button type="submit" disabled={isLoading} className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50">
+                {isLoading ? 'Resetting...' : 'Reset Password'}
+              </button>
+            </form>
+          )
         ) : authMode === 'resetPassword' ? (
           <form onSubmit={handleResetPassword} className="space-y-4">
             <div>
