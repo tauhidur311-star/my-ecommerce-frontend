@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Settings, ShoppingCart, X, Menu, LogIn, LogOut, User, Info, Mail } from 'lucide-react';
 import NavbarDropdown from './NavbarDropdown';
@@ -19,7 +19,7 @@ const mockNavbarConfig = {
 };
 
 const Navbar = ({ user, cartCount, onLogout, onLogin, onCartClick }) => {
-  const [config, setConfig] = useState(mockNavbarConfig);
+  const [config] = useState(mockNavbarConfig);
   const [isSettingsOpen, setSettingsOpen] = useState(false);
   const [isSearchOpen, setSearchOpen] = useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -33,8 +33,6 @@ const Navbar = ({ user, cartCount, onLogout, onLogin, onCartClick }) => {
     // };
     // fetchConfig();
   }, []);
-
-  const location = useLocation();
 
   const settingsDropdownItems = (
     <>

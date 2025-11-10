@@ -1,6 +1,6 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import SearchFilters from '../../components/SearchFilters';
 import ProductSkeleton from '../../components/ProductSkeleton';
 import ZoomableImage from '../../components/ZoomableImage';
@@ -13,7 +13,6 @@ const AuthModal = lazy(() => import('../../components/AuthModal'));
 
 export default function Store() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [cart, setCart] = useState([]);
@@ -112,10 +111,6 @@ export default function Store() {
   };
 
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-  const handleLogout = () => {
-    setShowLogoutConfirm(true);
-  };
 
   const confirmLogout = () => {
     setUser(null);
