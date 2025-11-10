@@ -24,7 +24,7 @@ const bangladeshDivisions = [
 
 export default function UserDashboard() {
   const navigate = useNavigate();
-  const { user: authUser, isAuthenticated, isLoading: authLoading, logout } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, logout } = useAuth();
   const [userData, setUserData] = useState({
     name: '',
     address: '',

@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Store from './pages/store/Store';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -8,7 +8,6 @@ import UserDashboard from './pages/dashboard/UserDashboard';
 import LazyWishlistPage from './components/LazyWishlistPage';
 import AboutPage from './pages/store/AboutPage';
 import ContactPage from './pages/store/ContactPage';
-import ProtectedRoute from './components/ProtectedRoute';
 import TokenManager from './components/TokenManager';
 import { AuthProvider, withAuth, withAdminAuth } from './hooks/useAuth';
 import './App.css';

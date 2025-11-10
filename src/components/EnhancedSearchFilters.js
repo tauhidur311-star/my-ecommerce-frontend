@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, X, SlidersHorizontal, Star, Tag } from 'lucide-react';
+import { Search, X, SlidersHorizontal, Star, Tag } from 'lucide-react';
 
 const EnhancedSearchFilters = ({ 
   products = [], 

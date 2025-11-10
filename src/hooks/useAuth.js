@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, createContext } from 'react';
+import { useState, useEffect, useContext, createContext, useCallback } from 'react';
 import enhancedApiService from '../services/enhancedApi';
 import toast from 'react-hot-toast';
 
@@ -147,11 +147,11 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Get time until token expires
-  const getTokenTimeRemaining = () => {
+  const getTokenTimeRemaining = useCallback(() => {
     if (!tokenExpiry) return null;
     const remaining = tokenExpiry - Date.now();
     return remaining > 0 ? remaining : 0;
-  };
+  }, [tokenExpiry]);
 
   // Auto-refresh token when it's about to expire
   useEffect(() => {
@@ -178,7 +178,7 @@ export const AuthProvider = ({ children }) => {
     const interval = setInterval(checkTokenExpiry, 60 * 1000);
 
     return () => clearInterval(interval);
-  }, [isAuthenticated, tokenExpiry]);
+  }, [isAuthenticated, tokenExpiry, getTokenTimeRemaining]);
 
   const contextValue = {
     user,

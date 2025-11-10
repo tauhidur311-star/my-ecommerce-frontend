@@ -6,7 +6,6 @@ const TokenManager = () => {
   const { 
     isAuthenticated, 
     tokenExpiry, 
-    isTokenExpiringSoon, 
     getTokenTimeRemaining 
   } = useAuth();
   
