@@ -57,6 +57,7 @@ const Navbar = ({ user, cart, onLogout, onLogin, onCartClick, onSearch, onChecko
   const [isSearchOpen, setSearchOpen] = useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isCartHovered, setCartHovered] = useState(false);
+  let hoverTimeout;
 
   // Load settings from local storage
   useEffect(() => {
@@ -72,6 +73,15 @@ const Navbar = ({ user, cart, onLogout, onLogin, onCartClick, onSearch, onChecko
       }
     };
     loadSettings();
+
+    const handleStorageChange = (e) => {
+      if (e.key === 'store-settings') {
+        loadSettings();
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const settingsDropdownItems = (
@@ -136,7 +146,15 @@ const Navbar = ({ user, cart, onLogout, onLogin, onCartClick, onSearch, onChecko
               </Link>
             ))}
             
-            <div className="relative" onMouseEnter={() => setCartHovered(true)} onMouseLeave={() => setCartHovered(false)}>
+            <div 
+              className="relative" 
+              onMouseEnter={() => {
+                clearTimeout(hoverTimeout);
+                setCartHovered(true);
+              }} 
+              onMouseLeave={() => {
+                hoverTimeout = setTimeout(() => setCartHovered(false), 300);
+              }}>
               <button onClick={onCartClick} className="relative rounded-full p-2 transition-colors hover:bg-white/10">
                   <ShoppingCart size={20} />
                 {cart.length > 0 && (

@@ -37,6 +37,15 @@ export default function Store() {
     loadProducts();
   }, []);
 
+  // Load cart from localStorage on initial render
+  useEffect(() => {
+    const savedCart = localStorage.getItem('cart');
+    if (savedCart) {
+      setCart(JSON.parse(savedCart));
+    }
+  }, []);
+
+
   // Update the loadProducts function
   const loadProducts = async () => {
     try {
@@ -65,6 +74,7 @@ export default function Store() {
       // Simulate a delay to show loading state
       await new Promise(resolve => setTimeout(resolve, 500));
 
+      let updatedCart;
       setCart(prevCart => {
         const existingItem = prevCart.find(
           item => item.id === product.id && item.selectedSize === size
@@ -73,12 +83,13 @@ export default function Store() {
         if (existingItem) {
           return prevCart.map(item =>
             item.id === product.id && item.selectedSize === size
-              ? { ...item, quantity: item.quantity + 1 }
+              ? { ...item, quantity: (item.quantity || 1) + 1 }
               : item
           );
         }
 
-        return [...prevCart, { ...product, quantity: 1, selectedSize: size }];
+        updatedCart = [...prevCart, { ...product, quantity: 1, selectedSize: size }];
+        return updatedCart;
       });
 
       toast.success('Added to cart!');
@@ -88,6 +99,15 @@ export default function Store() {
       setIsAddingToCart(false);
     }
   };
+
+  // Save cart to localStorage whenever it changes
+  useEffect(() => {
+    if (cart.length > 0) {
+      localStorage.setItem('cart', JSON.stringify(cart));
+    } else {
+      localStorage.removeItem('cart');
+    }
+  }, [cart]);
 
   const removeFromCart = (productId, size) => {
     setCart(prevCart => 

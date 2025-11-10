@@ -24,9 +24,7 @@ function App() {
         <Route 
           path="/dashboard"
           element={
-            <AuthenticatedRoute>
-              <UserDashboard />
-            </AuthenticatedRoute>
+            <UserDashboard />
           }
         />
         <Route path="/forgot-password" element={<AuthPage />} />
@@ -42,16 +40,5 @@ function App() {
     </Router>
   );
 }
-
-// A new component to protect routes that require any logged-in user
-const AuthenticatedRoute = ({ children }) => {
-  const token = localStorage.getItem('token');
-
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return children;
-};
 
 export default App;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
 import { Plus, Edit2, Trash2, Save, X, Upload, Package, Grid, Tag, List, Store as StoreIcon, Expand, Loader2 } from 'lucide-react';
 import ImageCropper from '../../components/ImageCropper';
 import Silk from '../../components/Silk';
@@ -462,6 +462,7 @@ export default function AdminDashboard() {
         />
       </div>
 
+      <Toaster position="bottom-center" />
       {/* Header */}
       <header className="bg-white shadow-md sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4">
