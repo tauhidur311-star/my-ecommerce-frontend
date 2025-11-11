@@ -3,6 +3,9 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Store from './pages/store/Store';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import UserDashboard from './pages/dashboard/UserDashboard';
+import AboutPage from './pages/store/AboutPage';
+import ContactPage from './pages/store/ContactPage';
+import WishlistPage from './pages/WishlistPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import Auth from './Auth';
 // Error logging simplified for better performance
@@ -42,19 +45,38 @@ function App() {
     <Router>
       {showAuth && <Auth onClose={() => setShowAuth(false)} />}
       <Routes>
+        {/* Public routes */}
         <Route path="/" element={<Store />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/cart" element={<Store />} /> {/* Cart is handled within Store component */}
+        
+        {/* Protected user routes */}
         <Route path="/dashboard" element={
           <ProtectedRoute>
             <UserDashboard />
           </ProtectedRoute>
         } />
-        <Route path="/admin" element={
+        <Route path="/dashboard/:tab" element={
           <ProtectedRoute>
+            <UserDashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/wishlist" element={
+          <ProtectedRoute>
+            <WishlistPage />
+          </ProtectedRoute>
+        } />
+        
+        {/* Protected admin routes */}
+        <Route path="/admin" element={
+          <ProtectedRoute requireAdmin={true}>
             <AdminDashboard />
           </ProtectedRoute>
         } />
-        {/* Catch-all route for SPA routing */}
-        <Route path="*" element={<Store />} />
+        
+        {/* Catch-all route for SPA routing - redirects unknown routes to home */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );
