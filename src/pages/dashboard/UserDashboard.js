@@ -182,23 +182,24 @@ export default function UserDashboard() {
 
     const fetchAddresses = async () => {
       try {
-        const response = await enhancedApiService.request('/api/users/addresses');
-        setAddresses(response.data.addresses || []);
-      } catch (err) {
-        console.error('Failed to load addresses:', err);
-        // Initialize with current user address as default
-        if (user && user.address) {
-          setAddresses([{
+        // Since address management isn't implemented in backend yet,
+        // create default address from user profile
+        if (user) {
+          const defaultAddress = {
             _id: 'default',
             label: 'Home',
-            name: user.name,
-            phone: user.phone,
-            address: user.address,
-            city: user.province,
+            name: user.name || '',
+            phone: user.phone || '',
+            address: typeof user.address === 'string' ? user.address : (user.address?.street || ''),
+            city: user.province || '',
             zipCode: '',
             isDefault: true
-          }]);
+          };
+          setAddresses([defaultAddress]);
         }
+      } catch (err) {
+        console.error('Failed to load addresses:', err);
+        setAddresses([]);
       }
     };
 
@@ -209,7 +210,14 @@ export default function UserDashboard() {
       fetchUserWishlist();
       fetchCartCount();
       fetchNotificationCount();
-      fetchAddresses();
+      
+      // Fetch addresses with error handling to prevent tab breaking
+      try {
+        fetchAddresses();
+      } catch (error) {
+        console.error('Address fetch failed:', error);
+        setAddresses([]);
+      }
     }
   }, [navigate, authLoading, user]);
 
@@ -636,7 +644,12 @@ export default function UserDashboard() {
                     <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-600 rounded-xl flex items-center justify-center">
                       <AddressIcon size={20} className="text-white" />
                     </div>
-                    <h2 className="text-2xl font-bold text-gray-900">Address Book</h2>
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-900">Address Book</h2>
+                      <p className="text-sm text-amber-600 mt-1">
+                        ⚠️ Note: Address management is in development. Changes are stored locally.
+                      </p>
+                    </div>
                   </div>
                   
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -662,18 +675,21 @@ export default function UserDashboard() {
                               <button 
                                 onClick={async () => {
                                   try {
-                                    await enhancedApiService.request(`/api/users/addresses/${address._id}`, {
-                                      method: 'DELETE'
-                                    });
+                                    // Since address management isn't implemented in backend,
+                                    // remove address locally for now
+                                    if (address._id === 'default') {
+                                      toast.error('Cannot delete default address');
+                                      return;
+                                    }
                                     setAddresses(prev => prev.filter(a => a._id !== address._id));
-                                    toast.success('Address deleted');
+                                    toast.success('Address removed (locally)');
                                   } catch (error) {
                                     toast.error('Failed to delete address');
                                   }
                                 }}
                                 className="text-red-600 hover:text-red-800 text-sm"
                               >
-                                Delete
+                                {address._id === 'default' ? 'Default' : 'Delete'}
                               </button>
                             </div>
                             <div className="text-sm text-gray-600 space-y-1">
@@ -693,12 +709,15 @@ export default function UserDashboard() {
                       <form onSubmit={async (e) => {
                         e.preventDefault();
                         try {
-                          const response = await enhancedApiService.request('/api/users/addresses', {
-                            method: 'POST',
-                            body: newAddress
-                          });
+                          // Since address management isn't implemented in backend,
+                          // simulate adding address locally for now
+                          const newAddressWithId = {
+                            ...newAddress,
+                            _id: `addr_${Date.now()}`,
+                            isDefault: addresses.length === 0
+                          };
                           
-                          setAddresses(prev => [...prev, response.data.address]);
+                          setAddresses(prev => [...prev, newAddressWithId]);
                           setNewAddress({
                             label: '',
                             name: '',
@@ -707,7 +726,7 @@ export default function UserDashboard() {
                             city: '',
                             zipCode: ''
                           });
-                          toast.success('Address added successfully');
+                          toast.success('Address added successfully (locally stored)');
                         } catch (error) {
                           toast.error('Failed to add address');
                         }
@@ -827,15 +846,24 @@ export default function UserDashboard() {
                         }
                         
                         try {
-                          await enhancedApiService.request('/api/auth/change-password', {
-                            method: 'PUT',
+                          const response = await enhancedApiService.request('/api/auth/change-password', {
+                            method: 'POST',
                             body: { currentPassword, newPassword }
                           });
                           
-                          toast.success('Password changed successfully');
-                          e.target.reset();
+                          if (response.success) {
+                            toast.success('Password changed successfully');
+                            e.target.reset();
+                          } else {
+                            throw new Error(response.error || 'Failed to change password');
+                          }
                         } catch (error) {
-                          toast.error(error.message || 'Failed to change password');
+                          console.error('Password change error:', error);
+                          if (error.response?.data?.error) {
+                            toast.error(error.response.data.error);
+                          } else {
+                            toast.error(error.message || 'Failed to change password');
+                          }
                         }
                       }} className="space-y-4">
                         <div>
