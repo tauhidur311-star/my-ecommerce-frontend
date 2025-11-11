@@ -54,8 +54,8 @@ export default function Store() {
   // Helper function to fix image URLs
   const getImageUrl = (product) => {
     const imageFields = [
+      product.images?.[0],  // Check full URL first
       product.image, 
-      product.images?.[0], 
       product.imageUrl, 
       product.photo, 
       product.thumbnail
@@ -63,12 +63,20 @@ export default function Store() {
     
     for (const imageField of imageFields) {
       if (imageField) {
-        // If it's a relative URL, prepend the backend URL
+        // If it's already a full URL (contains http), use as is
+        if (imageField.includes('http')) {
+          return imageField;
+        }
+        // If it's a relative URL starting with /, prepend the backend URL
         if (imageField.startsWith('/')) {
           return `${process.env.REACT_APP_API_URL}${imageField}`;
         }
-        // If it's already a full URL, use as is
-        return imageField;
+        // If it's just a filename, prepend backend URL with /
+        if (!imageField.includes('/')) {
+          return `${process.env.REACT_APP_API_URL}/${imageField}`;
+        }
+        // Otherwise, treat as relative path
+        return `${process.env.REACT_APP_API_URL}${imageField}`;
       }
     }
     
