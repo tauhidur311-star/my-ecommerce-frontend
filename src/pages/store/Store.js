@@ -51,13 +51,37 @@ export default function Store() {
     setShowQuickView(true);
   };
 
+  // Helper function to fix image URLs
+  const getImageUrl = (product) => {
+    const imageFields = [
+      product.image, 
+      product.images?.[0], 
+      product.imageUrl, 
+      product.photo, 
+      product.thumbnail
+    ];
+    
+    for (const imageField of imageFields) {
+      if (imageField) {
+        // If it's a relative URL, prepend the backend URL
+        if (imageField.startsWith('/')) {
+          return `${process.env.REACT_APP_API_URL}${imageField}`;
+        }
+        // If it's already a full URL, use as is
+        return imageField;
+      }
+    }
+    
+    return 'https://via.placeholder.com/200?text=No+Image';
+  };
+
   // Add to cart handler
   const handleAddToCart = (product) => {
     const newItem = {
       id: product._id,
       name: product.name,
       price: product.price,
-      image: product.image || product.images?.[0] || product.imageUrl || product.photo || product.thumbnail || 'https://via.placeholder.com/200?text=No+Image',
+      image: getImageUrl(product),
       quantity: 1,
       selectedSize: product.sizes?.[0] || 'M' // Default size
     };
@@ -312,14 +336,7 @@ export default function Store() {
                   onClick={() => handleQuickView(product)}
                 >
                   <img 
-                    src={
-                      product.image || 
-                      product.images?.[0] || 
-                      product.imageUrl || 
-                      product.photo || 
-                      product.thumbnail || 
-                      'https://via.placeholder.com/200?text=No+Image'
-                    } 
+                    src={getImageUrl(product)} 
                     alt={product.name} 
                     className="w-full h-full object-cover hover:scale-110 transition duration-300"
                     onError={(e) => {
@@ -380,14 +397,7 @@ export default function Store() {
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="aspect-square bg-gray-200 rounded-lg overflow-hidden">
                   <img 
-                    src={
-                      selectedProduct.image || 
-                      selectedProduct.images?.[0] || 
-                      selectedProduct.imageUrl || 
-                      selectedProduct.photo || 
-                      selectedProduct.thumbnail || 
-                      'https://via.placeholder.com/400?text=No+Image'
-                    } 
+                    src={getImageUrl(selectedProduct)} 
                     alt={selectedProduct.name}
                     className="w-full h-full object-cover"
                     onError={(e) => {
