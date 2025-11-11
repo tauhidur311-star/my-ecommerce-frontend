@@ -7,13 +7,23 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 class EnhancedAPIService {
   constructor() {
     this.baseURL = API_BASE_URL;
-    this.accessToken = localStorage.getItem('accessToken') || localStorage.getItem('token');
+    // Enhanced token detection - check all possible storage locations
+    this.accessToken = this.getStoredToken();
     this.refreshToken = localStorage.getItem('refreshToken');
     this.isRefreshing = false;
     this.failedQueue = [];
     
     // Listen for auth events
     this.setupAuthEventListeners();
+  }
+
+  // Get token from various storage locations
+  getStoredToken() {
+    return localStorage.getItem('accessToken') || 
+           localStorage.getItem('token') || 
+           localStorage.getItem('adminToken') || 
+           sessionStorage.getItem('token') ||
+           sessionStorage.getItem('accessToken');
   }
 
   // Setup event listeners for auth state changes
@@ -67,7 +77,7 @@ class EnhancedAPIService {
     return userData ? JSON.parse(userData) : null;
   }
 
-  // Get auth headers
+  // Get auth headers with dynamic token refresh
   getHeaders(includeContentType = true) {
     const headers = {};
     
@@ -75,8 +85,13 @@ class EnhancedAPIService {
       headers['Content-Type'] = 'application/json';
     }
 
-    if (this.accessToken) {
-      headers.Authorization = `Bearer ${this.accessToken}`;
+    // Always check for latest token in storage
+    const currentToken = this.getStoredToken();
+    if (currentToken) {
+      this.accessToken = currentToken; // Update instance token
+      headers.Authorization = `Bearer ${currentToken}`;
+    } else {
+      console.warn('🚨 No authentication token found in storage');
     }
 
     return headers;
@@ -152,12 +167,21 @@ class EnhancedAPIService {
       config.body = JSON.stringify(config.body);
     }
 
+    // Debug logging for authentication issues
+    const hasToken = !!this.getStoredToken();
+    console.log(`🔍 API Request Debug: ${config.method} ${endpoint}`, {
+      hasToken,
+      baseURL: this.baseURL,
+      headers: config.headers
+    });
+
     try {
       const response = await fetch(url, config);
       
       // Handle token expiration (401 with TOKEN_EXPIRED code)
       if (response.status === 401) {
         const errorData = await response.json().catch(() => ({}));
+        console.error(`🚨 401 Unauthorized for ${endpoint}:`, errorData);
         
         if (errorData.code === 'TOKEN_EXPIRED' && this.refreshToken) {
           console.log('🔄 Access token expired, attempting refresh...');
