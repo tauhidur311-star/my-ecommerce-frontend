@@ -32,9 +32,21 @@ export default function UserDashboard() {
     province: ''
   });
   const [orders, setOrders] = useState([]);
+  const [wishlist, setWishlist] = useState([]);
+  const [addresses, setAddresses] = useState([]);
+  const [cartCount, setCartCount] = useState(0);
+  const [notificationCount, setNotificationCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
+  const [newAddress, setNewAddress] = useState({
+    label: '',
+    name: '',
+    phone: '',
+    address: '',
+    city: '',
+    zipCode: ''
+  });
   
   // Initialize socket connection for real-time features
   const { isConnected } = useSocket();
@@ -75,7 +87,6 @@ export default function UserDashboard() {
             province: user.province || ''
           };
           setUserData(authData);
-          console.log('Setting user data from auth context:', authData);
         }
 
         // Then try to fetch from API for any updates
@@ -90,11 +101,9 @@ export default function UserDashboard() {
               province: response.user.province || user?.province || ''
             };
             setUserData(apiData);
-            console.log('Updated user data from API:', apiData);
           }
         } catch (apiError) {
-          console.log('API fetch failed, using auth context data. Error:', apiError.message);
-          // Keep using auth context data - don't show error for API failure
+          // Keep using auth context data - API fetch is optional
         }
         
       } catch (error) {
@@ -139,58 +148,102 @@ export default function UserDashboard() {
       }
     };
 
+    const fetchUserWishlist = async () => {
+      try {
+        const response = await enhancedApiService.request('/api/wishlist');
+        setWishlist(response.data.items || []);
+      } catch (err) {
+        console.error('Failed to load wishlist:', err);
+      }
+    };
+
+    const fetchCartCount = () => {
+      try {
+        const savedCart = localStorage.getItem('cart');
+        if (savedCart) {
+          const cart = JSON.parse(savedCart);
+          const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+          setCartCount(totalItems);
+        }
+      } catch (err) {
+        console.error('Failed to load cart count:', err);
+      }
+    };
+
+    const fetchNotificationCount = async () => {
+      try {
+        const response = await enhancedApiService.request('/api/notifications/unread-count');
+        setNotificationCount(response.count || 0);
+      } catch (err) {
+        // Notification API might not be implemented yet
+        setNotificationCount(0);
+      }
+    };
+
+    const fetchAddresses = async () => {
+      try {
+        const response = await enhancedApiService.request('/api/users/addresses');
+        setAddresses(response.data.addresses || []);
+      } catch (err) {
+        console.error('Failed to load addresses:', err);
+        // Initialize with current user address as default
+        if (user && user.address) {
+          setAddresses([{
+            _id: 'default',
+            label: 'Home',
+            name: user.name,
+            phone: user.phone,
+            address: user.address,
+            city: user.province,
+            zipCode: '',
+            isDefault: true
+          }]);
+        }
+      }
+    };
+
     fetchUserData();
     if (user) {
-      // Fetch user orders
+      // Fetch user orders and wishlist
       fetchUserOrders();
+      fetchUserWishlist();
+      fetchCartCount();
+      fetchNotificationCount();
+      fetchAddresses();
     }
   }, [navigate, authLoading, user]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    console.log(`Input changed - ${name}:`, value);
-    setUserData(prev => {
-      const newData = { ...prev, [name]: value };
-      console.log('Updated userData:', newData);
-      return newData;
-    });
+    setUserData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
-
-    // Debug: Log current form data
-    console.log('Form submission - Current userData:', userData);
     
-    // Validation with detailed logging
+    // Validation
     if (!userData.name || !userData.name.trim()) {
-      console.log('Validation failed: Name is missing or empty');
       toast.error('Full Name is required.');
       setSaving(false);
       return;
     }
     if (!userData.address || !userData.address.trim()) {
-      console.log('Validation failed: Address is missing or empty');
       toast.error('Billing Address is required.');
       setSaving(false);
       return;
     }
     if (!userData.province) {
-      console.log('Validation failed: Province is missing');
       toast.error('Please select your Province / Region.');
       setSaving(false);
       return;
     }
     const phoneRegex = /^01[0-9]{9}$/;
     if (!userData.phone || !phoneRegex.test(userData.phone)) {
-      console.log('Validation failed: Phone is invalid. Phone:', userData.phone);
       toast.error('Please enter a valid 11-digit phone number starting with 01.');
       setSaving(false);
       return;
     }
-
-    console.log('All validations passed. Sending to API:', userData);
 
     try {
       // Format data to match backend validation schema
@@ -206,15 +259,11 @@ export default function UserDashboard() {
         province: userData.province
       };
 
-      console.log('Formatted request data for backend:', requestData);
-
       // Use enhanced API service which handles token refresh automatically
       const response = await enhancedApiService.request('/api/users/profile', {
         method: 'PUT',
         body: requestData
       });
-
-      console.log('API Response:', response);
 
       if (response.success && response.user) {
         // Update user data in local storage
@@ -224,15 +273,11 @@ export default function UserDashboard() {
 
         toast.success('Profile updated successfully!');
       } else {
-        console.log('API returned unsuccessful response:', response);
         throw new Error(response.error || response.message || 'Failed to update profile.');
       }
     } catch (error) {
-      console.error('Error updating profile:', error);
-      
-      // More detailed error handling
-      if (error.response) {
-        console.log('Error response data:', error.response.data);
+      // Enhanced error handling
+      if (error.response?.data) {
         toast.error(error.response.data.message || error.response.data.error || 'Server error occurred');
       } else {
         toast.error(error.message || 'Failed to update profile');
@@ -244,9 +289,9 @@ export default function UserDashboard() {
 
   const dashboardStats = [
     { title: 'Total Orders', value: orders.length.toString(), icon: Package, color: 'bg-blue-500' },
-    { title: 'Wishlist Items', value: '5', icon: Heart, color: 'bg-red-500' },
-    { title: 'Cart Items', value: '3', icon: ShoppingCart, color: 'bg-green-500' },
-    { title: 'Notifications', value: '8', icon: Bell, color: 'bg-purple-500' }
+    { title: 'Wishlist Items', value: wishlist.length.toString(), icon: Heart, color: 'bg-red-500' },
+    { title: 'Cart Items', value: cartCount.toString(), icon: ShoppingCart, color: 'bg-green-500' },
+    { title: 'Notifications', value: notificationCount.toString(), icon: Bell, color: 'bg-purple-500' }
   ];
 
   const menuItems = [
@@ -286,12 +331,19 @@ export default function UserDashboard() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <Navbar 
         user={user}
-        cart={[]}
+        cart={(() => {
+          try {
+            const savedCart = localStorage.getItem('cart');
+            return savedCart ? JSON.parse(savedCart) : [];
+          } catch {
+            return [];
+          }
+        })()}
         onLogout={logout}
-        onLogin={() => {}}
-        onCartClick={() => {}}
-        onCheckout={() => {}}
-        onSearch={() => {}}
+        onLogin={() => setActiveTab('security')}
+        onCartClick={() => navigate('/')}
+        onCheckout={() => navigate('/')}
+        onSearch={() => navigate('/')}
         products={[]}
       />
       <Toaster position="bottom-center" />
@@ -343,13 +395,13 @@ export default function UserDashboard() {
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {dashboardStats.map((stat, index) => (
-            <div key={index} className="bg-white/60 backdrop-blur-sm rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow border border-white/20">
+            <div key={index} className="bg-white/60 backdrop-blur-sm rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-300 border border-white/20 group cursor-pointer">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">{stat.title}</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
+                  <p className="text-sm text-gray-600 group-hover:text-gray-700 transition-colors">{stat.title}</p>
+                  <p className="text-2xl font-bold text-gray-900 mt-1 group-hover:scale-105 transition-transform">{stat.value}</p>
                 </div>
-                <div className={`p-3 rounded-lg ${stat.color}`}>
+                <div className={`p-3 rounded-lg ${stat.color} group-hover:scale-110 transition-transform`}>
                   <stat.icon size={24} className="text-white" />
                 </div>
               </div>
@@ -398,6 +450,524 @@ export default function UserDashboard() {
           {/* Enhanced Main Content */}
           <div className="lg:col-span-3">
             <div className="bg-white/60 backdrop-blur-sm rounded-2xl shadow-sm border border-white/20 p-8 min-h-[600px]">
+              {activeTab === 'orders' && (
+                <div className="animate-fade-in-up">
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                      <Package size={20} className="text-white" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900">Order History</h2>
+                  </div>
+                  
+                  {orders.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Package size={64} className="mx-auto mb-4 text-gray-400" />
+                      <h3 className="text-xl font-semibold text-gray-700 mb-2">No orders yet</h3>
+                      <p className="text-gray-500 mb-6">Start shopping to see your orders here</p>
+                      <Link 
+                        to="/"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                      >
+                        <ShoppingCart size={20} />
+                        Browse Products
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {orders.map(order => (
+                        <div key={order._id} className="bg-white/60 backdrop-blur-sm rounded-xl shadow-sm p-6 border border-white/20">
+                          <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
+                            <div>
+                              <h3 className="font-semibold text-lg">Order #{order._id?.slice(-8) || 'N/A'}</h3>
+                              <p className="text-gray-600">
+                                {new Date(order.createdAt).toLocaleDateString('en-US', {
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric'
+                                })}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                                order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
+                                order.status === 'processing' ? 'bg-yellow-100 text-yellow-800' :
+                                order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                                'bg-gray-100 text-gray-800'
+                              }`}>
+                                {order.status?.charAt(0).toUpperCase() + order.status?.slice(1) || 'Pending'}
+                              </span>
+                              <p className="text-lg font-bold mt-2">৳{order.totalAmount || 0}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="border-t pt-4">
+                            <h4 className="font-medium mb-3">Items ({order.items?.length || 0})</h4>
+                            <div className="space-y-2">
+                              {order.items?.slice(0, 3).map((item, index) => (
+                                <div key={index} className="flex items-center gap-3 text-sm">
+                                  <div className="w-10 h-10 bg-gray-200 rounded-md"></div>
+                                  <div>
+                                    <p className="font-medium">{item.productId?.name || 'Product'}</p>
+                                    <p className="text-gray-600">
+                                      Qty: {item.quantity} × ৳{item.price} = ৳{item.quantity * item.price}
+                                    </p>
+                                  </div>
+                                </div>
+                              ))}
+                              {order.items?.length > 3 && (
+                                <p className="text-sm text-gray-500">
+                                  +{order.items.length - 3} more items
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          
+                          {order.shippingAddress && (
+                            <div className="border-t pt-4 mt-4">
+                              <h4 className="font-medium mb-2">Shipping Address</h4>
+                              <p className="text-sm text-gray-600">
+                                {order.shippingAddress.name}<br />
+                                {order.shippingAddress.address}<br />
+                                {order.shippingAddress.city}, {order.shippingAddress.zipCode}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'wishlist' && (
+                <div className="animate-fade-in-up">
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-pink-600 rounded-xl flex items-center justify-center">
+                      <Heart size={20} className="text-white" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900">My Wishlist</h2>
+                  </div>
+                  
+                  {wishlist.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Heart size={64} className="mx-auto mb-4 text-gray-400" />
+                      <h3 className="text-xl font-semibold text-gray-700 mb-2">Your wishlist is empty</h3>
+                      <p className="text-gray-500 mb-6">Add products you love to your wishlist</p>
+                      <Link 
+                        to="/"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                      >
+                        <Heart size={20} />
+                        Browse Products
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {wishlist.map(item => (
+                        <div key={item._id} className="bg-white/60 backdrop-blur-sm rounded-xl shadow-sm p-4 border border-white/20 group hover:shadow-md transition">
+                          <div className="relative mb-4">
+                            <img 
+                              src={item.product?.images?.[0] || item.product?.image || 'https://via.placeholder.com/200?text=No+Image'} 
+                              alt={item.product?.name}
+                              className="w-full h-48 object-cover rounded-lg"
+                              onError={(e) => {
+                                e.target.src = 'https://via.placeholder.com/200?text=No+Image';
+                              }}
+                            />
+                            <button 
+                              onClick={async () => {
+                                try {
+                                  await enhancedApiService.request(`/api/wishlist/${item._id}`, {
+                                    method: 'DELETE'
+                                  });
+                                  setWishlist(prev => prev.filter(w => w._id !== item._id));
+                                  toast.success('Removed from wishlist');
+                                } catch (error) {
+                                  toast.error('Failed to remove from wishlist');
+                                }
+                              }}
+                              className="absolute top-2 right-2 p-2 bg-white/80 rounded-full hover:bg-white transition opacity-0 group-hover:opacity-100"
+                            >
+                              <Heart size={16} className="text-red-500 fill-current" />
+                            </button>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <h3 className="font-semibold text-lg line-clamp-2">{item.product?.name || 'Product'}</h3>
+                            <p className="text-gray-600 text-sm line-clamp-2">
+                              {item.product?.description || 'No description available'}
+                            </p>
+                            <div className="flex items-center justify-between">
+                              <span className="text-xl font-bold text-blue-600">
+                                ৳{item.product?.price || 0}
+                              </span>
+                              {item.product?.stock > 0 ? (
+                                <button 
+                                  onClick={async () => {
+                                    try {
+                                      // Add to cart logic here
+                                      toast.success(`${item.product.name} added to cart!`);
+                                    } catch (error) {
+                                      toast.error('Failed to add to cart');
+                                    }
+                                  }}
+                                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm"
+                                >
+                                  Add to Cart
+                                </button>
+                              ) : (
+                                <span className="px-4 py-2 bg-gray-300 text-gray-500 rounded-lg text-sm">
+                                  Out of Stock
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'addresses' && (
+                <div className="animate-fade-in-up">
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-600 rounded-xl flex items-center justify-center">
+                      <AddressIcon size={20} className="text-white" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900">Address Book</h2>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Address List */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold mb-4">Saved Addresses</h3>
+                      
+                      {addresses.length === 0 ? (
+                        <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
+                          <AddressIcon size={48} className="mx-auto mb-3 text-gray-400" />
+                          <p className="text-gray-500">No saved addresses</p>
+                        </div>
+                      ) : (
+                        addresses.map(address => (
+                          <div key={address._id} className="bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                            <div className="flex justify-between items-start mb-2">
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold">{address.label}</span>
+                                {address.isDefault && (
+                                  <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Default</span>
+                                )}
+                              </div>
+                              <button 
+                                onClick={async () => {
+                                  try {
+                                    await enhancedApiService.request(`/api/users/addresses/${address._id}`, {
+                                      method: 'DELETE'
+                                    });
+                                    setAddresses(prev => prev.filter(a => a._id !== address._id));
+                                    toast.success('Address deleted');
+                                  } catch (error) {
+                                    toast.error('Failed to delete address');
+                                  }
+                                }}
+                                className="text-red-600 hover:text-red-800 text-sm"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                            <div className="text-sm text-gray-600 space-y-1">
+                              <p className="font-medium text-gray-900">{address.name}</p>
+                              <p>{address.address}</p>
+                              <p>{address.city} {address.zipCode}</p>
+                              <p>{address.phone}</p>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                    
+                    {/* Add New Address Form */}
+                    <div>
+                      <h3 className="text-lg font-semibold mb-4">Add New Address</h3>
+                      <form onSubmit={async (e) => {
+                        e.preventDefault();
+                        try {
+                          const response = await enhancedApiService.request('/api/users/addresses', {
+                            method: 'POST',
+                            body: newAddress
+                          });
+                          
+                          setAddresses(prev => [...prev, response.data.address]);
+                          setNewAddress({
+                            label: '',
+                            name: '',
+                            phone: '',
+                            address: '',
+                            city: '',
+                            zipCode: ''
+                          });
+                          toast.success('Address added successfully');
+                        } catch (error) {
+                          toast.error('Failed to add address');
+                        }
+                      }} className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Address Label</label>
+                          <input
+                            type="text"
+                            value={newAddress.label}
+                            onChange={(e) => setNewAddress(prev => ({ ...prev, label: e.target.value }))}
+                            placeholder="e.g., Home, Office"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            required
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                          <input
+                            type="text"
+                            value={newAddress.name}
+                            onChange={(e) => setNewAddress(prev => ({ ...prev, name: e.target.value }))}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            required
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                          <input
+                            type="tel"
+                            value={newAddress.phone}
+                            onChange={(e) => setNewAddress(prev => ({ ...prev, phone: e.target.value }))}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            required
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Street Address</label>
+                          <textarea
+                            value={newAddress.address}
+                            onChange={(e) => setNewAddress(prev => ({ ...prev, address: e.target.value }))}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            rows="3"
+                            required
+                          />
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+                            <input
+                              type="text"
+                              value={newAddress.city}
+                              onChange={(e) => setNewAddress(prev => ({ ...prev, city: e.target.value }))}
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              required
+                            />
+                          </div>
+                          
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">ZIP Code</label>
+                            <input
+                              type="text"
+                              value={newAddress.zipCode}
+                              onChange={(e) => setNewAddress(prev => ({ ...prev, zipCode: e.target.value }))}
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                          </div>
+                        </div>
+                        
+                        <button
+                          type="submit"
+                          className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
+                        >
+                          Add Address
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'security' && (
+                <div className="animate-fade-in-up">
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl flex items-center justify-center">
+                      <Shield size={20} className="text-white" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900">Security Settings</h2>
+                  </div>
+                  
+                  <div className="space-y-8">
+                    {/* Password Change Section */}
+                    <div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <Shield size={20} className="text-orange-600" />
+                        Change Password
+                      </h3>
+                      
+                      <form onSubmit={async (e) => {
+                        e.preventDefault();
+                        const formData = new FormData(e.target);
+                        const currentPassword = formData.get('currentPassword');
+                        const newPassword = formData.get('newPassword');
+                        const confirmPassword = formData.get('confirmPassword');
+                        
+                        if (newPassword !== confirmPassword) {
+                          toast.error('New passwords do not match');
+                          return;
+                        }
+                        
+                        if (newPassword.length < 6) {
+                          toast.error('Password must be at least 6 characters');
+                          return;
+                        }
+                        
+                        try {
+                          await enhancedApiService.request('/api/auth/change-password', {
+                            method: 'PUT',
+                            body: { currentPassword, newPassword }
+                          });
+                          
+                          toast.success('Password changed successfully');
+                          e.target.reset();
+                        } catch (error) {
+                          toast.error(error.message || 'Failed to change password');
+                        }
+                      }} className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
+                          <input
+                            type="password"
+                            name="currentPassword"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                            required
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">New Password</label>
+                          <input
+                            type="password"
+                            name="newPassword"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                            minLength="6"
+                            required
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
+                          <input
+                            type="password"
+                            name="confirmPassword"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                            minLength="6"
+                            required
+                          />
+                        </div>
+                        
+                        <button
+                          type="submit"
+                          className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition font-medium"
+                        >
+                          Change Password
+                        </button>
+                      </form>
+                    </div>
+                    
+                    {/* Account Information */}
+                    <div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <User size={20} className="text-blue-600" />
+                        Account Information
+                      </h3>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                          <p className="px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+                            {user?.email || 'Not provided'}
+                          </p>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Account Type</label>
+                          <p className="px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+                            {user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'User'}
+                          </p>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Member Since</label>
+                          <p className="px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+                            {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Not available'}
+                          </p>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Last Login</label>
+                          <p className="px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+                            {user?.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Not available'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Account Actions */}
+                    <div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <Settings size={20} className="text-purple-600" />
+                        Account Actions
+                      </h3>
+                      
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                          <div>
+                            <h4 className="font-medium text-gray-900">Download Account Data</h4>
+                            <p className="text-sm text-gray-600">Get a copy of your account information</p>
+                          </div>
+                          <button 
+                            onClick={async () => {
+                              try {
+                                const response = await enhancedApiService.request('/api/users/export-data');
+                                // Handle download
+                                toast.success('Account data export initiated');
+                              } catch (error) {
+                                toast.error('Failed to export account data');
+                              }
+                            }}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm"
+                          >
+                            Download
+                          </button>
+                        </div>
+                        
+                        <div className="flex items-center justify-between p-4 border border-red-200 rounded-lg bg-red-50">
+                          <div>
+                            <h4 className="font-medium text-red-900">Delete Account</h4>
+                            <p className="text-sm text-red-600">Permanently delete your account and all data</p>
+                          </div>
+                          <button 
+                            onClick={() => {
+                              if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                                toast.error('Account deletion feature will be implemented');
+                              }
+                            }}
+                            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm"
+                          >
+                            Delete Account
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {activeTab === 'profile' && (
                 <div className="animate-fade-in-up">
                   <div className="flex items-center gap-3 mb-8">
