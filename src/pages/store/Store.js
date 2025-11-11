@@ -7,6 +7,7 @@ import EnhancedProductCard from '../../components/EnhancedProductCard';
 import QuickViewModal from '../../components/QuickViewModal';
 import { ProductGridSkeleton } from '../../components/EnhancedProductSkeleton';
 import { useWishlist } from '../../hooks/useWishlist';
+import { useAuth } from '../../hooks/useAuth';
 import '../../styles/animations.css';
 
 const ProductModal = lazy(() => import('../../components/ProductModal'));
@@ -20,14 +21,18 @@ export default function Store() {
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [selectedSize, setSelectedSize] = useState('');
-  const [user, setUser] = useState(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showAuth, setShowAuth] = useState(false);
-  const [authMode, setAuthMode] = useState('login');
-  const [authForm, setAuthForm] = useState({ name: '', email: '', password: '' });
+  
+  // Auth hook
+  const {
+    user,
+    showAuth, setShowAuth,
+    authMode, setAuthMode,
+    authForm, setAuthForm,
+    handleAuthSubmit, handleLogout, handleLoginSuccess
+  } = useAuth();
   
   // Enhanced store state
   const [showQuickView, setShowQuickView] = useState(false);
@@ -44,12 +49,6 @@ export default function Store() {
   
   // Wishlist hook
   const { toggleWishlist, isInWishlist } = useWishlist();
-
-  const handleLoginSuccess = (loggedInUser) => {
-    setUser(loggedInUser);
-    setShowAuth(false);
-    toast.success(`Welcome, ${loggedInUser.name}!`);
-  };
 
   // Load products
   useEffect(() => {
@@ -207,11 +206,7 @@ export default function Store() {
 
   const confirmLogout = () => {
     setUser(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setCart([]);
-    localStorage.removeItem('cart');
-    toast.success('You have been logged out.');
+    handleLogout();
     setShowLogoutConfirm(false);
   };
 
@@ -262,56 +257,9 @@ export default function Store() {
     }
   };
 
-  // Add token restoration on component mount
-  useEffect(() => {
-    const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-    if (token) {
-      const savedUser = localStorage.getItem('user');
-      if (savedUser) {
-        setUser(JSON.parse(savedUser));
-      }
-    }
-  }, []);
-
   const showAuthModal = () => {
     setShowAuth(true);
     setAuthMode('login');
-  };
-
-  const handleAuth = async (e) => {
-    e.preventDefault();
-    
-    const endpoint = authMode === 'login' ? 'login' : 'register';
-    
-    try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(authForm)
-      });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || `${authMode} failed`);
-      }
-      
-      // Store tokens properly for the enhanced API service
-      if (data.tokens) {
-        localStorage.setItem('accessToken', data.tokens.accessToken);
-        localStorage.setItem('refreshToken', data.tokens.refreshToken);
-      } else if (data.token) {
-        // Fallback for old token format
-        localStorage.setItem('accessToken', data.token);
-        localStorage.setItem('token', data.token);
-      }
-      localStorage.setItem('user', JSON.stringify(data.user));
-      
-      handleLoginSuccess(data.user);
-      
-    } catch (error) {
-      throw error; // Re-throw to be caught by AuthModal
-    }
   };
 
   // Enhanced filtering and sorting logic
@@ -473,8 +421,6 @@ export default function Store() {
           <ProductModal
             product={selectedProduct}
             setSelectedProduct={setSelectedProduct}
-            selectedSize={selectedSize}
-            setSelectedSize={setSelectedSize}
             addToCart={addToCart}
             isAddingToCart={isAddingToCart}
           />
@@ -511,7 +457,7 @@ export default function Store() {
         <AuthModal
           showAuth={showAuth}
           setShowAuth={setShowAuth}
-          handleAuth={handleAuth}
+          handleAuth={handleAuthSubmit}
           authMode={authMode}
           setAuthMode={setAuthMode}
           authForm={authForm}
