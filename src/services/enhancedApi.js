@@ -1,5 +1,5 @@
 // Disable error logger import for production  
-// import errorLogger from './errorLogger';
+// Error logger removed for performance
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 

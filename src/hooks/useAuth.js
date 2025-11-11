@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import errorLogger from '../services/errorLogger';
+// Error logger removed for performance
 
 export default function useAuth() {
   const [user, setUser] = useState(null);
@@ -51,11 +51,9 @@ export default function useAuth() {
         const context = 'Session Validation Warning';
         
         // Log session validation warning (don't logout immediately)
-        errorLogger.logError(new Error(`Session validation warning: ${reason}`), context, {
+        console.warn(`Session validation warning: ${reason}`, {
           responseStatus: response.status,
-          validationReason: reason,
-          userData: data,
-          action: 'warning_logged'
+          validationReason: reason
         });
         
         console.log('Session validation warning:', reason);
@@ -74,7 +72,7 @@ export default function useAuth() {
       return true;
     } catch (error) {
       // Enhanced error logging for session validation
-      errorLogger.logError(error, 'Session Validation Network Error', {
+      console.error('Session Validation Network Error:', error.message, {
         endpoint: '/api/auth/validate-session',
         action: 'session_validation',
         keepSessionActive: true
@@ -141,8 +139,8 @@ export default function useAuth() {
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
       if (!token) {
-        const error = new Error('No active session');
-        errorLogger.showErrorDialog(error, 'Terminate Sessions Failed', 'No active session found to terminate.');
+        const error = new Error('No active session found to terminate');
+        console.error('Terminate Sessions Failed:', error.message);
         throw error;
       }
 
@@ -158,12 +156,12 @@ export default function useAuth() {
 
       if (!response.ok) {
         const error = new Error(data.message || data.error || 'Failed to terminate sessions');
-        errorLogger.showErrorDialog(error, 'Terminate All Sessions Failed', error.message);
+        console.error('Terminate All Sessions Failed:', error.message);
         throw error;
       }
 
       // Log successful session termination
-      errorLogger.logError(new Error('All sessions terminated by user'), 'Session Termination Success', {
+      console.log('Session Termination Success: All sessions terminated by user', {
         action: 'terminate_all_sessions',
         success: true,
         timestamp: new Date().toISOString()
@@ -174,7 +172,7 @@ export default function useAuth() {
       
       return { success: true, message: 'All sessions terminated successfully' };
     } catch (error) {
-      errorLogger.logError(error, 'Terminate All Sessions Error', {
+      console.error('Terminate All Sessions Error:', error.message, {
         action: 'terminate_all_sessions',
         success: false,
         hasToken: !!(localStorage.getItem('token') || localStorage.getItem('accessToken'))

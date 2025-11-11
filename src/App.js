@@ -4,8 +4,7 @@ import Store from './pages/store/Store';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import UserDashboard from './pages/dashboard/UserDashboard';
 import Auth from './Auth';
-// Disable error logger import for production to prevent browser freeze
-// import errorLogger from './services/errorLogger';
+// Error logging simplified for better performance
 import './App.css';
 
 function App() {
@@ -13,7 +12,7 @@ function App() {
 
   // Simplified error handling to prevent browser freeze
   useEffect(() => {
-    // Simple error handlers without heavy errorLogger service
+    // Simple error handlers for better performance
     const handleGlobalError = (event) => {
       console.error('Global JavaScript Error:', event.error?.message || event.message);
     };

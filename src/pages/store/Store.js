@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, Suspense, lazy } from 'react';
-// Disable error logger import for production
-// import errorLogger from '../../services/errorLogger';
+// Error logging simplified for better performance
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { User, ShoppingCart, LogOut, Star, Package, TrendingUp } from 'lucide-react';
@@ -438,7 +437,7 @@ export default function Store() {
         validationPassed: stockErrors.length === 0
       };
 
-      // errorLogger.logError(error, context, additionalData); // Disabled for performance
+      // Error logging removed for performance
       
       console.error('Failed to place order', error);
       handleError(error, 'place order');
