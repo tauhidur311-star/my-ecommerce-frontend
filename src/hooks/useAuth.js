@@ -18,6 +18,14 @@ export default function useAuth() {
     }
   }, []);
 
+  const logout = useCallback(() => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    setUser(null);
+  }, []);
+
   // Session validation with IP checking
   const validateSession = useCallback(async (token) => {
     try {
@@ -97,14 +105,6 @@ export default function useAuth() {
     localStorage.setItem('user', JSON.stringify(userData));
     localStorage.setItem('token', token);
     setUser(userData);
-  }, []);
-
-  const logout = useCallback(() => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    setUser(null);
   }, []);
 
   // Terminate all sessions function
