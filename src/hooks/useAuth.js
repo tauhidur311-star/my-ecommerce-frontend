@@ -75,7 +75,6 @@ export const useAuth = () => {
     user,
     isAuthenticated,
     isLoading, // Expose the loading state
-    isLoading,
     showAuth,
     setShowAuth,
     authMode,
