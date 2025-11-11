@@ -49,7 +49,7 @@ export default function useAuth() {
       // Don't logout on network errors, just log the issue
       return false;
     }
-  }, []);
+  }, [logout]);
 
   useEffect(() => {
     const checkAuth = async () => {
