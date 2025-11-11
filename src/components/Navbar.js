@@ -175,6 +175,34 @@ const Navbar = ({ user, cart, onLogout, onLogin, onCartClick, onSearch, onChecko
               <NavbarDropdown isOpen={isSearchOpen}>{searchDropdown}</NavbarDropdown>
             </div>
 
+            {/* Login/User Button */}
+            {!user ? (
+              <button 
+                onClick={onLogin} 
+                className="flex items-center gap-2 rounded-full bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700"
+              >
+                <LogIn size={16} />
+                Login
+              </button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Link 
+                  to="/dashboard" 
+                  className="rounded-full p-2 transition-colors hover:bg-white/10"
+                  title="Dashboard"
+                >
+                  <User size={20} />
+                </Link>
+                <button 
+                  onClick={onLogout} 
+                  className="rounded-full p-2 text-red-400 transition-colors hover:bg-white/10"
+                  title="Logout"
+                >
+                  <LogOut size={20} />
+                </button>
+              </div>
+            )}
+
             <div className="relative">
               <button onClick={() => setSettingsOpen(!isSettingsOpen)} className="rounded-full p-2 transition-colors hover:bg-white/10">
                 <Settings size={20} />
