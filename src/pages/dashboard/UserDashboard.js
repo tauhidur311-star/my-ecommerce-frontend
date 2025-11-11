@@ -55,27 +55,53 @@ export default function UserDashboard() {
       try {
         setLoading(true);
         
-        // Use enhanced API service which handles token refresh automatically
-        const response = await enhancedApiService.request('/api/users/profile');
-        
-        if (response.success && response.user) {
-          setUserData({
-            name: response.user.name || '',
-            address: response.user.address || '',
-            phone: response.user.phone || '',
-            province: response.user.province || ''
-          });
-        } else {
-          throw new Error(response.error || 'Failed to fetch user data');
+        // First, set user data from auth context (immediate fallback)
+        if (user) {
+          const authData = {
+            name: user.name || '',
+            address: user.address || '',
+            phone: user.phone || '',
+            province: user.province || ''
+          };
+          setUserData(authData);
+          console.log('Setting user data from auth context:', authData);
         }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
 
-        // If it's an authentication error, just navigate without showing error
+        // Then try to fetch from API for any updates
+        try {
+          const response = await enhancedApiService.request('/api/users/profile');
+          
+          if (response.success && response.user) {
+            const apiData = {
+              name: response.user.name || user?.name || '',
+              address: response.user.address || user?.address || '',
+              phone: response.user.phone || user?.phone || '',
+              province: response.user.province || user?.province || ''
+            };
+            setUserData(apiData);
+            console.log('Updated user data from API:', apiData);
+          }
+        } catch (apiError) {
+          console.log('API fetch failed, using auth context data. Error:', apiError.message);
+          // Keep using auth context data - don't show error for API failure
+        }
+        
+      } catch (error) {
+        console.error('Error in fetchUserData:', error);
+        
+        // Ensure we always have user data from auth context as minimum
+        if (user) {
+          setUserData({
+            name: user.name || '',
+            address: user.address || '',
+            phone: user.phone || '',
+            province: user.province || ''
+          });
+        }
+
+        // If it's an authentication error, navigate to login
         if (error.message.includes('Authentication') || error.message.includes('token')) {
-          navigate('/login');
-        } else {
-          toast.error(error.message || 'Failed to load user data');
+          navigate('/');
         }
       } finally {
         setLoading(false);
@@ -135,7 +161,7 @@ export default function UserDashboard() {
       return;
     }
     const phoneRegex = /^01[0-9]{9}$/;
-    if (!phoneRegex.test(userData.phone)) {
+    if (!userData.phone || !phoneRegex.test(userData.phone)) {
       toast.error('Please enter a valid 11-digit phone number starting with 01.');
       setSaving(false);
       return;

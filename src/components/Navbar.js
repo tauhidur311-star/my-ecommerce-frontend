@@ -116,15 +116,20 @@ const Navbar = ({ user, cart, onLogout, onLogin, onCartClick, onSearch, onChecko
   );
 
   const searchDropdown = (
-    <div className="p-2 text-gray-200">
-      <h4 className="px-2 pb-2 text-sm font-medium">Filter Products</h4>
-      {/* Your Search/Filter component can go here */}
-      <input 
-        type="text" 
-        placeholder="Search..." 
-        onChange={(e) => onSearch(e.target.value)}
-        className="w-full rounded-md border-none bg-white/10 px-3 py-2 text-sm placeholder-gray-400 focus:ring-2 focus:ring-purple-500" 
-      />
+    <div className="p-3 text-gray-200 w-80">
+      <div className="mb-3">
+        <h4 className="text-sm font-medium mb-2">Search Products</h4>
+        <input 
+          type="text" 
+          placeholder="Search for products..." 
+          onChange={(e) => onSearch(e.target.value)}
+          className="w-full rounded-md border-none bg-white/10 px-3 py-2 text-sm placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:outline-none" 
+          autoFocus
+        />
+      </div>
+      <div className="text-xs text-gray-400">
+        Search by product name, category, or description
+      </div>
     </div>
   );
 
