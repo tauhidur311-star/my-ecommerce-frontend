@@ -121,7 +121,7 @@ const AdvancedAnalytics = () => {
     return Object.values(customerOrderCounts).filter(count => count > 1).length;
   };
 
-  const getTopProducts = (orders, products) => {
+  const getTopProducts = (orders) => {
     const productSales = {};
     
     orders.forEach(order => {

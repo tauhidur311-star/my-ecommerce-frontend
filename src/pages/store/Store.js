@@ -40,7 +40,7 @@ export default function Store() {
     logout();
   };
 
-  const handleLoginSuccess = (userData) => {
+  const handleLoginSuccess = () => {
     // User data is already managed by useAuth hook
     setShowAuth(false);
   };
