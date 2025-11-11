@@ -55,11 +55,22 @@ export default function UserDashboard() {
       try {
         setLoading(true);
         
+        // Helper function to extract address string from object
+        const extractAddress = (addressData) => {
+          if (typeof addressData === 'string') {
+            return addressData;
+          }
+          if (typeof addressData === 'object' && addressData) {
+            return addressData.street || addressData.address || '';
+          }
+          return '';
+        };
+
         // First, set user data from auth context (immediate fallback)
         if (user) {
           const authData = {
             name: user.name || '',
-            address: user.address || '',
+            address: extractAddress(user.address),
             phone: user.phone || '',
             province: user.province || ''
           };
@@ -74,7 +85,7 @@ export default function UserDashboard() {
           if (response.success && response.user) {
             const apiData = {
               name: response.user.name || user?.name || '',
-              address: response.user.address || user?.address || '',
+              address: extractAddress(response.user.address) || extractAddress(user?.address) || '',
               phone: response.user.phone || user?.phone || '',
               province: response.user.province || user?.province || ''
             };
