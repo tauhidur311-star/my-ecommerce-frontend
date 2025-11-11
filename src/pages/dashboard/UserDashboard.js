@@ -70,11 +70,12 @@ export default function UserDashboard() {
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
-        toast.error(error.message || 'Failed to load user data');
-        
-        // If it's an authentication error, the enhanced API will handle logout
+
+        // If it's an authentication error, just navigate without showing error
         if (error.message.includes('Authentication') || error.message.includes('token')) {
           navigate('/login');
+        } else {
+          toast.error(error.message || 'Failed to load user data');
         }
       } finally {
         setLoading(false);
