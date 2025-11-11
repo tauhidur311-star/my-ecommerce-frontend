@@ -137,35 +137,49 @@ export default function UserDashboard() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setUserData(prev => ({ ...prev, [name]: value }));
+    console.log(`Input changed - ${name}:`, value);
+    setUserData(prev => {
+      const newData = { ...prev, [name]: value };
+      console.log('Updated userData:', newData);
+      return newData;
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
 
-    // Validation
-    if (!userData.name.trim()) {
+    // Debug: Log current form data
+    console.log('Form submission - Current userData:', userData);
+    
+    // Validation with detailed logging
+    if (!userData.name || !userData.name.trim()) {
+      console.log('Validation failed: Name is missing or empty');
       toast.error('Full Name is required.');
       setSaving(false);
       return;
     }
-    if (!userData.address.trim()) {
+    if (!userData.address || !userData.address.trim()) {
+      console.log('Validation failed: Address is missing or empty');
       toast.error('Billing Address is required.');
       setSaving(false);
       return;
     }
     if (!userData.province) {
+      console.log('Validation failed: Province is missing');
       toast.error('Please select your Province / Region.');
       setSaving(false);
       return;
     }
     const phoneRegex = /^01[0-9]{9}$/;
     if (!userData.phone || !phoneRegex.test(userData.phone)) {
+      console.log('Validation failed: Phone is invalid. Phone:', userData.phone);
       toast.error('Please enter a valid 11-digit phone number starting with 01.');
       setSaving(false);
       return;
     }
+
+    console.log('All validations passed. Sending to API:', userData);
 
     try {
       // Use enhanced API service which handles token refresh automatically
@@ -173,6 +187,8 @@ export default function UserDashboard() {
         method: 'PUT',
         body: userData
       });
+
+      console.log('API Response:', response);
 
       if (response.success && response.user) {
         // Update user data in local storage
@@ -182,11 +198,19 @@ export default function UserDashboard() {
 
         toast.success('Profile updated successfully!');
       } else {
-        throw new Error(response.error || 'Failed to update profile.');
+        console.log('API returned unsuccessful response:', response);
+        throw new Error(response.error || response.message || 'Failed to update profile.');
       }
     } catch (error) {
       console.error('Error updating profile:', error);
-      toast.error(error.message || 'Failed to update profile');
+      
+      // More detailed error handling
+      if (error.response) {
+        console.log('Error response data:', error.response.data);
+        toast.error(error.response.data.message || error.response.data.error || 'Server error occurred');
+      } else {
+        toast.error(error.message || 'Failed to update profile');
+      }
     } finally {
       setSaving(false);
     }
