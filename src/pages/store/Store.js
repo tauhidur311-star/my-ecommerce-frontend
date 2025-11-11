@@ -401,22 +401,38 @@ export default function Store() {
       return;
     }
 
-    // Check if user profile is complete
+    // Check if user profile is complete - more flexible validation
     const hasName = user?.name && user.name.trim();
-    const hasAddress = user?.address && (typeof user.address === 'string' ? user.address.trim() : user.address.street);
+    
+    // Check for address in multiple possible formats
+    const hasAddress = user?.address && (
+      (typeof user.address === 'string' && user.address.trim()) ||
+      (typeof user.address === 'object' && (user.address.street || user.address.address)) ||
+      false
+    );
+    
     const hasPhone = user?.phone && user.phone.trim();
-    const hasProvince = user?.province && user.province.trim();
+    
+    // Check for province/region in multiple possible formats
+    const hasProvince = user?.province || user?.region || user?.city || user?.state;
 
-    if (!hasName || !hasAddress || !hasPhone || !hasProvince) {
+    // More lenient validation - only require name and phone as essentials
+    if (!hasName || !hasPhone) {
       const missingFields = [];
       if (!hasName) missingFields.push('name');
-      if (!hasAddress) missingFields.push('address');
       if (!hasPhone) missingFields.push('phone');
-      if (!hasProvince) missingFields.push('province');
+      if (!hasAddress) missingFields.push('address');
+      if (!hasProvince) missingFields.push('province/region');
       
-      toast.error(`Please complete your profile: ${missingFields.join(', ')}`);
-      navigate('/dashboard?tab=profile');
-      return;
+      // Only show error for truly missing essential fields
+      if (!hasName || !hasPhone) {
+        toast.error(`Please complete your profile: ${missingFields.join(', ')}`);
+        navigate('/dashboard?tab=profile');
+        return;
+      } else {
+        // Just warn about optional fields but allow checkout
+        console.warn('Optional profile fields missing:', missingFields);
+      }
     }
 
     // Validate cart items stock
