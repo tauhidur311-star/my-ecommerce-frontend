@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   User, MapPin, Save, ArrowLeft, Package, Heart, 
-  ShoppingCart, Settings, Bell, Shield, CreditCard, MapPin as AddressIcon 
+  ShoppingCart, Settings, Bell, Shield, CreditCard, MapPin as AddressIcon, ExternalLink 
 } from 'lucide-react';
 import { toast, Toaster } from 'react-hot-toast';
 import Navbar from '../../components/Navbar';
@@ -644,12 +644,7 @@ export default function UserDashboard() {
                     <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-600 rounded-xl flex items-center justify-center">
                       <AddressIcon size={20} className="text-white" />
                     </div>
-                    <div>
-                      <h2 className="text-2xl font-bold text-gray-900">Address Book</h2>
-                      <p className="text-sm text-amber-600 mt-1">
-                        ⚠️ Note: Address management is in development. Changes are stored locally.
-                      </p>
-                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900">Address Book</h2>
                   </div>
                   
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -828,7 +823,27 @@ export default function UserDashboard() {
                         Change Password
                       </h3>
                       
-                      <form onSubmit={async (e) => {
+                      {user?.authProvider === 'google' || user?.googleId ? (
+                        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Shield size={16} className="text-blue-600" />
+                            <h4 className="font-medium text-blue-800">Google Account</h4>
+                          </div>
+                          <p className="text-blue-700 text-sm">
+                            You signed in with Google. To change your password, please go to your Google Account settings.
+                          </p>
+                          <a 
+                            href="https://myaccount.google.com/security" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm"
+                          >
+                            Manage Google Account
+                            <ExternalLink size={16} />
+                          </a>
+                        </div>
+                      ) : (
+                        <form onSubmit={async (e) => {
                         e.preventDefault();
                         const formData = new FormData(e.target);
                         const currentPassword = formData.get('currentPassword');
@@ -905,6 +920,7 @@ export default function UserDashboard() {
                           Change Password
                         </button>
                       </form>
+                      )}
                     </div>
                     
                     {/* Account Information */}

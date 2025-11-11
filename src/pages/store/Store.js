@@ -379,17 +379,23 @@ export default function Store() {
       });
 
       const data = await response.json();
+      console.log('Order response:', data);
 
       if (!response.ok) {
-        throw new Error(data.message || data.error || 'Failed to place order');
+        console.error('Order failed:', response.status, data);
+        throw new Error(data.message || data.error || data.details || 'Failed to place order');
       }
-      
-      // Clear cart after successful order
-      setCart([]);
-      localStorage.removeItem('cart');
-      
-      toast.success('Order placed successfully! You will receive a confirmation shortly.');
-      navigate('/dashboard');
+
+      if (data.success || data.order) {
+        // Clear cart after successful order
+        setCart([]);
+        localStorage.removeItem('cart');
+        
+        toast.success('Order placed successfully! You will receive a confirmation shortly.');
+        navigate('/dashboard');
+      } else {
+        throw new Error(data.message || data.error || 'Order placement failed');
+      }
       
     } catch (error) {
       console.error('Failed to place order', error);
