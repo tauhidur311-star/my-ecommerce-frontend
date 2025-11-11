@@ -243,31 +243,31 @@ class APIService {
 
   // Notifications API
   async getNotifications(page = 1, limit = 20) {
-    return this.request(`/notifications?page=${page}&limit=${limit}`);
+    return this.request(`/api/notifications?page=${page}&limit=${limit}`);
   }
 
   async getUnreadNotificationCount() {
-    return this.request('/notifications/unread-count');
+    return this.request('/api/notifications/unread-count');
   }
 
   async markNotificationAsRead(notificationId) {
-    return this.request(`/notifications/${notificationId}/read`, {
+    return this.request(`/api/notifications/${notificationId}/read`, {
       method: 'PATCH',
     });
   }
 
   async markAllNotificationsAsRead() {
-    return this.request('/notifications/mark-all-read', {
+    return this.request('/api/notifications/mark-all-read', {
       method: 'PATCH',
     });
   }
 
   async getNotificationPreferences() {
-    return this.request('/notifications/preferences');
+    return this.request('/api/notifications/preferences');
   }
 
   async updateNotificationPreferences(preferences) {
-    return this.request('/notifications/preferences', {
+    return this.request('/api/notifications/preferences', {
       method: 'PUT',
       body: JSON.stringify(preferences),
     });
@@ -275,18 +275,18 @@ class APIService {
 
   // Cart API
   async getCart() {
-    return this.request('/cart');
+    return this.request('/api/cart');
   }
 
   async addToCart(productId, quantity = 1, options = {}) {
-    return this.request('/cart/items', {
+    return this.request('/api/cart/items', {
       method: 'POST',
       body: JSON.stringify({ productId, quantity, ...options }),
     });
   }
 
   async updateCartItem(productId, quantity, options = {}) {
-    return this.request(`/cart/items/${productId}`, {
+    return this.request(`/api/cart/items/${productId}`, {
       method: 'PUT',
       body: JSON.stringify({ quantity, ...options }),
     });

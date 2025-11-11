@@ -46,8 +46,8 @@ const NotificationBell = () => {
     try {
       setLoading(true);
       const [notificationsRes, unreadRes] = await Promise.all([
-        enhancedApiService.request('/notifications?page=1&limit=10'),
-        enhancedApiService.request('/notifications/unread-count')
+        enhancedApiService.request('/api/notifications?page=1&limit=10'),
+        enhancedApiService.request('/api/notifications/unread-count')
       ]);
 
       if (notificationsRes.success) {
@@ -66,7 +66,7 @@ const NotificationBell = () => {
 
   const markAsRead = async (notificationId) => {
     try {
-      await enhancedApiService.request(`/notifications/${notificationId}/read`, {
+      await enhancedApiService.request(`/api/notifications/${notificationId}/read`, {
         method: 'PATCH',
       });
 
@@ -89,7 +89,7 @@ const NotificationBell = () => {
 
   const markAllAsRead = async () => {
     try {
-      await enhancedApiService.request('/notifications/mark-all-read', {
+      await enhancedApiService.request('/api/notifications/mark-all-read', {
         method: 'PATCH',
       });
 
