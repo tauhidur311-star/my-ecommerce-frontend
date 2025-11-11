@@ -1,7 +1,6 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-
-// Import error logger for enhanced debugging
 import errorLogger from './errorLogger';
+
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 // Enhanced API Service with Comprehensive Token Management
 class EnhancedAPIService {
