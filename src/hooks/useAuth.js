@@ -3,6 +3,8 @@ import toast from 'react-hot-toast';
 
 export const useAuth = () => {
   const [user, setUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [showAuth, setShowAuth] = useState(false);
   const [authMode, setAuthMode] = useState('login');
   const [authForm, setAuthForm] = useState({ name: '', email: '', password: '' });
@@ -13,8 +15,10 @@ export const useAuth = () => {
       const savedUser = localStorage.getItem('user');
       if (savedUser) {
         setUser(JSON.parse(savedUser));
+        setIsAuthenticated(true);
       }
     }
+    setIsLoading(false);
   }, []);
 
   const handleLoginSuccess = (loggedInUser) => {
@@ -67,6 +71,8 @@ export const useAuth = () => {
 
   return {
     user,
+    isAuthenticated,
+    isLoading,
     showAuth,
     setShowAuth,
     authMode,
