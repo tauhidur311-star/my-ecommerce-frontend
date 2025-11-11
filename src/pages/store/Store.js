@@ -9,6 +9,7 @@ import QuickViewModal from '../../components/QuickViewModal';
 import { ProductGridSkeleton } from '../../components/EnhancedProductSkeleton';
 import { useWishlist } from '../../hooks/useWishlist';
 import { useAuth } from '../../hooks/useAuth';
+import Auth from '../../Auth';
 import '../../styles/animations.css';
 
 const ProductModal = lazy(() => import('../../components/ProductModal'));
@@ -18,6 +19,7 @@ const AuthModal = lazy(() => import('../../components/AuthModal'));
 export default function Store() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const [showAuth, setShowAuth] = useState(false);
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [cart, setCart] = useState([]);
@@ -411,10 +413,19 @@ export default function Store() {
         </div>
       </header>
 
-      {/* Enhanced Store Content */}
-      <div className="container mx-auto px-4 py-8 pt-28">
+      {/* Auth Modal */}
+      {showAuth && (
+        <Auth onClose={() => setShowAuth(false)} />
+      )}
+
+      {/* Products Section */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <h2 className="text-3xl font-bold mb-8">Featured Products</h2>
+        
         {isLoading ? (
-          <ProductGridSkeleton count={8} />
+          <div className="flex justify-center items-center min-h-96">
+            <ProductGridSkeleton count={8} />
+          </div>
         ) : (
           <>
             {/* Results Summary */}
@@ -455,7 +466,7 @@ export default function Store() {
             )}
           </>
         )}
-      </div>
+      </main>
 
       {/* Wrap lazy-loaded components with Suspense */}
       {/* Enhanced Modals */}

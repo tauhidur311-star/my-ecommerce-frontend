@@ -35,6 +35,8 @@ export default function UserDashboard() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [error, setError] = useState(null);
   
   // Initialize socket connection for real-time features
   const { isConnected } = useSocket();
@@ -82,37 +84,27 @@ export default function UserDashboard() {
       }
     };
 
-    const fetchUserOrders = async () => {
+    const fetchUserOrders = async (retryCount = 0) => {
       try {
         setOrdersLoading(true);
-        const token = localStorage.getItem('token');
+        setError(null);
         
-        if (!token) {
-          navigate('/');
-          return;
-        }
-
-        const response = await fetch('/api/orders', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (!response.ok) {
-          if (response.status === 401) {
-            localStorage.removeItem('user');
-            localStorage.removeItem('token');
-            navigate('/');
-            return;
-          }
-          throw new Error('Failed to fetch orders');
-        }
-
-        const data = await response.json();
-        setOrders(data.orders || []);
+        const response = await enhancedApiService.request('/api/orders');
+        setOrders(response.data.orders || []);
       } catch (err) {
-        console.error('Error fetching orders:', err);
+        if (err.response?.status === 429) {
+          const retryAfter = Math.min(1000 * Math.pow(2, retryCount), 30000);
+          setError(`Rate limited. Retrying in ${Math.ceil(retryAfter / 1000)} seconds...`);
+          
+          setTimeout(() => {
+            fetchUserOrders(retryCount + 1);
+          }, retryAfter);
+        } else if (err.response?.status === 401) {
+          navigate('/');
+        } else {
+          setError('Failed to load orders. Please try again.');
+          console.error('Error fetching orders:', err);
+        }
       } finally {
         setOrdersLoading(false);
       }
