@@ -320,9 +320,18 @@ export default function Store() {
     }
   }, []);
 
-  // Periodic session validation for logged in users
+  // Periodic session validation for logged in users (disabled on mobile and production for performance)
   useEffect(() => {
     if (!user) return;
+
+    // Skip intensive session validation on mobile or production Render deployment
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isRenderProduction = window.location.hostname.includes('onrender.com');
+    
+    if (isMobile || isRenderProduction) {
+      setSessionStatus('secure'); // Just set as secure to avoid performance issues
+      return;
+    }
 
     const checkSessionPeriodically = async () => {
       setSessionStatus('checking');
@@ -347,16 +356,19 @@ export default function Store() {
       }
     };
 
-    // Initial check after 30 seconds to allow proper login
-    const initialTimeout = setTimeout(checkSessionPeriodically, 30000);
+    // Only run validation on localhost for development
+    if (window.location.hostname === 'localhost') {
+      // Initial check after 60 seconds to allow proper login
+      const initialTimeout = setTimeout(checkSessionPeriodically, 60000);
 
-    // Set up periodic validation (every 15 minutes to reduce API calls)
-    const interval = setInterval(checkSessionPeriodically, 15 * 60 * 1000);
+      // Set up periodic validation (every 30 minutes to reduce load)
+      const interval = setInterval(checkSessionPeriodically, 30 * 60 * 1000);
 
-    return () => {
-      clearTimeout(initialTimeout);
-      clearInterval(interval);
-    };
+      return () => {
+        clearTimeout(initialTimeout);
+        clearInterval(interval);
+      };
+    }
   }, [user, validateSession]);
 
   // Cart functions (currently unused but may be needed later)

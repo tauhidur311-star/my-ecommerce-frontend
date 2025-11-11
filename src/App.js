@@ -43,14 +43,16 @@ function App() {
     window.addEventListener('error', handleGlobalError);
     window.addEventListener('unhandledrejection', handleUnhandledRejection);
 
-    // Development mode console override
-    if (process.env.NODE_ENV === 'development') {
+    // Development mode console override (only on localhost)
+    if (process.env.NODE_ENV === 'development' && window.location.hostname === 'localhost') {
       console.log('🔍 Enhanced Error Logging System Initialized');
       console.log('🛠️  Available debugging commands:');
       console.log('   - window.errorLogger.getErrorHistory() - View error history');
       console.log('   - window.errorLogger.downloadErrorLog() - Download error log');
       console.log('   - window.errorLogger.clearErrorHistory() - Clear error history');
       console.log('   - window.errorLogger.showErrorDialog(new Error("test"), "Test Context") - Test error dialog');
+    } else {
+      console.log('🚀 Production mode - Error logging optimized for performance');
     }
 
     // Cleanup function

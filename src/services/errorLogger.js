@@ -14,32 +14,37 @@ class ErrorLogger {
       timestamp: new Date().toISOString(),
       context,
       message: error.message || 'Unknown error',
-      stack: error.stack,
+      stack: this.isDevelopment ? error.stack : null, // Only include stack in development
       name: error.name,
       code: error.code,
       status: error.status || error.response?.status,
       url: error.config?.url || window.location.href,
       method: error.config?.method,
-      requestData: error.config?.data,
-      responseData: error.response?.data,
+      requestData: this.isDevelopment ? error.config?.data : null, // Only include request data in development
+      responseData: this.isDevelopment ? error.response?.data : null, // Only include response data in development
       userAgent: navigator.userAgent,
       userId: this.getCurrentUserId(),
       sessionId: this.getSessionId(),
-      additionalData,
+      additionalData: this.isDevelopment ? additionalData : {}, // Only include additional data in development
       severity: this.determineSeverity(error)
     };
 
-    // Add to error history
+    // Add to error history (smaller history for production)
     this.errorHistory.unshift(errorInfo);
-    if (this.errorHistory.length > this.maxHistorySize) {
+    const maxHistory = this.isDevelopment ? this.maxHistorySize : 10;
+    if (this.errorHistory.length > maxHistory) {
       this.errorHistory.pop();
     }
 
-    // Console logging
-    console.group(`🚨 Error in ${context || 'Unknown Context'}`);
-    console.error('Error Object:', error);
-    console.table(errorInfo);
-    console.groupEnd();
+    // Simplified console logging for production
+    if (this.isDevelopment) {
+      console.group(`🚨 Error in ${context || 'Unknown Context'}`);
+      console.error('Error Object:', error);
+      console.table(errorInfo);
+      console.groupEnd();
+    } else {
+      console.error(`Error in ${context}:`, error.message);
+    }
 
     return errorInfo;
   }
@@ -61,16 +66,25 @@ class ErrorLogger {
       }
     });
 
-    // Show detailed debug dialog in development
-    if (this.isDevelopment) {
+    // Show detailed debug dialog in development (but not on mobile or production)
+    if (this.isDevelopment && window.location.hostname === 'localhost') {
       this.showDebugDialog(errorInfo);
     }
 
     return errorInfo;
   }
 
-  // Show detailed debug dialog
+  // Show detailed debug dialog (only in development and not on mobile)
   showDebugDialog(errorInfo) {
+    // Skip debug dialog if on mobile or production to prevent freezing
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isProduction = window.location.hostname !== 'localhost';
+    
+    if (isMobile || isProduction) {
+      console.log('Skipping debug dialog on mobile/production to prevent browser freeze');
+      return;
+    }
+
     const debugMessage = `
 🔍 DEBUG INFO:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
