@@ -24,7 +24,7 @@ const bangladeshDivisions = [
 
 export default function UserDashboard() {
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading: authLoading, logout, user } = useAuth();
+  const { user, loading: authLoading, logout } = useAuth();
   const [userData, setUserData] = useState({
     name: '',
     address: '',
@@ -45,10 +45,10 @@ export default function UserDashboard() {
       if (authLoading) return;
       
       // If not authenticated, redirect to login
-      if (!isAuthenticated) {
+      if (!user) {
         setLoading(false);
         toast.error('You must be logged in to view this page.');
-        navigate('/login');
+        navigate('/');
         return;
       }
 
