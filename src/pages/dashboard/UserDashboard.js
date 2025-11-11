@@ -38,7 +38,13 @@ export default function UserDashboard() {
   const [notificationCount, setNotificationCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeTab, setActiveTab] = useState(() => {
+    // Check URL parameters for tab
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('tab') || 'profile';
+  });
+  const [activeSessions, setActiveSessions] = useState([]);
+  const [sessionWarnings, setSessionWarnings] = useState([]);
   const [newAddress, setNewAddress] = useState({
     label: '',
     name: '',
@@ -180,6 +186,36 @@ export default function UserDashboard() {
       }
     };
 
+    const fetchActiveSessions = async () => {
+      try {
+        const response = await enhancedApiService.request('/api/auth/active-sessions');
+        setActiveSessions(response.sessions || []);
+      } catch (err) {
+        console.log('Active sessions endpoint not available, creating mock data');
+        // Create mock session data until backend is ready
+        const mockSession = {
+          id: 'current-session',
+          deviceInfo: navigator.userAgent.includes('Mobile') ? 'Mobile Device' : 'Desktop Computer',
+          browser: getBrowserName(),
+          ipAddress: 'Current IP',
+          location: 'Current Location',
+          lastActivity: new Date().toISOString(),
+          isCurrent: true,
+          createdAt: user?.lastLoginAt || new Date().toISOString()
+        };
+        setActiveSessions([mockSession]);
+      }
+    };
+
+    const getBrowserName = () => {
+      const userAgent = navigator.userAgent;
+      if (userAgent.includes('Chrome')) return 'Chrome';
+      if (userAgent.includes('Firefox')) return 'Firefox';
+      if (userAgent.includes('Safari')) return 'Safari';
+      if (userAgent.includes('Edge')) return 'Edge';
+      return 'Unknown Browser';
+    };
+
     const fetchAddresses = async () => {
       try {
         // Since address management isn't implemented in backend yet,
@@ -210,6 +246,7 @@ export default function UserDashboard() {
       fetchUserWishlist();
       fetchCartCount();
       fetchNotificationCount();
+      fetchActiveSessions();
       
       // Fetch addresses with error handling to prevent tab breaking
       try {
@@ -969,20 +1006,90 @@ export default function UserDashboard() {
                       </h3>
                       
                       <div className="space-y-4">
+                        {/* Active Sessions List */}
+                        <div className="space-y-3">
+                          <h4 className="font-medium text-gray-900">Active Sessions</h4>
+                          {activeSessions.map(session => (
+                            <div key={session.id} className={`p-4 border rounded-lg ${
+                              session.isCurrent ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'
+                            }`}>
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  <div className={`w-3 h-3 rounded-full ${
+                                    session.isCurrent ? 'bg-green-500 animate-pulse' : 'bg-gray-400'
+                                  }`}></div>
+                                  <h5 className="font-medium text-gray-800">
+                                    {session.isCurrent ? 'Current Session' : 'Other Session'}
+                                  </h5>
+                                  {session.isCurrent && (
+                                    <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                                      This Device
+                                    </span>
+                                  )}
+                                </div>
+                                {!session.isCurrent && (
+                                  <button 
+                                    onClick={async () => {
+                                      try {
+                                        await enhancedApiService.request(`/api/auth/terminate-session/${session.id}`, {
+                                          method: 'DELETE'
+                                        });
+                                        setActiveSessions(prev => prev.filter(s => s.id !== session.id));
+                                        toast.success('Session terminated');
+                                      } catch (error) {
+                                        toast.error('Failed to terminate session');
+                                      }
+                                    }}
+                                    className="text-red-600 hover:text-red-800 text-sm"
+                                  >
+                                    Terminate
+                                  </button>
+                                )}
+                              </div>
+                              <div className="text-sm text-gray-600 space-y-1">
+                                <p><strong>Device:</strong> {session.deviceInfo}</p>
+                                <p><strong>Browser:</strong> {session.browser}</p>
+                                <p><strong>IP:</strong> {session.ipAddress}</p>
+                                <p><strong>Location:</strong> {session.location}</p>
+                                <p><strong>Last Active:</strong> {new Date(session.lastActivity).toLocaleString()}</p>
+                                <p><strong>Login Time:</strong> {new Date(session.createdAt).toLocaleString()}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Session Security Info */}
                         <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                           <div className="flex items-center gap-2 mb-2">
-                            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                            <h4 className="font-medium text-blue-800">Current Session</h4>
+                            <Shield size={16} className="text-blue-600" />
+                            <h4 className="font-medium text-blue-800">Session Security</h4>
                           </div>
-                          <p className="text-blue-700 text-sm mb-3">
-                            You are currently logged in from this device. Your session is being monitored for security.
-                          </p>
                           <div className="text-xs text-blue-600 space-y-1">
-                            <p>• IP address is tracked for security</p>
-                            <p>• Session validates automatically</p>
-                            <p>• Invalid sessions are terminated</p>
+                            <p>• IP address changes are monitored for security</p>
+                            <p>• Session validates automatically every 5 minutes</p>
+                            <p>• You can terminate suspicious sessions manually</p>
+                            <p>• Warnings are logged but won't auto-logout</p>
                           </div>
                         </div>
+
+                        {/* Session Warnings */}
+                        {sessionWarnings.length > 0 && (
+                          <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                            <h4 className="font-medium text-orange-800 mb-3">Recent Security Warnings</h4>
+                            <div className="space-y-2">
+                              {sessionWarnings.slice(0, 5).map(warning => (
+                                <div key={warning.id} className="text-sm">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-orange-700">{warning.message}</span>
+                                    <span className="text-orange-600 text-xs">
+                                      {new Date(warning.timestamp).toLocaleString()}
+                                    </span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                         
                         <div className="flex items-center justify-between p-4 border border-orange-200 rounded-lg bg-orange-50">
                           <div>

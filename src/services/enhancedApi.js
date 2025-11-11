@@ -264,7 +264,7 @@ class EnhancedAPIService {
         baseUrl: API_BASE_URL
       };
 
-      // Log error with detailed information
+      // Log error with detailed information (but not show dialog for rate limiting)
       errorLogger.logError(error, context, additionalData);
       
       // Show user-friendly error dialog with specific messages
@@ -275,7 +275,10 @@ class EnhancedAPIService {
         userMessage = 'Network error. Please check if the server is running.';
       }
 
-      errorLogger.showErrorDialog(error, context, userMessage);
+      // Don't show error dialog for rate limiting (429) to avoid spam
+      if (!error.message?.includes('Too many requests')) {
+        errorLogger.showErrorDialog(error, context, userMessage);
+      }
       
       console.error(`API Error [${config.method} ${endpoint}]:`, error);
       throw error;

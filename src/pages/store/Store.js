@@ -21,7 +21,8 @@ export default function Store() {
   
   // Auth hook
   const { user, logout, login, validateSession } = useAuth();
-  const [sessionStatus, setSessionStatus] = useState('secure'); // secure, checking, invalid
+  const [sessionStatus, setSessionStatus] = useState('secure'); // secure, checking, warning, invalid
+  const [sessionWarnings, setSessionWarnings] = useState([]);
 
   // Auth modal state
   const [showAuth, setShowAuth] = useState(false);
@@ -329,15 +330,28 @@ export default function Store() {
       
       if (token && validateSession) {
         const isValid = await validateSession(token);
-        setSessionStatus(isValid ? 'secure' : 'invalid');
+        if (isValid) {
+          setSessionStatus('secure');
+          setSessionWarnings([]); // Clear warnings on successful validation
+        } else {
+          setSessionStatus('warning');
+          // Add warning but don't logout
+          const newWarning = {
+            id: Date.now(),
+            timestamp: new Date().toISOString(),
+            message: 'Session security warning - IP address may have changed',
+            type: 'ip_change'
+          };
+          setSessionWarnings(prev => [newWarning, ...prev.slice(0, 4)]); // Keep last 5 warnings
+        }
       }
     };
 
-    // Initial check after 10 seconds to allow proper login
-    const initialTimeout = setTimeout(checkSessionPeriodically, 10000);
+    // Initial check after 30 seconds to allow proper login
+    const initialTimeout = setTimeout(checkSessionPeriodically, 30000);
 
-    // Set up periodic validation (every 5 minutes)
-    const interval = setInterval(checkSessionPeriodically, 5 * 60 * 1000);
+    // Set up periodic validation (every 15 minutes to reduce API calls)
+    const interval = setInterval(checkSessionPeriodically, 15 * 60 * 1000);
 
     return () => {
       clearTimeout(initialTimeout);
@@ -571,24 +585,31 @@ export default function Store() {
       {/* Session Security Status */}
       {user && (
         <div className="fixed top-20 right-4 z-40">
-          <div className={`px-3 py-2 rounded-full shadow-lg transition-all duration-300 ${
-            sessionStatus === 'secure' ? 'bg-green-100 border border-green-300' :
-            sessionStatus === 'checking' ? 'bg-yellow-100 border border-yellow-300' :
-            'bg-red-100 border border-red-300'
-          }`}>
+          <div className={`px-3 py-2 rounded-full shadow-lg transition-all duration-300 cursor-pointer ${
+            sessionStatus === 'secure' ? 'bg-green-100 border border-green-300 hover:bg-green-200' :
+            sessionStatus === 'checking' ? 'bg-yellow-100 border border-yellow-300 hover:bg-yellow-200' :
+            sessionStatus === 'warning' ? 'bg-orange-100 border border-orange-300 hover:bg-orange-200' :
+            'bg-red-100 border border-red-300 hover:bg-red-200'
+          }`}
+          onClick={() => navigate('/dashboard?tab=security')}
+          title="Click to view session details"
+          >
             <div className="flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full ${
                 sessionStatus === 'secure' ? 'bg-green-500 animate-pulse' :
                 sessionStatus === 'checking' ? 'bg-yellow-500 animate-pulse' :
+                sessionStatus === 'warning' ? 'bg-orange-500 animate-pulse' :
                 'bg-red-500 animate-pulse'
               }`}></div>
               <span className={`text-xs font-medium ${
                 sessionStatus === 'secure' ? 'text-green-800' :
                 sessionStatus === 'checking' ? 'text-yellow-800' :
+                sessionStatus === 'warning' ? 'text-orange-800' :
                 'text-red-800'
               }`}>
                 {sessionStatus === 'secure' ? 'Session Secure' :
                  sessionStatus === 'checking' ? 'Checking...' :
+                 sessionStatus === 'warning' ? `Security Warning (${sessionWarnings.length})` :
                  'Session Invalid'}
               </span>
             </div>

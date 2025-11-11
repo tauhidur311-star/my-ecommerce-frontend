@@ -48,17 +48,20 @@ export default function useAuth() {
 
       if (!response.ok || !data.valid) {
         const reason = data.reason || 'IP address changed or session expired';
-        const context = 'Session Validation Failed';
+        const context = 'Session Validation Warning';
         
-        // Log session validation failure
-        errorLogger.logError(new Error(`Session validation failed: ${reason}`), context, {
+        // Log session validation warning (don't logout immediately)
+        errorLogger.logError(new Error(`Session validation warning: ${reason}`), context, {
           responseStatus: response.status,
           validationReason: reason,
-          userData: data
+          userData: data,
+          action: 'warning_logged'
         });
         
-        console.log('Session invalid:', reason);
-        logout();
+        console.log('Session validation warning:', reason);
+        
+        // Instead of logging out, just return false to indicate session issue
+        // Let the user continue but mark session as potentially compromised
         return false;
       }
 
@@ -114,13 +117,13 @@ export default function useAuth() {
 
     checkAuth();
 
-    // Set up periodic session validation (every 5 minutes)
+    // Set up periodic session validation (every 10 minutes to reduce API calls)
     const validationInterval = setInterval(async () => {
       const token = localStorage.getItem('token');
       if (token && user) {
         await validateSession(token);
       }
-    }, 5 * 60 * 1000); // 5 minutes
+    }, 10 * 60 * 1000); // 10 minutes
 
     return () => {
       clearInterval(validationInterval);
