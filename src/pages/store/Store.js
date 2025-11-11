@@ -44,6 +44,29 @@ export default function Store() {
     // User data is already managed by useAuth hook
     setShowAuth(false);
   };
+
+  // Quick view handler
+  const handleQuickView = (product) => {
+    setSelectedProduct(product);
+    setShowQuickView(true);
+  };
+
+  // Add to cart handler
+  const handleAddToCart = (product) => {
+    const newItem = {
+      id: product._id,
+      name: product.name,
+      price: product.price,
+      image: product.image || product.images?.[0] || 'https://via.placeholder.com/200?text=No+Image',
+      quantity: 1,
+      selectedSize: product.sizes?.[0] || 'M' // Default size
+    };
+    
+    const updatedCart = [...cart, newItem];
+    setCart(updatedCart);
+    localStorage.setItem('cart', JSON.stringify(updatedCart));
+    toast.success(`${product.name} added to cart!`);
+  };
   
   // Enhanced store state
   const [sortBy] = useState('featured');
@@ -54,6 +77,10 @@ export default function Store() {
     inStock: false,
     onSale: false
   });
+
+  // Quick view modal state
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showQuickView, setShowQuickView] = useState(false);
   
   // Wishlist hook (currently unused but may be needed later)
   // const { toggleWishlist, isInWishlist } = useWishlist();
@@ -276,15 +303,23 @@ export default function Store() {
                 key={product._id} 
                 className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition duration-300 transform hover:-translate-y-1"
               >
-                <div className="relative w-full h-48 bg-gray-200 overflow-hidden">
+                <div 
+                  className="relative w-full h-48 bg-gray-200 overflow-hidden cursor-pointer"
+                  onClick={() => handleQuickView(product)}
+                >
                   <img 
-                    src={product.image} 
+                    src={product.image || product.images?.[0] || 'https://via.placeholder.com/200?text=No+Image'} 
                     alt={product.name} 
                     className="w-full h-full object-cover hover:scale-110 transition duration-300"
                     onError={(e) => {
                       e.target.src = 'https://via.placeholder.com/200?text=No+Image';
                     }}
                   />
+                  <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                    <span className="text-white font-semibold opacity-0 hover:opacity-100 transition-opacity">
+                      Quick View
+                    </span>
+                  </div>
                 </div>
                 <div className="p-4">
                   <h3 className="font-bold text-lg mb-2 line-clamp-2">
@@ -299,9 +334,12 @@ export default function Store() {
                     </span>
                     <button 
                       className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
-                      onClick={() => console.log('Add to cart:', product._id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddToCart(product);
+                      }}
                     >
-                      Add
+                      Add to Cart
                     </button>
                   </div>
                 </div>
@@ -310,6 +348,79 @@ export default function Store() {
           </div>
         )}
       </main>
+
+      {/* Quick View Modal */}
+      {showQuickView && selectedProduct && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <h2 className="text-2xl font-bold">{selectedProduct.name}</h2>
+                <button 
+                  onClick={() => setShowQuickView(false)}
+                  className="text-gray-500 hover:text-gray-700 text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+              
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="aspect-square bg-gray-200 rounded-lg overflow-hidden">
+                  <img 
+                    src={selectedProduct.image || selectedProduct.images?.[0] || 'https://via.placeholder.com/400?text=No+Image'} 
+                    alt={selectedProduct.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.src = 'https://via.placeholder.com/400?text=No+Image';
+                    }}
+                  />
+                </div>
+                
+                <div>
+                  <p className="text-3xl font-bold text-blue-600 mb-4">
+                    ৳{selectedProduct.price || 0}
+                  </p>
+                  
+                  <p className="text-gray-600 mb-6">
+                    {selectedProduct.description || 'No description available'}
+                  </p>
+                  
+                  {selectedProduct.sizes && selectedProduct.sizes.length > 0 && (
+                    <div className="mb-4">
+                      <h4 className="font-semibold mb-2">Available Sizes:</h4>
+                      <div className="flex gap-2">
+                        {selectedProduct.sizes.map(size => (
+                          <span key={size} className="px-3 py-1 border rounded-md text-sm">
+                            {size}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="flex gap-3">
+                    <button 
+                      onClick={() => {
+                        handleAddToCart(selectedProduct);
+                        setShowQuickView(false);
+                      }}
+                      className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                    >
+                      Add to Cart
+                    </button>
+                    <button 
+                      onClick={() => setShowQuickView(false)}
+                      className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
