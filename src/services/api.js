@@ -28,7 +28,7 @@ class APIService {
 
   // Generic API call method
   async makeRequest(endpoint, options = {}) {
-    const url = `${this.baseURL}${endpoint}`;
+    const url = `${this.baseURL}/api${endpoint}`;
     
     const config = {
       headers: this.getHeaders(),
