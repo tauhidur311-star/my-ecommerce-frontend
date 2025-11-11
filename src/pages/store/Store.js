@@ -205,7 +205,6 @@ export default function Store() {
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   const confirmLogout = () => {
-    setUser(null);
     handleLogout();
     setShowLogoutConfirm(false);
   };
