@@ -1,6 +1,7 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import { User, ShoppingCart, LogOut } from 'lucide-react';
 import Silk from '../../components/Silk';
 import Navbar from '../../components/Navbar';
 import EnhancedProductCard from '../../components/EnhancedProductCard';
@@ -16,6 +17,7 @@ const AuthModal = lazy(() => import('../../components/AuthModal'));
 
 export default function Store() {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [cart, setCart] = useState([]);
@@ -366,6 +368,48 @@ export default function Store() {
         onSearch={setSearchQuery}
         products={products}
       />
+
+      {/* Header */}
+      <header className="sticky top-0 bg-white shadow-sm z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold text-gray-900">StyleShop</h1>
+            
+            <div className="flex items-center gap-4">
+              <button className="p-2 hover:bg-gray-100 rounded-lg">
+                <ShoppingCart size={24} />
+              </button>
+
+              {user ? (
+                <div className="flex items-center gap-3">
+                  <span className="text-gray-700">Welcome, {user.name}</span>
+                  <button 
+                    onClick={handleUserClick}
+                    className="p-2 hover:bg-gray-100 rounded-lg"
+                  >
+                    <User size={24} />
+                  </button>
+                  <button 
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md"
+                  >
+                    <LogOut size={18} />
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <button 
+                  onClick={handleUserClick}
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
+                >
+                  <User size={20} />
+                  Login
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
 
       {/* Enhanced Store Content */}
       <div className="container mx-auto px-4 py-8 pt-28">

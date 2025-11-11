@@ -84,12 +84,37 @@ export default function UserDashboard() {
 
     const fetchUserOrders = async () => {
       try {
-        const response = await enhancedApiService.request('/api/users/orders');
-        if (response.success) {
-          setOrders(response.data || []);
+        setOrdersLoading(true);
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          navigate('/');
+          return;
         }
+
+        const response = await fetch('/api/orders', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            navigate('/');
+            return;
+          }
+          throw new Error('Failed to fetch orders');
+        }
+
+        const data = await response.json();
+        setOrders(data.orders || []);
       } catch (err) {
         console.error('Error fetching orders:', err);
+      } finally {
+        setOrdersLoading(false);
       }
     };
 

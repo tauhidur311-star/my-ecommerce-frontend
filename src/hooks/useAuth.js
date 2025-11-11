@@ -1,26 +1,67 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 
 export const useAuth = () => {
   const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Keep this for clarity
-  const [isLoading, setIsLoading] = useState(true); // This is the key addition
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showAuth, setShowAuth] = useState(false);
   const [authMode, setAuthMode] = useState('login');
   const [authForm, setAuthForm] = useState({ name: '', email: '', password: '' });
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-    if (token) {
-      const savedUser = localStorage.getItem('user');
-      if (savedUser) {
-        setUser(JSON.parse(savedUser));
-        setIsAuthenticated(true);
+    const checkAuth = () => {
+      const storedUser = localStorage.getItem('user');
+      const token = localStorage.getItem('token');
+
+      if (storedUser && token) {
+        try {
+          const timeRemaining = getTokenTimeRemaining();
+          if (!timeRemaining || timeRemaining <= 0) {
+            console.log('Token expired');
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            setUser(null);
+          } else {
+            setUser(JSON.parse(storedUser));
+          }
+        } catch (err) {
+          console.error('Auth check error:', err);
+          setUser(null);
+        }
       }
-    }
-    setIsLoading(false);
+      setLoading(false);
+    };
+
+    checkAuth();
+  }, [getTokenTimeRemaining]);
+
+  const login = useCallback((userData, token) => {
+    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('token', token);
+    setUser(userData);
   }, []);
-  
+
+  const logout = useCallback(() => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    setUser(null);
+  }, []);
+
+  const getTokenTimeRemaining = useCallback(() => {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const expiresIn = payload.exp * 1000 - Date.now();
+      return expiresIn > 0 ? expiresIn : null;
+    } catch (err) {
+      console.error('Token parsing error:', err);
+      return null;
+    }
+  }, []);
+
   const handleLoginSuccess = (loggedInUser) => {
     setUser(loggedInUser);
     setIsAuthenticated(true);
@@ -73,8 +114,11 @@ export const useAuth = () => {
 
   return {
     user,
-    isAuthenticated,
-    isLoading, // Expose the loading state
+    loading,
+    error,
+    login,
+    logout,
+    getTokenTimeRemaining,
     showAuth,
     setShowAuth,
     authMode,
