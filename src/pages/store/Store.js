@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { User, ShoppingCart, LogOut } from 'lucide-react';
 import Silk from '../../components/Silk';
 import Navbar from '../../components/Navbar';
-import { useWishlist } from '../../hooks/useWishlist';
+// import { useWishlist } from '../../hooks/useWishlist';
 import useAuth from '../../hooks/useAuth';
 
 const AuthModal = lazy(() => import('../../components/AuthModal'));
@@ -55,8 +55,8 @@ export default function Store() {
     onSale: false
   });
   
-  // Wishlist hook
-  const { toggleWishlist, isInWishlist } = useWishlist();
+  // Wishlist hook (currently unused but may be needed later)
+  // const { toggleWishlist, isInWishlist } = useWishlist();
 
   // Load products
   useEffect(() => {
@@ -200,68 +200,13 @@ export default function Store() {
     }
   };
 
-  // Enhanced filtering and sorting logic
-  const applyFiltersAndSort = (products, searchQuery, filters, sortBy) => {
-    let filtered = [...products];
-
-    // Search filter
-    if (searchQuery) {
-      filtered = filtered.filter(product =>
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    // Category filter
-    if (filters.category !== 'all') {
-      filtered = filtered.filter(product => 
-        product.category?.toLowerCase() === filters.category.toLowerCase()
-      );
-    }
-
-    // Price filter
-    filtered = filtered.filter(product => 
-      product.price >= filters.minPrice && product.price <= filters.maxPrice
-    );
-
-    // Stock filter
-    if (filters.inStock) {
-      filtered = filtered.filter(product => product.stock > 0);
-    }
-
-    // Sale filter
-    if (filters.onSale) {
-      filtered = filtered.filter(product => product.discount > 0);
-    }
-
-    // Sorting
-    switch (sortBy) {
-      case 'price-low':
-        filtered.sort((a, b) => a.price - b.price);
-        break;
-      case 'price-high':
-        filtered.sort((a, b) => b.price - a.price);
-        break;
-      case 'newest':
-        filtered.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-        break;
-      case 'popular':
-        filtered.sort((a, b) => (b.sold || 0) - (a.sold || 0));
-        break;
-      case 'rating':
-        filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-        break;
-      default:
-        // Featured - no sorting needed
-        break;
-    }
-
-    return filtered;
-  };
+  // Enhanced filtering and sorting logic (currently unused but may be needed later)
+  // const applyFiltersAndSort = (products, searchQuery, filters, sortBy) => { ... }
 
   // Update filtered products when products, search, filters, or sort change
   useEffect(() => {
-    const filtered = applyFiltersAndSort(products, searchQuery, filters, sortBy);
+    // Filter logic will be implemented when needed
+    // const filtered = applyFiltersAndSort(products, searchQuery, filters, sortBy);
   }, [products, searchQuery, filters, sortBy]);
 
 

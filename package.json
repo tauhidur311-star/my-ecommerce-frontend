@@ -1,6 +1,7 @@
 {
-  "name": "frontend",
+  "name": "my-ecommerce-frontend",
   "version": "0.1.0",
+  "description": "Frontend React application for My E-commerce",
   "private": true,
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

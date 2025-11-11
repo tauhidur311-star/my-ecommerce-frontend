@@ -1,70 +1,90 @@
-# Getting Started with Create React App
+# My E-commerce Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern React-based frontend for an e-commerce application with responsive design, real-time features, and comprehensive user experience.
+
+## Features
+
+- **Modern UI/UX**: Responsive design with dark/light mode support
+- **User Authentication**: Login/register with Google OAuth integration
+- **Product Catalog**: Advanced search, filtering, and product browsing
+- **Shopping Cart**: Real-time cart management with persistent storage
+- **User Dashboard**: Profile management, order history, wishlist
+- **Admin Panel**: Product management, analytics, and order processing
+- **Real-time Updates**: Live notifications and real-time data sync
+- **Internationalization**: Multi-language support (English/Bengali)
+
+## Tech Stack
+
+- **Framework**: React 18
+- **Routing**: React Router v7
+- **State Management**: React Context + Hooks
+- **Styling**: CSS3 with CSS Variables
+- **UI Components**: Custom components with Framer Motion animations
+- **Forms**: React Hook Form with Zod validation
+- **HTTP Client**: Axios
+- **Real-time**: Socket.io Client
+- **Authentication**: Google OAuth + JWT
+- **Image Handling**: React Image Crop, Zoom Pan Pinch
+
+## Quick Start
+
+1. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+2. **Environment Setup**:
+   ```bash
+   # Edit .env with your API URL and Google Client ID
+   REACT_APP_API_URL=http://localhost:5000
+   REACT_APP_GOOGLE_CLIENT_ID=your-google-client-id
+   ```
+
+3. **Start development server**:
+   ```bash
+   npm start
+   ```
+
+4. **Build for production**:
+   ```bash
+   npm run build
+   ```
+
+## Environment Variables
+
+Configure in `.env`:
+
+- `REACT_APP_API_URL`: Backend API URL
+- `REACT_APP_GOOGLE_CLIENT_ID`: Google OAuth client ID
+- `GENERATE_SOURCEMAP`: Set to false for production builds
 
 ## Available Scripts
 
-In the project directory, you can run:
+- `npm start` - Start development server (http://localhost:3000)
+- `npm run build` - Create production build
+- `npm test` - Run test suite
+- `npm run eject` - Eject from Create React App (one-way operation)
 
-### `npm start`
+## Project Structure
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```
+src/
+├── components/       # Reusable UI components
+│   ├── admin/       # Admin-specific components
+│   └── ui/          # Base UI components
+├── contexts/        # React contexts for state management
+├── hooks/           # Custom React hooks
+├── i18n/            # Internationalization
+│   └── locales/     # Translation files
+├── lib/             # Utility libraries
+├── pages/           # Page components
+│   ├── admin/       # Admin pages
+│   ├── auth/        # Authentication pages
+│   ├── dashboard/   # User dashboard
+│   └── store/       # Store pages
+├── services/        # API services and external integrations
+├── styles/          # Global styles and animations
+├── utils/           # Utility functions
+├── App.js           # Main application component
+└── index.js         # Application entry point
+```
