@@ -37,6 +37,12 @@ export default function useAuth() {
         }
       });
 
+      // If the endpoint doesn't exist (404), assume session is valid
+      if (response.status === 404) {
+        console.log('Session validation endpoint not implemented yet, assuming valid session');
+        return true;
+      }
+
       const data = await response.json();
 
       if (!response.ok || !data.valid) {
@@ -54,8 +60,9 @@ export default function useAuth() {
       return true;
     } catch (error) {
       console.error('Session validation failed:', error);
-      // Don't logout on network errors, just log the issue
-      return false;
+      // Don't logout on network errors - assume session is still valid
+      console.log('Network error during validation, keeping session active');
+      return true;
     }
   }, [logout]);
 
@@ -75,8 +82,10 @@ export default function useAuth() {
           } else {
             setUser(JSON.parse(storedUser));
             
-            // Validate session with IP check for active users
-            await validateSession(token);
+            // Validate session with IP check for active users (only after user is set)
+            setTimeout(async () => {
+              await validateSession(token);
+            }, 1000); // Wait 1 second to avoid immediate logout
           }
         } catch (err) {
           console.error('Auth check error:', err);

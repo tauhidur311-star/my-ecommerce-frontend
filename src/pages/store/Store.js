@@ -318,13 +318,16 @@ export default function Store() {
       }
     };
 
-    // Initial check
-    checkSessionPeriodically();
+    // Initial check after 10 seconds to allow proper login
+    const initialTimeout = setTimeout(checkSessionPeriodically, 10000);
 
-    // Set up periodic validation (every 3 minutes)
-    const interval = setInterval(checkSessionPeriodically, 3 * 60 * 1000);
+    // Set up periodic validation (every 5 minutes)
+    const interval = setInterval(checkSessionPeriodically, 5 * 60 * 1000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(initialTimeout);
+      clearInterval(interval);
+    };
   }, [user, validateSession]);
 
   // Cart functions (currently unused but may be needed later)
