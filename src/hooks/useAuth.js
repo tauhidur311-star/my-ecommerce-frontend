@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import errorLogger from '../services/errorLogger';
 
 export default function useAuth() {
   const [user, setUser] = useState(null);
@@ -46,7 +47,17 @@ export default function useAuth() {
       const data = await response.json();
 
       if (!response.ok || !data.valid) {
-        console.log('Session invalid:', data.reason || 'IP address changed or session expired');
+        const reason = data.reason || 'IP address changed or session expired';
+        const context = 'Session Validation Failed';
+        
+        // Log session validation failure
+        errorLogger.logError(new Error(`Session validation failed: ${reason}`), context, {
+          responseStatus: response.status,
+          validationReason: reason,
+          userData: data
+        });
+        
+        console.log('Session invalid:', reason);
         logout();
         return false;
       }
@@ -59,8 +70,14 @@ export default function useAuth() {
 
       return true;
     } catch (error) {
+      // Enhanced error logging for session validation
+      errorLogger.logError(error, 'Session Validation Network Error', {
+        endpoint: '/api/auth/validate-session',
+        action: 'session_validation',
+        keepSessionActive: true
+      });
+      
       console.error('Session validation failed:', error);
-      // Don't logout on network errors - assume session is still valid
       console.log('Network error during validation, keeping session active');
       return true;
     }
@@ -121,7 +138,9 @@ export default function useAuth() {
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
       if (!token) {
-        throw new Error('No active session');
+        const error = new Error('No active session');
+        errorLogger.showErrorDialog(error, 'Terminate Sessions Failed', 'No active session found to terminate.');
+        throw error;
       }
 
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/terminate-all-sessions`, {
@@ -135,14 +154,29 @@ export default function useAuth() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || data.error || 'Failed to terminate sessions');
+        const error = new Error(data.message || data.error || 'Failed to terminate sessions');
+        errorLogger.showErrorDialog(error, 'Terminate All Sessions Failed', error.message);
+        throw error;
       }
+
+      // Log successful session termination
+      errorLogger.logError(new Error('All sessions terminated by user'), 'Session Termination Success', {
+        action: 'terminate_all_sessions',
+        success: true,
+        timestamp: new Date().toISOString()
+      });
 
       // Force logout after terminating all sessions
       logout();
       
       return { success: true, message: 'All sessions terminated successfully' };
     } catch (error) {
+      errorLogger.logError(error, 'Terminate All Sessions Error', {
+        action: 'terminate_all_sessions',
+        success: false,
+        hasToken: !!(localStorage.getItem('token') || localStorage.getItem('accessToken'))
+      });
+      
       console.error('Failed to terminate sessions:', error);
       return { success: false, error: error.message };
     }

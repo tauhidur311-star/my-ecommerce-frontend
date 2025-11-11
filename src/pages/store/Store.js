@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, Suspense, lazy } from 'react';
+import errorLogger from '../../services/errorLogger';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { User, ShoppingCart, LogOut, Star, Package, TrendingUp } from 'lucide-react';
@@ -87,12 +88,26 @@ export default function Store() {
     return 'https://via.placeholder.com/200?text=No+Image';
   };
 
-  // Error handler
+  // Enhanced error handler with detailed logging
   const handleError = useCallback((error, action) => {
-    console.error(`Error in ${action}:`, error);
+    const context = `Store ${action}`;
+    const userMessage = `Failed to ${action}. Please try again.`;
+    
+    // Log error with detailed context
+    errorLogger.logError(error, context, {
+      action,
+      currentPath: window.location.pathname,
+      userLoggedIn: !!user,
+      cartItems: cart.length,
+      productsLoaded: products.length
+    });
+    
+    // Show error dialog to user
+    errorLogger.showErrorDialog(error, context, userMessage);
+    
     setError(`Failed to ${action}. Please try again.`);
-    toast.error(`Failed to ${action}. Please try again.`);
-  }, []);
+    console.error(`Error in ${action}:`, error);
+  }, [user, cart.length, products.length]);
 
   // Add to cart handler with duplicate prevention
   const handleAddToCart = (product, selectedSize = null) => {
@@ -425,6 +440,26 @@ export default function Store() {
       }
       
     } catch (error) {
+      // Enhanced checkout error logging
+      const context = 'Checkout Process Failed';
+      const additionalData = {
+        cartItems: cart.length,
+        totalAmount: cart.reduce((total, item) => total + (item.price * item.quantity), 0),
+        userProfile: {
+          hasAddress: !!user?.address,
+          hasPhone: !!user?.phone,
+          hasName: !!user?.name,
+          hasProvince: !!user?.province
+        },
+        orderData: {
+          itemCount: cart.length,
+          paymentMethod: 'cod'
+        },
+        validationPassed: stockErrors.length === 0
+      };
+
+      errorLogger.logError(error, context, additionalData);
+      
       console.error('Failed to place order', error);
       handleError(error, 'place order');
     } finally {

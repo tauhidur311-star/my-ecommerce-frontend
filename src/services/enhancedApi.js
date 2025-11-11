@@ -1,5 +1,8 @@
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
+// Import error logger for enhanced debugging
+import errorLogger from './errorLogger';
+
 // Enhanced API Service with Comprehensive Token Management
 class EnhancedAPIService {
   constructor() {
@@ -251,6 +254,29 @@ class EnhancedAPIService {
         return await response.text();
       }
     } catch (error) {
+      // Enhanced error logging with debug dialog
+      const context = `API ${config.method.toUpperCase()} ${endpoint}`;
+      const additionalData = {
+        endpoint,
+        method: config.method,
+        body: config.body,
+        headers: config.headers,
+        baseUrl: API_BASE_URL
+      };
+
+      // Log error with detailed information
+      errorLogger.logError(error, context, additionalData);
+      
+      // Show user-friendly error dialog with specific messages
+      let userMessage = null;
+      if (error.message === 'Failed to fetch') {
+        userMessage = 'Connection failed. Please check your internet connection and try again.';
+      } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        userMessage = 'Network error. Please check if the server is running.';
+      }
+
+      errorLogger.showErrorDialog(error, context, userMessage);
+      
       console.error(`API Error [${config.method} ${endpoint}]:`, error);
       throw error;
     }
