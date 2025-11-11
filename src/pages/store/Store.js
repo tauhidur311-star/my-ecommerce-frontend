@@ -8,7 +8,7 @@ import EnhancedProductCard from '../../components/EnhancedProductCard';
 import QuickViewModal from '../../components/QuickViewModal';
 import { ProductGridSkeleton } from '../../components/EnhancedProductSkeleton';
 import { useWishlist } from '../../hooks/useWishlist';
-import { useAuth } from '../../hooks/useAuth';
+import useAuth from '../../hooks/useAuth';
 import Auth from '../../Auth';
 
 const ProductModal = lazy(() => import('../../components/ProductModal'));
