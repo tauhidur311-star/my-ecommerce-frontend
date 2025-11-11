@@ -1,7 +1,7 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import { User, ShoppingCart, LogOut } from 'lucide-react';
+import { User, ShoppingCart, LogOut, Star, Package, TrendingUp } from 'lucide-react';
 import Silk from '../../components/Silk';
 import Navbar from '../../components/Navbar';
 // import { useWishlist } from '../../hooks/useWishlist';
@@ -13,6 +13,8 @@ export default function Store() {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [cartLoading, setCartLoading] = useState(false);
   const [cart, setCart] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -48,6 +50,7 @@ export default function Store() {
   // Quick view handler
   const handleQuickView = (product) => {
     setSelectedProduct(product);
+    setSelectedSize(product.sizes?.[0] || 'M');
     setShowQuickView(true);
   };
 
@@ -83,36 +86,124 @@ export default function Store() {
     return 'https://via.placeholder.com/200?text=No+Image';
   };
 
-  // Add to cart handler
-  const handleAddToCart = (product) => {
-    const newItem = {
-      id: product._id,
-      name: product.name,
-      price: product.price,
-      image: getImageUrl(product),
-      quantity: 1,
-      selectedSize: product.sizes?.[0] || 'M' // Default size
-    };
-    
-    const updatedCart = [...cart, newItem];
+  // Error handler
+  const handleError = (error, action) => {
+    console.error(`Error in ${action}:`, error);
+    setError(`Failed to ${action}. Please try again.`);
+    toast.error(`Failed to ${action}. Please try again.`);
+  };
+
+  // Add to cart handler with duplicate prevention
+  const handleAddToCart = (product, selectedSize = null) => {
+    try {
+      setCartLoading(true);
+      
+      if (!product._id || !product.name || !product.price) {
+        throw new Error('Invalid product data');
+      }
+
+      const size = selectedSize || product.sizes?.[0] || 'M';
+      const existingItemIndex = cart.findIndex(
+        item => item.id === product._id && item.selectedSize === size
+      );
+
+      let updatedCart;
+      if (existingItemIndex !== -1) {
+        // Item exists, increase quantity
+        updatedCart = [...cart];
+        updatedCart[existingItemIndex].quantity += 1;
+        toast.success(`Updated ${product.name} quantity in cart!`);
+      } else {
+        // New item, add to cart
+        const newItem = {
+          id: product._id,
+          name: product.name,
+          price: product.price,
+          image: getImageUrl(product),
+          quantity: 1,
+          selectedSize: size
+        };
+        updatedCart = [...cart, newItem];
+        toast.success(`${product.name} added to cart!`);
+      }
+      
+      setCart(updatedCart);
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+    } catch (error) {
+      handleError(error, 'add item to cart');
+    } finally {
+      setCartLoading(false);
+    }
+  };
+
+  // Remove from cart handler
+  const removeFromCart = (productId, selectedSize) => {
+    const updatedCart = cart.filter(
+      item => !(item.id === productId && item.selectedSize === selectedSize)
+    );
     setCart(updatedCart);
     localStorage.setItem('cart', JSON.stringify(updatedCart));
-    toast.success(`${product.name} added to cart!`);
+    toast.success('Item removed from cart');
+  };
+
+  // Update cart quantity
+  const updateCartQuantity = (productId, selectedSize, newQuantity) => {
+    if (newQuantity <= 0) {
+      removeFromCart(productId, selectedSize);
+      return;
+    }
+    
+    const updatedCart = cart.map(item => 
+      (item.id === productId && item.selectedSize === selectedSize)
+        ? { ...item, quantity: newQuantity }
+        : item
+    );
+    setCart(updatedCart);
+    localStorage.setItem('cart', JSON.stringify(updatedCart));
+  };
+
+  // Clear entire cart
+  const clearCart = () => {
+    setCart([]);
+    localStorage.removeItem('cart');
+    toast.success('Cart cleared');
+  };
+
+  // Format price with discount calculation
+  const formatPrice = (price, discount = 0) => {
+    const finalPrice = discount ? price - (price * discount / 100) : price;
+    return finalPrice;
+  };
+
+  // Render star rating
+  const renderStars = (rating) => {
+    return [...Array(5)].map((_, i) => (
+      <Star 
+        key={i} 
+        size={14} 
+        className={i < Math.floor(rating) ? "text-yellow-400 fill-current" : "text-gray-300"} 
+      />
+    ));
   };
   
   // Enhanced store state
-  const [sortBy] = useState('featured');
-  const [filters] = useState({
+  const [sortBy, setSortBy] = useState('featured');
+  const [filters, setFilters] = useState({
     category: 'all',
     minPrice: 0,
     maxPrice: 10000,
     inStock: false,
     onSale: false
   });
+  const [filteredProducts, setFilteredProducts] = useState([]);
 
   // Quick view modal state
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showQuickView, setShowQuickView] = useState(false);
+  const [selectedSize, setSelectedSize] = useState('');
+  
+  // Cart sidebar state
+  const [showCartSidebar, setShowCartSidebar] = useState(false);
   
   // Wishlist hook (currently unused but may be needed later)
   // const { toggleWishlist, isInWishlist } = useWishlist();
@@ -135,6 +226,7 @@ export default function Store() {
   const loadProducts = async () => {
     try {
       setLoading(true);
+      setError(null);
       
       // Load products from backend API instead of localStorage
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/products`, {
@@ -149,20 +241,16 @@ export default function Store() {
         const products = data.products || data.data || data;
         
         // Enhance products with additional properties
-        const enhancedProducts = products.map(product => {
-          // Debug: Log product structure to see image field names
-          console.log('Product data:', product);
-          return {
-            ...product,
-            id: product._id || product.id, // Ensure we have an id field
-            rating: product.rating || product.averageRating || null,
-            sold: product.sold || product.totalSales || null,
-            isNew: product.isNew || false,
-            stock: product.stock || 0,
-            discount: product.discount || 0,
-            showSoldNumbers: product.showSoldNumbers !== false // Default to true unless explicitly disabled
-          };
-        });
+        const enhancedProducts = products.map(product => ({
+          ...product,
+          id: product._id || product.id, // Ensure we have an id field
+          rating: product.rating || product.averageRating || null,
+          sold: product.sold || product.totalSales || null,
+          isNew: product.isNew || false,
+          stock: product.stock || 0,
+          discount: product.discount || 0,
+          showSoldNumbers: product.showSoldNumbers !== false // Default to true unless explicitly disabled
+        }));
         
         setProducts(enhancedProducts);
       } else {
@@ -186,20 +274,31 @@ export default function Store() {
       setLoading(false);
     } catch (error) {
       console.error('Error loading products:', error);
+      setError('Failed to load products. Please check your connection.');
+      
       // Fallback to localStorage on network error
       const localProducts = localStorage.getItem('admin-products');
       if (localProducts) {
-        const parsedProducts = JSON.parse(localProducts);
-        const enhancedProducts = parsedProducts.map(product => ({
-          ...product,
-          rating: product.rating || null,
-          sold: product.sold || null,
-          isNew: product.isNew || false,
-          stock: product.stock || 0,
-          discount: product.discount || null,
-          showSoldNumbers: product.showSoldNumbers !== false
-        }));
-        setProducts(enhancedProducts);
+        try {
+          const parsedProducts = JSON.parse(localProducts);
+          const enhancedProducts = parsedProducts.map(product => ({
+            ...product,
+            rating: product.rating || null,
+            sold: product.sold || null,
+            isNew: product.isNew || false,
+            stock: product.stock || 0,
+            discount: product.discount || null,
+            showSoldNumbers: product.showSoldNumbers !== false
+          }));
+          setProducts(enhancedProducts);
+          setError(null); // Clear error if fallback works
+          toast.success('Loaded products from local storage');
+        } catch (localError) {
+          console.error('Error parsing local products:', localError);
+          handleError(localError, 'load products');
+        }
+      } else {
+        handleError(error, 'load products');
       }
       setLoading(false);
     }
@@ -218,24 +317,51 @@ export default function Store() {
 
 
   const handleCheckout = async () => {
-    // If the user is not logged in, redirect them to the login page first.
     if (!user) {
-      navigate('/login');
+      toast.error('Please login to proceed with checkout');
+      setShowAuth(true);
       return;
     }
 
-    // --- All logic that requires a user is now safely inside this block ---
-    // First, validate that the user's profile is complete.
+    if (cart.length === 0) {
+      toast.error('Your cart is empty');
+      return;
+    }
+
+    // Check if user profile is complete
     const requiredFields = ['name', 'address', 'phone', 'province'];
     const missingFields = requiredFields.filter(field => !user[field]);
 
     if (missingFields.length > 0) {
-      toast.error('Please complete your profile before checking out.');
-      navigate('/dashboard'); // Redirect to the dashboard to complete profile.
-    } else {
-      // If the profile is complete, proceed to create the order.
-      try {
-        await fetch(`${process.env.REACT_APP_API_URL}/api/orders`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('accessToken') || localStorage.getItem('token')}` }, body: JSON.stringify({
+      toast.error(`Please complete your profile: ${missingFields.join(', ')}`);
+      navigate('/dashboard');
+      return;
+    }
+
+    // Validate cart items stock
+    const stockErrors = [];
+    cart.forEach(item => {
+      const product = products.find(p => p._id === item.id);
+      if (!product || product.stock < item.quantity) {
+        stockErrors.push(`${item.name} - insufficient stock`);
+      }
+    });
+
+    if (stockErrors.length > 0) {
+      toast.error(`Stock issues: ${stockErrors.join(', ')}`);
+      return;
+    }
+
+    try {
+      setCartLoading(true);
+      
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/orders`, { 
+        method: 'POST', 
+        headers: { 
+          'Content-Type': 'application/json', 
+          'Authorization': `Bearer ${localStorage.getItem('accessToken') || localStorage.getItem('token')}` 
+        }, 
+        body: JSON.stringify({
           items: cart.map(item => ({
             productId: item.id,
             quantity: item.quantity,
@@ -245,31 +371,107 @@ export default function Store() {
             name: user.name,
             phone: user.phone,
             address: user.address,
-            city: user.province, // Using province as the city
+            city: user.province,
             zipCode: ''
           },
-          paymentMethod: 'cod'
-        })});
-        
-        // Clear cart after successful order
-        setCart([]);
-        localStorage.removeItem('cart');
-        
-        alert('Order placed successfully!');
-      } catch (error) {
-        console.error('Failed to place order', error);
-        toast.error('There was an issue placing your order.');
+          paymentMethod: 'cod',
+          totalAmount: cart.reduce((total, item) => total + (item.price * item.quantity), 0)
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || data.error || 'Failed to place order');
       }
+      
+      // Clear cart after successful order
+      setCart([]);
+      localStorage.removeItem('cart');
+      
+      toast.success('Order placed successfully! You will receive a confirmation shortly.');
+      navigate('/dashboard');
+      
+    } catch (error) {
+      console.error('Failed to place order', error);
+      handleError(error, 'place order');
+    } finally {
+      setCartLoading(false);
     }
   };
 
-  // Enhanced filtering and sorting logic (currently unused but may be needed later)
-  // const applyFiltersAndSort = (products, searchQuery, filters, sortBy) => { ... }
+  // Enhanced filtering and sorting logic
+  const applyFiltersAndSort = (products, searchQuery, filters, sortBy) => {
+    let filtered = [...products];
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter(product => 
+        product.name.toLowerCase().includes(query) ||
+        product.description.toLowerCase().includes(query) ||
+        product.category.toLowerCase().includes(query)
+      );
+    }
+
+    // Apply category filter
+    if (filters.category && filters.category !== 'all') {
+      filtered = filtered.filter(product => 
+        product.category.toLowerCase() === filters.category.toLowerCase()
+      );
+    }
+
+    // Apply price range filter
+    filtered = filtered.filter(product => {
+      const price = product.price || 0;
+      return price >= filters.minPrice && price <= filters.maxPrice;
+    });
+
+    // Apply stock filter
+    if (filters.inStock) {
+      filtered = filtered.filter(product => product.stock > 0);
+    }
+
+    // Apply sale filter
+    if (filters.onSale) {
+      filtered = filtered.filter(product => 
+        product.discount > 0 || product.onSale || product.discountPercentage > 0
+      );
+    }
+
+    // Apply sorting
+    switch (sortBy) {
+      case 'price-low':
+        filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
+        break;
+      case 'price-high':
+        filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
+        break;
+      case 'rating':
+        filtered.sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0));
+        break;
+      case 'newest':
+        filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        break;
+      case 'bestseller':
+        filtered.sort((a, b) => (b.salesCount || 0) - (a.salesCount || 0));
+        break;
+      default:
+        // Featured - prioritize featured products
+        filtered.sort((a, b) => {
+          if (a.featured && !b.featured) return -1;
+          if (!a.featured && b.featured) return 1;
+          return 0;
+        });
+    }
+
+    return filtered;
+  };
 
   // Update filtered products when products, search, filters, or sort change
   useEffect(() => {
-    // Filter logic will be implemented when needed
-    // const filtered = applyFiltersAndSort(products, searchQuery, filters, sortBy);
+    const filtered = applyFiltersAndSort(products, searchQuery, filters, sortBy);
+    setFilteredProducts(filtered);
   }, [products, searchQuery, filters, sortBy]);
 
 
@@ -293,7 +495,7 @@ export default function Store() {
         cart={cart}
         onLogout={handleLogout}
         onLogin={() => setShowAuth(true)}
-        onCartClick={() => console.log('Cart clicked')}
+        onCartClick={() => setShowCartSidebar(true)}
         onCheckout={handleCheckout}
         onSearch={setSearchQuery}
         products={products}
@@ -322,19 +524,113 @@ export default function Store() {
           <p className="text-gray-600">Discover our latest collection of premium products</p>
         </div>
         
+        {/* Filters and Sort Section */}
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Category Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+              <select 
+                value={filters.category} 
+                onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">All Categories</option>
+                <option value="casual">Casual</option>
+                <option value="formal">Formal</option>
+                <option value="sportswear">Sportswear</option>
+                <option value="accessories">Accessories</option>
+              </select>
+            </div>
+            
+            {/* Sort Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
+              <select 
+                value={sortBy} 
+                onChange={(e) => setSortBy(e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="featured">Featured</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="rating">Highest Rated</option>
+                <option value="newest">Newest First</option>
+                <option value="bestseller">Best Sellers</option>
+              </select>
+            </div>
+            
+            {/* Price Range */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Price Range</label>
+              <div className="flex gap-2">
+                <input 
+                  type="number" 
+                  placeholder="Min" 
+                  value={filters.minPrice}
+                  onChange={(e) => setFilters(prev => ({ ...prev, minPrice: parseInt(e.target.value) || 0 }))}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <input 
+                  type="number" 
+                  placeholder="Max" 
+                  value={filters.maxPrice}
+                  onChange={(e) => setFilters(prev => ({ ...prev, maxPrice: parseInt(e.target.value) || 10000 }))}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+            
+            {/* Additional Filters */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Filters</label>
+              <div className="space-y-2">
+                <label className="flex items-center">
+                  <input 
+                    type="checkbox" 
+                    checked={filters.inStock}
+                    onChange={(e) => setFilters(prev => ({ ...prev, inStock: e.target.checked }))}
+                    className="mr-2 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm">In Stock Only</span>
+                </label>
+                <label className="flex items-center">
+                  <input 
+                    type="checkbox" 
+                    checked={filters.onSale}
+                    onChange={(e) => setFilters(prev => ({ ...prev, onSale: e.target.checked }))}
+                    className="mr-2 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm">On Sale</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          
+          {/* Results Count */}
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <p className="text-sm text-gray-600">
+              Showing {filteredProducts.length} of {products.length} products
+              {searchQuery && ` for "${searchQuery}"`}
+            </p>
+          </div>
+        </div>
+        
         {loading ? (
           <div className="flex justify-center items-center min-h-96">
             <div className="animate-spin">
               <ShoppingCart size={48} className="text-blue-600" />
             </div>
           </div>
-        ) : products.length === 0 ? (
+        ) : filteredProducts.length === 0 ? (
           <div className="flex justify-center items-center min-h-96">
-            <p className="text-xl text-gray-600">No products available at the moment</p>
+            <p className="text-xl text-gray-600">
+              {searchQuery ? `No products found for "${searchQuery}"` : 'No products available at the moment'}
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {products.map(product => (
+            {filteredProducts.map(product => (
               <div 
                 key={product._id} 
                 className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition duration-300 transform hover:-translate-y-1"
@@ -343,13 +639,32 @@ export default function Store() {
                   className="relative w-full h-48 bg-gray-200 overflow-hidden cursor-pointer"
                   onClick={() => handleQuickView(product)}
                 >
+                  {/* Sale Badge */}
+                  {(product.discount > 0 || product.onSale || product.discountPercentage > 0) && (
+                    <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-md text-xs font-bold z-10">
+                      {product.discountPercentage || product.discount}% OFF
+                    </div>
+                  )}
+                  
+                  {/* New Badge */}
+                  {product.newArrival && (
+                    <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-md text-xs font-bold z-10">
+                      NEW
+                    </div>
+                  )}
+                  
+                  {/* Stock Status */}
+                  {product.stock <= 0 && (
+                    <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center z-10">
+                      <span className="text-white font-bold text-lg">OUT OF STOCK</span>
+                    </div>
+                  )}
+                  
                   <img 
                     src={getImageUrl(product)} 
                     alt={product.name} 
                     className="w-full h-full object-cover hover:scale-110 transition duration-300"
                     onError={(e) => {
-                      console.log('Image failed to load:', e.target.src);
-                      console.log('Product data for failed image:', product);
                       e.target.src = 'https://via.placeholder.com/200?text=No+Image';
                     }}
                   />
@@ -363,29 +678,181 @@ export default function Store() {
                   <h3 className="font-bold text-lg mb-2 line-clamp-2">
                     {product.name}
                   </h3>
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                  
+                  {/* Rating */}
+                  {product.averageRating > 0 && (
+                    <div className="flex items-center gap-1 mb-2">
+                      {renderStars(product.averageRating)}
+                      <span className="text-sm text-gray-600 ml-1">
+                        ({product.reviewCount || 0})
+                      </span>
+                    </div>
+                  )}
+                  
+                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">
                     {product.description || 'No description available'}
                   </p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-2xl font-bold text-blue-600">
-                      ৳{product.price || 0}
-                    </span>
-                    <button 
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleAddToCart(product);
-                      }}
-                    >
-                      Add to Cart
-                    </button>
+                  
+                  {/* Price Section */}
+                  <div className="mb-3">
+                    {product.discount > 0 || product.discountPercentage > 0 ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xl font-bold text-blue-600">
+                          ৳{formatPrice(product.price, product.discountPercentage || product.discount)}
+                        </span>
+                        <span className="text-lg text-gray-500 line-through">
+                          ৳{product.price}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-2xl font-bold text-blue-600">
+                        ৳{product.price || 0}
+                      </span>
+                    )}
                   </div>
+                  
+                  {/* Stock and Sales Info */}
+                  <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
+                    <div className="flex items-center gap-1">
+                      <Package size={12} />
+                      <span>{product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}</span>
+                    </div>
+                    {product.salesCount > 0 && (
+                      <div className="flex items-center gap-1">
+                        <TrendingUp size={12} />
+                        <span>{product.salesCount} sold</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <button 
+                    disabled={product.stock <= 0 || cartLoading}
+                    className={`w-full px-4 py-2 rounded-lg transition font-medium ${
+                      product.stock <= 0 
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                    } ${cartLoading ? 'opacity-75 cursor-wait' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAddToCart(product);
+                    }}
+                  >
+                    {cartLoading ? 'Adding...' : product.stock <= 0 ? 'Out of Stock' : 'Add to Cart'}
+                  </button>
                 </div>
               </div>
             ))}
           </div>
         )}
       </main>
+
+      {/* Cart Sidebar */}
+      {showCartSidebar && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-end">
+          <div className="bg-white w-full max-w-md h-full overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold">Shopping Cart</h2>
+                <button 
+                  onClick={() => setShowCartSidebar(false)}
+                  className="text-gray-500 hover:text-gray-700 text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+              
+              {cart.length === 0 ? (
+                <div className="text-center py-8">
+                  <ShoppingCart size={64} className="mx-auto mb-4 text-gray-400" />
+                  <p className="text-gray-600 mb-4">Your cart is empty</p>
+                  <button 
+                    onClick={() => setShowCartSidebar(false)}
+                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                  >
+                    Continue Shopping
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <div className="space-y-4 mb-6">
+                    {cart.map(item => (
+                      <div key={`${item.id}-${item.selectedSize}`} className="flex items-center gap-4 p-4 border rounded-lg">
+                        <img 
+                          src={item.image} 
+                          alt={item.name}
+                          className="w-16 h-16 object-cover rounded-md"
+                          onError={(e) => {
+                            e.target.src = 'https://via.placeholder.com/64?text=No+Image';
+                          }}
+                        />
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-sm">{item.name}</h4>
+                          <p className="text-gray-600 text-xs">Size: {item.selectedSize}</p>
+                          <p className="font-bold text-blue-600">৳{item.price}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button 
+                            onClick={() => updateCartQuantity(item.id, item.selectedSize, item.quantity - 1)}
+                            className="w-8 h-8 flex items-center justify-center bg-gray-200 rounded-full hover:bg-gray-300 transition"
+                          >
+                            -
+                          </button>
+                          <span className="w-8 text-center font-semibold">{item.quantity}</span>
+                          <button 
+                            onClick={() => updateCartQuantity(item.id, item.selectedSize, item.quantity + 1)}
+                            className="w-8 h-8 flex items-center justify-center bg-gray-200 rounded-full hover:bg-gray-300 transition"
+                          >
+                            +
+                          </button>
+                        </div>
+                        <button 
+                          onClick={() => removeFromCart(item.id, item.selectedSize)}
+                          className="text-red-600 hover:text-red-800 transition"
+                        >
+                          <LogOut size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="border-t pt-4">
+                    <div className="flex justify-between items-center mb-4">
+                      <span className="text-lg font-bold">Total:</span>
+                      <span className="text-xl font-bold text-blue-600">
+                        ৳{cart.reduce((total, item) => total + (item.price * item.quantity), 0)}
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <button 
+                        onClick={() => {
+                          handleCheckout();
+                          setShowCartSidebar(false);
+                        }}
+                        className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                      >
+                        Checkout
+                      </button>
+                      <button 
+                        onClick={clearCart}
+                        className="w-full px-6 py-3 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition"
+                      >
+                        Clear Cart
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          {/* Backdrop */}
+          <div 
+            className="flex-1" 
+            onClick={() => setShowCartSidebar(false)}
+          ></div>
+        </div>
+      )}
 
       {/* Quick View Modal */}
       {showQuickView && selectedProduct && (
@@ -409,8 +876,6 @@ export default function Store() {
                     alt={selectedProduct.name}
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      console.log('Quick view image failed to load:', e.target.src);
-                      console.log('Selected product data:', selectedProduct);
                       e.target.src = 'https://via.placeholder.com/400?text=No+Image';
                     }}
                   />
@@ -430,9 +895,17 @@ export default function Store() {
                       <h4 className="font-semibold mb-2">Available Sizes:</h4>
                       <div className="flex gap-2">
                         {selectedProduct.sizes.map(size => (
-                          <span key={size} className="px-3 py-1 border rounded-md text-sm">
+                          <button
+                            key={size}
+                            onClick={() => setSelectedSize(size)}
+                            className={`px-3 py-1 border rounded-md text-sm transition-colors ${
+                              selectedSize === size
+                                ? 'bg-blue-600 text-white border-blue-600'
+                                : 'hover:bg-gray-100 border-gray-300'
+                            }`}
+                          >
                             {size}
-                          </span>
+                          </button>
                         ))}
                       </div>
                     </div>
@@ -441,7 +914,7 @@ export default function Store() {
                   <div className="flex gap-3">
                     <button 
                       onClick={() => {
-                        handleAddToCart(selectedProduct);
+                        handleAddToCart(selectedProduct, selectedSize);
                         setShowQuickView(false);
                       }}
                       className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
