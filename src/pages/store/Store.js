@@ -39,12 +39,12 @@ export default function Store() {
   // Auth handlers
   const handleAuth = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
+    // Use the authForm state instead of FormData since AuthModal uses controlled inputs
     const data = {
-      name: formData.get('name'),
-      email: formData.get('email'),
-      password: formData.get('password'),
-      phone: formData.get('phone'),
+      name: authForm.name,
+      email: authForm.email,
+      password: authForm.password,
+      phone: authForm.phone,
     };
 
     try {
