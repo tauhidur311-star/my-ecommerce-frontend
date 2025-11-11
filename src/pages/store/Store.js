@@ -100,9 +100,9 @@ export default function Store() {
     
     setError(`Failed to ${action}. Please try again.`);
     
-    // Only log to errorLogger in development
+    // Only log to console in development
     if (process.env.NODE_ENV === 'development' && window.location.hostname === 'localhost') {
-      errorLogger.logError(error, context, { action });
+      console.log(`Enhanced error logging disabled for performance`);
     }
   }, []);
 
@@ -438,7 +438,7 @@ export default function Store() {
         validationPassed: stockErrors.length === 0
       };
 
-      errorLogger.logError(error, context, additionalData);
+      // errorLogger.logError(error, context, additionalData); // Disabled for performance
       
       console.error('Failed to place order', error);
       handleError(error, 'place order');
