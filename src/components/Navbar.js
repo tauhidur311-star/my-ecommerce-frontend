@@ -7,7 +7,7 @@ import NavbarDropdown from './NavbarDropdown';
 // Mock configuration - in a real app, this would be fetched from an API
 const mockNavbarConfig = {
   logoUrl: 'https://raw.githubusercontent.com/user-attachments/assets/5363c127-4f63-421c-a283-1b39332ae28c/react-bits-logo.svg',
-  brandName: 'React Bits',
+  brandName: 'StyleShop',
   links: [
     { text: 'Products', href: '/' },
     { text: 'Cart', href: '/cart' }

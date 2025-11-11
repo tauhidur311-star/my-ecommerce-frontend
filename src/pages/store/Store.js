@@ -236,53 +236,6 @@ export default function Store() {
         products={products}
       />
 
-      {/* Header */}
-      <header className="sticky top-0 bg-white shadow-sm z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-900">StyleShop</h1>
-            
-            <div className="flex items-center gap-4">
-              <button 
-                className="p-2 hover:bg-gray-100 rounded-lg transition"
-                aria-label="Shopping Cart"
-              >
-                <ShoppingCart size={24} />
-              </button>
-
-              {user ? (
-                <div className="flex items-center gap-3">
-                  <span className="text-gray-700 text-sm md:text-base">
-                    Welcome, {user.name}
-                  </span>
-                  <button 
-                    onClick={() => navigate('/dashboard')}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition"
-                    aria-label="User Dashboard"
-                  >
-                    <User size={24} />
-                  </button>
-                  <button 
-                    onClick={handleLogout}
-                    className="flex items-center gap-2 px-3 md:px-4 py-2 text-xs md:text-sm font-medium text-red-600 hover:bg-red-50 rounded-md transition"
-                  >
-                    <LogOut size={18} />
-                    <span className="hidden sm:inline">Logout</span>
-                  </button>
-                </div>
-              ) : (
-                <button 
-                  onClick={() => setShowAuth(true)}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md transition"
-                >
-                  <User size={20} />
-                  Login
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
 
       {/* Auth Modal */}
       <Suspense>
