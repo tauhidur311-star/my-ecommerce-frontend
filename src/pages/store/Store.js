@@ -9,7 +9,6 @@ import QuickViewModal from '../../components/QuickViewModal';
 import { ProductGridSkeleton } from '../../components/EnhancedProductSkeleton';
 import { useWishlist } from '../../hooks/useWishlist';
 import useAuth from '../../hooks/useAuth';
-import Auth from '../../Auth';
 
 const ProductModal = lazy(() => import('../../components/ProductModal'));
 const CartSidebar = lazy(() => import('../../components/CartSidebar'));
@@ -27,13 +26,33 @@ export default function Store() {
   const [searchQuery, setSearchQuery] = useState('');
   
   // Auth hook
-  const {
-    user,
-    showAuth, setShowAuth,
-    authMode, setAuthMode,
-    authForm, setAuthForm,
-    handleAuthSubmit, handleLogout, handleLoginSuccess
-  } = useAuth();
+  const { user, logout } = useAuth();
+
+  // Auth modal state
+  const [showAuth, setShowAuth] = useState(false);
+  const [authMode, setAuthMode] = useState('login');
+  const [authForm, setAuthForm] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    phone: ''
+  });
+
+  // Auth handlers
+  const handleAuthSubmit = async (e) => {
+    e.preventDefault();
+    // This will be handled by the AuthModal component
+  };
+
+  const handleLogout = () => {
+    logout();
+  };
+
+  const handleLoginSuccess = (userData) => {
+    // User data is already managed by useAuth hook
+    setShowAuth(false);
+  };
   
   // Enhanced store state
   const [showQuickView, setShowQuickView] = useState(false);
@@ -421,6 +440,7 @@ export default function Store() {
           setAuthMode={setAuthMode}
           authForm={authForm}
           setAuthForm={setAuthForm}
+          onLoginSuccess={handleLoginSuccess}
         />
       </Suspense>
 
