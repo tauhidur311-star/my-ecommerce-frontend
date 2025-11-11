@@ -378,7 +378,7 @@ export default function Store() {
             <h1 className="text-2xl font-bold text-gray-900">StyleShop</h1>
             
             <div className="flex items-center gap-4">
-              <button className="p-2 hover:bg-gray-100 rounded-lg">
+              <button className="p-2 hover:bg-gray-100 rounded-lg transition">
                 <ShoppingCart size={24} />
               </button>
 
@@ -387,13 +387,14 @@ export default function Store() {
                   <span className="text-gray-700">Welcome, {authUser.name}</span>
                   <button 
                     onClick={handleUserClick}
-                    className="p-2 hover:bg-gray-100 rounded-lg"
+                    className="p-2 hover:bg-gray-100 rounded-lg transition"
+                    title="Go to Dashboard"
                   >
                     <User size={24} />
                   </button>
                   <button 
                     onClick={handleLogout}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md"
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md transition"
                   >
                     <LogOut size={18} />
                     Logout
@@ -402,7 +403,7 @@ export default function Store() {
               ) : (
                 <button 
                   onClick={handleUserClick}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md transition"
                 >
                   <User size={20} />
                   Login
@@ -441,7 +442,9 @@ export default function Store() {
                 />
                 <div className="p-4">
                   <h3 className="font-bold text-lg mb-2">{product.name}</h3>
-                  <p className="text-gray-600 text-sm mb-4">{product.description?.substring(0, 50)}...</p>
+                  <p className="text-gray-600 text-sm mb-4">
+                    {product.description?.substring(0, 50)}...
+                  </p>
                   <div className="flex justify-between items-center">
                     <span className="text-2xl font-bold">৳{product.price}</span>
                     <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
