@@ -57,7 +57,7 @@ export default function Store() {
       id: product._id,
       name: product.name,
       price: product.price,
-      image: product.image || product.images?.[0] || 'https://via.placeholder.com/200?text=No+Image',
+      image: product.image || product.images?.[0] || product.imageUrl || product.photo || product.thumbnail || 'https://via.placeholder.com/200?text=No+Image',
       quantity: 1,
       selectedSize: product.sizes?.[0] || 'M' // Default size
     };
@@ -117,16 +117,20 @@ export default function Store() {
         const products = data.products || data.data || data;
         
         // Enhance products with additional properties
-        const enhancedProducts = products.map(product => ({
-          ...product,
-          id: product._id || product.id, // Ensure we have an id field
-          rating: product.rating || product.averageRating || null,
-          sold: product.sold || product.totalSales || null,
-          isNew: product.isNew || false,
-          stock: product.stock || 0,
-          discount: product.discount || 0,
-          showSoldNumbers: product.showSoldNumbers !== false // Default to true unless explicitly disabled
-        }));
+        const enhancedProducts = products.map(product => {
+          // Debug: Log product structure to see image field names
+          console.log('Product data:', product);
+          return {
+            ...product,
+            id: product._id || product.id, // Ensure we have an id field
+            rating: product.rating || product.averageRating || null,
+            sold: product.sold || product.totalSales || null,
+            isNew: product.isNew || false,
+            stock: product.stock || 0,
+            discount: product.discount || 0,
+            showSoldNumbers: product.showSoldNumbers !== false // Default to true unless explicitly disabled
+          };
+        });
         
         setProducts(enhancedProducts);
       } else {
@@ -308,10 +312,19 @@ export default function Store() {
                   onClick={() => handleQuickView(product)}
                 >
                   <img 
-                    src={product.image || product.images?.[0] || 'https://via.placeholder.com/200?text=No+Image'} 
+                    src={
+                      product.image || 
+                      product.images?.[0] || 
+                      product.imageUrl || 
+                      product.photo || 
+                      product.thumbnail || 
+                      'https://via.placeholder.com/200?text=No+Image'
+                    } 
                     alt={product.name} 
                     className="w-full h-full object-cover hover:scale-110 transition duration-300"
                     onError={(e) => {
+                      console.log('Image failed to load:', e.target.src);
+                      console.log('Product data for failed image:', product);
                       e.target.src = 'https://via.placeholder.com/200?text=No+Image';
                     }}
                   />
@@ -367,10 +380,19 @@ export default function Store() {
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="aspect-square bg-gray-200 rounded-lg overflow-hidden">
                   <img 
-                    src={selectedProduct.image || selectedProduct.images?.[0] || 'https://via.placeholder.com/400?text=No+Image'} 
+                    src={
+                      selectedProduct.image || 
+                      selectedProduct.images?.[0] || 
+                      selectedProduct.imageUrl || 
+                      selectedProduct.photo || 
+                      selectedProduct.thumbnail || 
+                      'https://via.placeholder.com/400?text=No+Image'
+                    } 
                     alt={selectedProduct.name}
                     className="w-full h-full object-cover"
                     onError={(e) => {
+                      console.log('Quick view image failed to load:', e.target.src);
+                      console.log('Selected product data:', selectedProduct);
                       e.target.src = 'https://via.placeholder.com/400?text=No+Image';
                     }}
                   />
