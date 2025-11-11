@@ -378,26 +378,31 @@ export default function Store() {
             <h1 className="text-2xl font-bold text-gray-900">StyleShop</h1>
             
             <div className="flex items-center gap-4">
-              <button className="p-2 hover:bg-gray-100 rounded-lg transition">
+              <button 
+                className="p-2 hover:bg-gray-100 rounded-lg transition"
+                aria-label="Shopping Cart"
+              >
                 <ShoppingCart size={24} />
               </button>
 
               {authUser ? (
                 <div className="flex items-center gap-3">
-                  <span className="text-gray-700">Welcome, {authUser.name}</span>
+                  <span className="text-gray-700 text-sm md:text-base">
+                    Welcome, {authUser.name}
+                  </span>
                   <button 
                     onClick={handleUserClick}
                     className="p-2 hover:bg-gray-100 rounded-lg transition"
-                    title="Go to Dashboard"
+                    aria-label="User Dashboard"
                   >
                     <User size={24} />
                   </button>
                   <button 
                     onClick={handleLogout}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md transition"
+                    className="flex items-center gap-2 px-3 md:px-4 py-2 text-xs md:text-sm font-medium text-red-600 hover:bg-red-50 rounded-md transition"
                   >
                     <LogOut size={18} />
-                    Logout
+                    <span className="hidden sm:inline">Logout</span>
                   </button>
                 </div>
               ) : (
@@ -421,34 +426,54 @@ export default function Store() {
 
       {/* Products Section */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h2 className="text-3xl font-bold mb-8">Featured Products</h2>
+        <div className="mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Featured Products</h2>
+          <p className="text-gray-600">Discover our latest collection of premium products</p>
+        </div>
         
         {loading ? (
           <div className="flex justify-center items-center min-h-96">
-            <p className="text-xl text-gray-600">Loading products...</p>
+            <div className="animate-spin">
+              <ShoppingCart size={48} className="text-blue-600" />
+            </div>
           </div>
         ) : products.length === 0 ? (
           <div className="flex justify-center items-center min-h-96">
-            <p className="text-xl text-gray-600">No products available</p>
+            <p className="text-xl text-gray-600">No products available at the moment</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {products.map(product => (
-              <div key={product._id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition">
-                <img 
-                  src={product.image} 
-                  alt={product.name} 
-                  className="w-full h-48 object-cover" 
-                />
+              <div 
+                key={product._id} 
+                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition duration-300 transform hover:-translate-y-1"
+              >
+                <div className="relative w-full h-48 bg-gray-200 overflow-hidden">
+                  <img 
+                    src={product.image} 
+                    alt={product.name} 
+                    className="w-full h-full object-cover hover:scale-110 transition duration-300"
+                    onError={(e) => {
+                      e.target.src = 'https://via.placeholder.com/200?text=No+Image';
+                    }}
+                  />
+                </div>
                 <div className="p-4">
-                  <h3 className="font-bold text-lg mb-2">{product.name}</h3>
-                  <p className="text-gray-600 text-sm mb-4">
-                    {product.description?.substring(0, 50)}...
+                  <h3 className="font-bold text-lg mb-2 line-clamp-2">
+                    {product.name}
+                  </h3>
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                    {product.description || 'No description available'}
                   </p>
                   <div className="flex justify-between items-center">
-                    <span className="text-2xl font-bold">৳{product.price}</span>
-                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                      Add to Cart
+                    <span className="text-2xl font-bold text-blue-600">
+                      ৳{product.price || 0}
+                    </span>
+                    <button 
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                      onClick={() => console.log('Add to cart:', product._id)}
+                    >
+                      Add
                     </button>
                   </div>
                 </div>
