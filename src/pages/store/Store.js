@@ -350,12 +350,20 @@ export default function Store() {
     }
 
     // Check if user profile is complete
-    const requiredFields = ['name', 'address', 'phone', 'province'];
-    const missingFields = requiredFields.filter(field => !user[field]);
+    const hasName = user?.name && user.name.trim();
+    const hasAddress = user?.address && (typeof user.address === 'string' ? user.address.trim() : user.address.street);
+    const hasPhone = user?.phone && user.phone.trim();
+    const hasProvince = user?.province && user.province.trim();
 
-    if (missingFields.length > 0) {
+    if (!hasName || !hasAddress || !hasPhone || !hasProvince) {
+      const missingFields = [];
+      if (!hasName) missingFields.push('name');
+      if (!hasAddress) missingFields.push('address');
+      if (!hasPhone) missingFields.push('phone');
+      if (!hasProvince) missingFields.push('province');
+      
       toast.error(`Please complete your profile: ${missingFields.join(', ')}`);
-      navigate('/dashboard');
+      navigate('/dashboard?tab=profile');
       return;
     }
 
@@ -391,9 +399,9 @@ export default function Store() {
           shippingAddress: {
             name: user.name,
             phone: user.phone,
-            address: user.address,
+            address: typeof user.address === 'string' ? user.address : user.address?.street || user.address?.address || '',
             city: user.province,
-            zipCode: ''
+            zipCode: user.address?.zipCode || ''
           },
           paymentMethod: 'cod',
           totalAmount: cart.reduce((total, item) => total + (item.price * item.quantity), 0)

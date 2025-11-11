@@ -189,11 +189,15 @@ export default function UserDashboard() {
     const fetchActiveSessions = async () => {
       try {
         const response = await enhancedApiService.request('/api/auth/active-sessions');
-        setActiveSessions(response.sessions || []);
+        if (response.success && response.sessions) {
+          setActiveSessions(response.sessions);
+        } else {
+          throw new Error('Invalid response format');
+        }
       } catch (err) {
-        console.log('Active sessions endpoint not available, creating mock data');
-        // Create mock session data until backend is ready
-        const mockSession = {
+        console.error('Failed to fetch active sessions:', err);
+        // Create fallback session data if API fails
+        const fallbackSession = {
           id: 'current-session',
           deviceInfo: navigator.userAgent.includes('Mobile') ? 'Mobile Device' : 'Desktop Computer',
           browser: getBrowserName(),
@@ -203,7 +207,7 @@ export default function UserDashboard() {
           isCurrent: true,
           createdAt: user?.lastLoginAt || new Date().toISOString()
         };
-        setActiveSessions([mockSession]);
+        setActiveSessions([fallbackSession]);
       }
     };
 

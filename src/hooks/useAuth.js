@@ -115,17 +115,8 @@ export default function useAuth() {
 
     checkAuth();
 
-    // Periodic session validation disabled for performance
-    // const validationInterval = setInterval(async () => {
-    //   const token = localStorage.getItem('token');
-    //   if (token && user) {
-    //     await validateSession(token);
-    //   }
-    // }, 10 * 60 * 1000); // 10 minutes
-
-    // return () => {
-    //   clearInterval(validationInterval);
-    // };
+    // Light session validation only when needed (no automatic intervals)
+    // Validation will be triggered manually when user accesses security tab
   }, [getTokenTimeRemaining, validateSession]);
 
   const login = useCallback((userData, token) => {
