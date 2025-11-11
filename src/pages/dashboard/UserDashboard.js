@@ -56,7 +56,7 @@ export default function UserDashboard() {
         setLoading(true);
         
         // Use enhanced API service which handles token refresh automatically
-        const response = await enhancedApiService.request('/users/profile');
+        const response = await enhancedApiService.request('/api/users/profile');
         
         if (response.success && response.user) {
           setUserData({
@@ -84,7 +84,7 @@ export default function UserDashboard() {
 
     const fetchUserOrders = async () => {
       try {
-        const response = await enhancedApiService.request('/users/orders');
+        const response = await enhancedApiService.request('/api/users/orders');
         if (response.success) {
           setOrders(response.data || []);
         }
@@ -134,7 +134,7 @@ export default function UserDashboard() {
 
     try {
       // Use enhanced API service which handles token refresh automatically
-      const response = await enhancedApiService.request('/users/profile', {
+      const response = await enhancedApiService.request('/api/users/profile', {
         method: 'PUT',
         body: userData
       });
