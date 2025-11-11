@@ -82,7 +82,7 @@ export default function useAuth() {
       console.log('Network error during validation, keeping session active');
       return true;
     }
-  }, [logout]);
+  }, []);
 
   useEffect(() => {
     const checkAuth = async () => {
