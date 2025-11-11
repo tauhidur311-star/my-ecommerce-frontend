@@ -46,7 +46,8 @@ export default function AuthModal({
       const res = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: authForm.email })
+        body: JSON.stringify({ email: authForm.email }),
+        signal: AbortSignal.timeout(30000) // 30 second timeout
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to send OTP.');
