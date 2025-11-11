@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Store from './pages/store/Store';
+import { useAuth } from './hooks/useAuth';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import UserDashboard from './pages/dashboard/UserDashboard';
 import AuthPage from './pages/auth/AuthPage';
@@ -36,13 +37,23 @@ function App() {
 }
 
 const AuthenticatedRoute = ({ children }) => {
-  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-  return token ? children : <Navigate to="/login" replace />;
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    // You can return a loading spinner here while checking auth status
+    return <div>Loading...</div>;
+  }
+
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
 const AdminRoute = ({ children }) => {
+  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user'));
-  return user && user.role === 'admin' ? children : <Navigate to="/" replace />;
+  if (token && user && user.role === 'admin') {
+    return children;
+  }
+  return <Navigate to="/" replace />;
 };
 
 export default App;

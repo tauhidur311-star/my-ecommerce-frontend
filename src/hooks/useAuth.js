@@ -3,8 +3,8 @@ import toast from 'react-hot-toast';
 
 export const useAuth = () => {
   const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Keep this for clarity
+  const [isLoading, setIsLoading] = useState(true); // This is the key addition
   const [showAuth, setShowAuth] = useState(false);
   const [authMode, setAuthMode] = useState('login');
   const [authForm, setAuthForm] = useState({ name: '', email: '', password: '' });
@@ -20,15 +20,17 @@ export const useAuth = () => {
     }
     setIsLoading(false);
   }, []);
-
+  
   const handleLoginSuccess = (loggedInUser) => {
     setUser(loggedInUser);
+    setIsAuthenticated(true);
     setShowAuth(false);
     toast.success(`Welcome, ${loggedInUser.name}!`);
   };
 
   const handleLogout = () => {
     setUser(null);
+    setIsAuthenticated(false);
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('token');
@@ -72,6 +74,7 @@ export const useAuth = () => {
   return {
     user,
     isAuthenticated,
+    isLoading, // Expose the loading state
     isLoading,
     showAuth,
     setShowAuth,
