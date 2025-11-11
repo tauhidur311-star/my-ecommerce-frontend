@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, Suspense, lazy } from 'react';
-import errorLogger from '../../services/errorLogger';
+// Disable error logger import for production
+// import errorLogger from '../../services/errorLogger';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { User, ShoppingCart, LogOut, Star, Package, TrendingUp } from 'lucide-react';
@@ -89,26 +90,21 @@ export default function Store() {
     return 'https://via.placeholder.com/200?text=No+Image';
   };
 
-  // Enhanced error handler with detailed logging
+  // Simplified error handler to prevent infinite loops
   const handleError = useCallback((error, action) => {
     const context = `Store ${action}`;
     const userMessage = `Failed to ${action}. Please try again.`;
     
-    // Log error with detailed context
-    errorLogger.logError(error, context, {
-      action,
-      currentPath: window.location.pathname,
-      userLoggedIn: !!user,
-      cartItems: cart.length,
-      productsLoaded: products.length
-    });
-    
-    // Show error dialog to user
-    errorLogger.showErrorDialog(error, context, userMessage);
+    // Simple error logging without heavy context
+    console.error(`Error in ${action}:`, error);
     
     setError(`Failed to ${action}. Please try again.`);
-    console.error(`Error in ${action}:`, error);
-  }, [user, cart.length, products.length]);
+    
+    // Only log to errorLogger in development
+    if (process.env.NODE_ENV === 'development' && window.location.hostname === 'localhost') {
+      errorLogger.logError(error, context, { action });
+    }
+  }, []);
 
   // Add to cart handler with duplicate prevention
   const handleAddToCart = (product, selectedSize = null) => {
@@ -225,7 +221,7 @@ export default function Store() {
   // Wishlist hook (currently unused but may be needed later)
   // const { toggleWishlist, isInWishlist } = useWishlist();
 
-  // Enhanced product loading with filtering
+  // Simplified product loading to prevent infinite loops
   const loadProducts = useCallback(async () => {
     try {
       setLoading(true);
@@ -320,56 +316,14 @@ export default function Store() {
     }
   }, []);
 
-  // Periodic session validation for logged in users (disabled on mobile and production for performance)
+  // Simplified session status (no periodic validation to prevent performance issues)
   useEffect(() => {
-    if (!user) return;
-
-    // Skip intensive session validation on mobile or production Render deployment
-    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const isRenderProduction = window.location.hostname.includes('onrender.com');
-    
-    if (isMobile || isRenderProduction) {
-      setSessionStatus('secure'); // Just set as secure to avoid performance issues
-      return;
+    if (user) {
+      setSessionStatus('secure');
+    } else {
+      setSessionStatus('invalid');
     }
-
-    const checkSessionPeriodically = async () => {
-      setSessionStatus('checking');
-      const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
-      
-      if (token && validateSession) {
-        const isValid = await validateSession(token);
-        if (isValid) {
-          setSessionStatus('secure');
-          setSessionWarnings([]); // Clear warnings on successful validation
-        } else {
-          setSessionStatus('warning');
-          // Add warning but don't logout
-          const newWarning = {
-            id: Date.now(),
-            timestamp: new Date().toISOString(),
-            message: 'Session security warning - IP address may have changed',
-            type: 'ip_change'
-          };
-          setSessionWarnings(prev => [newWarning, ...prev.slice(0, 4)]); // Keep last 5 warnings
-        }
-      }
-    };
-
-    // Only run validation on localhost for development
-    if (window.location.hostname === 'localhost') {
-      // Initial check after 60 seconds to allow proper login
-      const initialTimeout = setTimeout(checkSessionPeriodically, 60000);
-
-      // Set up periodic validation (every 30 minutes to reduce load)
-      const interval = setInterval(checkSessionPeriodically, 30 * 60 * 1000);
-
-      return () => {
-        clearTimeout(initialTimeout);
-        clearInterval(interval);
-      };
-    }
-  }, [user, validateSession]);
+  }, [user]);
 
   // Cart functions (currently unused but may be needed later)
 
@@ -493,8 +447,8 @@ export default function Store() {
     }
   };
 
-  // Enhanced filtering and sorting logic
-  const applyFiltersAndSort = (products, searchQuery, filters, sortBy) => {
+  // Enhanced filtering and sorting logic (memoized to prevent infinite loops)
+  const applyFiltersAndSort = useCallback((products, searchQuery, filters, sortBy) => {
     let filtered = [...products];
 
     // Apply search filter
@@ -559,13 +513,18 @@ export default function Store() {
     }
 
     return filtered;
-  };
+  }, []);
 
-  // Update filtered products when products, search, filters, or sort change
+  // Update filtered products when products, search, filters, or sort change (with dependency fix)
   useEffect(() => {
+    if (products.length === 0) {
+      setFilteredProducts([]);
+      return;
+    }
+    
     const filtered = applyFiltersAndSort(products, searchQuery, filters, sortBy);
     setFilteredProducts(filtered);
-  }, [products, searchQuery, filters, sortBy]);
+  }, [products, searchQuery, filters, sortBy, applyFiltersAndSort]);
 
 
 

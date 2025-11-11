@@ -1,4 +1,5 @@
-import errorLogger from './errorLogger';
+// Disable error logger import for production  
+// import errorLogger from './errorLogger';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -263,21 +264,8 @@ class EnhancedAPIService {
         baseUrl: API_BASE_URL
       };
 
-      // Log error with detailed information (but not show dialog for rate limiting)
-      errorLogger.logError(error, context, additionalData);
-      
-      // Show user-friendly error dialog with specific messages
-      let userMessage = null;
-      if (error.message === 'Failed to fetch') {
-        userMessage = 'Connection failed. Please check your internet connection and try again.';
-      } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        userMessage = 'Network error. Please check if the server is running.';
-      }
-
-      // Don't show error dialog for rate limiting (429) to avoid spam
-      if (!error.message?.includes('Too many requests')) {
-        errorLogger.showErrorDialog(error, context, userMessage);
-      }
+      // Simplified error handling without error logger to prevent performance issues
+      console.error(`API Error [${config.method} ${endpoint}]:`, error);
       
       console.error(`API Error [${config.method} ${endpoint}]:`, error);
       throw error;
