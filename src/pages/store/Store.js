@@ -37,9 +37,61 @@ export default function Store() {
   });
 
   // Auth handlers
-  const handleAuthSubmit = async (e) => {
+  const handleAuth = async (e) => {
     e.preventDefault();
-    // This will be handled by the AuthModal component
+    const formData = new FormData(e.target);
+    const data = {
+      name: formData.get('name'),
+      email: formData.get('email'),
+      password: formData.get('password'),
+      phone: formData.get('phone'),
+    };
+
+    try {
+      const endpoint = authMode === 'login' ? '/api/auth/login' : '/api/auth/register';
+      const response = await fetch(`${process.env.REACT_APP_API_URL}${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        // Extract tokens and user data
+        const accessToken = result.tokens?.accessToken || result.token;
+        const refreshToken = result.tokens?.refreshToken;
+        
+        // Store tokens properly
+        localStorage.setItem('token', accessToken);
+        localStorage.setItem('accessToken', accessToken);
+        if (refreshToken) {
+          localStorage.setItem('refreshToken', refreshToken);
+        }
+        
+        // Use the login function from useAuth hook
+        login(result.user, accessToken);
+        
+        toast.success(authMode === 'login' ? 'Login successful!' : 'Registration successful!');
+        setShowAuth(false);
+        
+        // Clear form
+        setAuthForm({
+          name: '',
+          email: '',
+          password: '',
+          confirmPassword: '',
+          phone: ''
+        });
+      } else {
+        throw new Error(result.error || 'Authentication failed');
+      }
+    } catch (error) {
+      console.error('Authentication error:', error);
+      throw error; // Re-throw to let AuthModal handle the error display
+    }
   };
 
   const handleLogout = () => {
@@ -597,7 +649,7 @@ export default function Store() {
         <AuthModal
           showAuth={showAuth}
           setShowAuth={setShowAuth}
-          handleAuth={handleAuthSubmit}
+          handleAuth={handleAuth}
           authMode={authMode}
           setAuthMode={setAuthMode}
           authForm={authForm}
