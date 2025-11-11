@@ -1,4 +1,4 @@
-import { useState, useEffect, Suspense, lazy } from 'react';
+import { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { User, ShoppingCart, LogOut, Star, Package, TrendingUp } from 'lucide-react';
@@ -211,7 +211,7 @@ export default function Store() {
   // Load products
   useEffect(() => {
     loadProducts();
-  }, []);
+  }, [loadProducts]);
 
   // Load cart from localStorage on initial render
   useEffect(() => {
@@ -223,7 +223,7 @@ export default function Store() {
 
 
   // Enhanced product loading with filtering
-  const loadProducts = async () => {
+  const loadProducts = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -302,7 +302,7 @@ export default function Store() {
       }
       setLoading(false);
     }
-  };
+  }, [handleError]);
 
   // Cart functions (currently unused but may be needed later)
 
