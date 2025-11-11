@@ -8,7 +8,7 @@ import { toast, Toaster } from 'react-hot-toast';
 import Navbar from '../../components/Navbar';
 import NotificationBell from '../../components/NotificationBell';
 import { useSocket } from '../../hooks/useSocket';
-import { useAuth } from '../../hooks/useAuth';
+import useAuth from '../../hooks/useAuth';
 import enhancedApiService from '../../services/enhancedApi';
 
 const bangladeshDivisions = [
