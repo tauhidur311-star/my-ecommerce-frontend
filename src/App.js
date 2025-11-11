@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Store from './pages/store/Store';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import UserDashboard from './pages/dashboard/UserDashboard';
+import ProtectedRoute from './components/ProtectedRoute';
 import Auth from './Auth';
 // Error logging simplified for better performance
 import './App.css';
@@ -42,8 +43,18 @@ function App() {
       {showAuth && <Auth onClose={() => setShowAuth(false)} />}
       <Routes>
         <Route path="/" element={<Store />} />
-        <Route path="/dashboard" element={<UserDashboard />} />
-        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <UserDashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin" element={
+          <ProtectedRoute>
+            <AdminDashboard />
+          </ProtectedRoute>
+        } />
+        {/* Catch-all route for SPA routing */}
+        <Route path="*" element={<Store />} />
       </Routes>
     </Router>
   );
