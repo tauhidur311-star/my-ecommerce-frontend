@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import { Plus, Edit2, Trash2, Save, X, Upload, Package, Grid, Tag, List, Store as StoreIcon, Expand, Loader2 } from 'lucide-react';
 import ImageCropper from '../../components/ImageCropper';
-import Silk from '../../components/Silk';
+// WebGL animation disabled for performance
+// import Silk from '../../components/Silk';
 // import { LoadingButton, SmartLoader, OverlayLoader } from '../../components/LoadingStates';
 // import { Input, Textarea, Select, Checkbox } from '../../components/ui/FormField';
 import OrderManagement from '../../components/OrderManagement';
@@ -612,14 +613,9 @@ export default function AdminDashboard() {
   return (
     <NotificationProvider>
       <div className="min-h-screen">
-      <div className="fixed inset-0 -z-10">
-        <Silk
-          speed={6.5}
-          scale={1}
-          color="#3612c0"
-          noiseIntensity={1.0}
-          rotation={0.76}
-        />
+      {/* WebGL background disabled for performance */}
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-blue-50 to-purple-100">
+        {/* Simple CSS gradient background instead of heavy WebGL animation */}
       </div>
 
       <Toaster position="bottom-center" />

@@ -3,7 +3,8 @@ import { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { User, ShoppingCart, LogOut, Star, Package, TrendingUp } from 'lucide-react';
-import Silk from '../../components/Silk';
+// WebGL animation disabled for performance
+// import Silk from '../../components/Silk';
 import Navbar from '../../components/Navbar';
 // import { useWishlist } from '../../hooks/useWishlist';
 import useAuth from '../../hooks/useAuth';
@@ -530,14 +531,9 @@ export default function Store() {
   // Wrap lazy-loaded components with Suspense
   return (
     <div className="min-h-screen">
-      <div className="fixed inset-0 -z-10">
-        <Silk
-          speed={6.5}
-          scale={1}
-          color="#3612c0"
-          noiseIntensity={1.0}
-          rotation={0.76}
-        />
+      {/* WebGL background disabled for performance */}
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-blue-50 to-purple-100">
+        {/* Simple CSS gradient background instead of heavy WebGL animation */}
       </div>
 
       {/* Navigation */}

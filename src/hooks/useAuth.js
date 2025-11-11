@@ -100,10 +100,10 @@ export default function useAuth() {
           } else {
             setUser(JSON.parse(storedUser));
             
-            // Validate session with IP check for active users (only after user is set)
-            setTimeout(async () => {
-              await validateSession(token);
-            }, 1000); // Wait 1 second to avoid immediate logout
+            // Session validation disabled for performance - simple token check only
+            // setTimeout(async () => {
+            //   await validateSession(token);
+            // }, 1000); // Wait 1 second to avoid immediate logout
           }
         } catch (err) {
           console.error('Auth check error:', err);
@@ -115,18 +115,18 @@ export default function useAuth() {
 
     checkAuth();
 
-    // Set up periodic session validation (every 10 minutes to reduce API calls)
-    const validationInterval = setInterval(async () => {
-      const token = localStorage.getItem('token');
-      if (token && user) {
-        await validateSession(token);
-      }
-    }, 10 * 60 * 1000); // 10 minutes
+    // Periodic session validation disabled for performance
+    // const validationInterval = setInterval(async () => {
+    //   const token = localStorage.getItem('token');
+    //   if (token && user) {
+    //     await validateSession(token);
+    //   }
+    // }, 10 * 60 * 1000); // 10 minutes
 
-    return () => {
-      clearInterval(validationInterval);
-    };
-  }, [getTokenTimeRemaining, validateSession, user]);
+    // return () => {
+    //   clearInterval(validationInterval);
+    // };
+  }, [getTokenTimeRemaining, validateSession]);
 
   const login = useCallback((userData, token) => {
     localStorage.setItem('user', JSON.stringify(userData));
