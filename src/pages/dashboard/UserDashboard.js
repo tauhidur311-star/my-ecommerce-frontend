@@ -182,10 +182,25 @@ export default function UserDashboard() {
     console.log('All validations passed. Sending to API:', userData);
 
     try {
+      // Format data to match backend validation schema
+      const requestData = {
+        name: userData.name,
+        phone: userData.phone,
+        address: {
+          street: userData.address,  // Convert string address to object
+          city: userData.province,   // Use province as city
+          state: userData.province,  // Also set as state
+          country: 'Bangladesh'
+        },
+        province: userData.province
+      };
+
+      console.log('Formatted request data for backend:', requestData);
+
       // Use enhanced API service which handles token refresh automatically
       const response = await enhancedApiService.request('/api/users/profile', {
         method: 'PUT',
-        body: userData
+        body: requestData
       });
 
       console.log('API Response:', response);
