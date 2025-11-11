@@ -3,7 +3,6 @@ import { useState, useEffect, useCallback } from 'react';
 export default function useAuth() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   const getTokenTimeRemaining = useCallback(() => {
     const token = localStorage.getItem('token');
@@ -58,5 +57,5 @@ export default function useAuth() {
     setUser(null);
   }, []);
 
-  return { user, loading, error, login, logout, getTokenTimeRemaining };
+  return { user, loading, login, logout, getTokenTimeRemaining };
 }

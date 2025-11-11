@@ -35,8 +35,6 @@ export default function UserDashboard() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
-  const [ordersLoading, setOrdersLoading] = useState(false);
-  const [error, setError] = useState(null);
   
   // Initialize socket connection for real-time features
   const { isConnected } = useSocket();
@@ -86,15 +84,12 @@ export default function UserDashboard() {
 
     const fetchUserOrders = async (retryCount = 0) => {
       try {
-        setOrdersLoading(true);
-        setError(null);
-        
         const response = await enhancedApiService.request('/api/orders');
         setOrders(response.data.orders || []);
       } catch (err) {
         if (err.response?.status === 429) {
           const retryAfter = Math.min(1000 * Math.pow(2, retryCount), 30000);
-          setError(`Rate limited. Retrying in ${Math.ceil(retryAfter / 1000)} seconds...`);
+          console.log(`Rate limited. Retrying in ${Math.ceil(retryAfter / 1000)} seconds...`);
           
           setTimeout(() => {
             fetchUserOrders(retryCount + 1);
@@ -102,11 +97,8 @@ export default function UserDashboard() {
         } else if (err.response?.status === 401) {
           navigate('/');
         } else {
-          setError('Failed to load orders. Please try again.');
-          console.error('Error fetching orders:', err);
+          console.error('Failed to load orders. Please try again.', err);
         }
-      } finally {
-        setOrdersLoading(false);
       }
     };
 
