@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Clock, RefreshCw, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 

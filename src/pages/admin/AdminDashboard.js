@@ -158,7 +158,7 @@ export default function AdminDashboard() {
     const loadProducts = async () => {
       try {
         // Try to load from backend API first
-        const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/products`, {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/products`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('accessToken') || localStorage.getItem('token')}`,
             'Content-Type': 'application/json',
@@ -349,8 +349,8 @@ export default function AdminDashboard() {
       // Try to save to backend API first
       try {
         const apiEndpoint = editingProduct 
-          ? `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/products/${editingProduct.id || editingProduct._id}`
-          : `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/products`;
+          ? `${process.env.REACT_APP_API_URL}/api/products/${editingProduct.id || editingProduct._id}`
+          : `${process.env.REACT_APP_API_URL}/api/products`;
         
         const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
         

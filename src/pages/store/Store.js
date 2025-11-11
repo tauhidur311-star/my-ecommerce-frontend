@@ -71,7 +71,7 @@ export default function Store() {
       setIsLoading(true);
       
       // Load products from backend API instead of localStorage
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/products`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/products`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

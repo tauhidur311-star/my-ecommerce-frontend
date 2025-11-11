@@ -24,18 +24,17 @@ const bangladeshDivisions = [
 
 export default function UserDashboard() {
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading: authLoading, logout } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, logout, user } = useAuth();
   const [userData, setUserData] = useState({
     name: '',
     address: '',
     phone: '',
     province: ''
   });
-  const [user, setUser] = useState(null);
+  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
-  const [orders] = useState([]);
   
   // Initialize socket connection for real-time features
   const { isConnected } = useSocket();
@@ -60,7 +59,6 @@ export default function UserDashboard() {
         const response = await enhancedApiService.request('/users/profile');
         
         if (response.success && response.user) {
-          setUser(response.user);
           setUserData({
             name: response.user.name || '',
             address: response.user.address || '',
@@ -83,8 +81,27 @@ export default function UserDashboard() {
       }
     };
 
+    const fetchUserOrders = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/orders', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        const data = await response.json();
+        setOrders(data.orders || []);
+      } catch (err) {
+        console.error('Error fetching orders:', err);
+      }
+    };
+
     fetchUserData();
-  }, [navigate, isAuthenticated, authLoading]);
+    if (user) {
+      // Fetch user orders
+      fetchUserOrders();
+    }
+  }, [navigate, isAuthenticated, authLoading, user]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -130,7 +147,6 @@ export default function UserDashboard() {
         const localUser = JSON.parse(localStorage.getItem('user') || '{}');
         const updatedUser = { ...localUser, ...response.user };
         localStorage.setItem('user', JSON.stringify(updatedUser));
-        setUser(prev => ({ ...prev, ...response.user }));
 
         toast.success('Profile updated successfully!');
       } else {
