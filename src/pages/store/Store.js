@@ -18,10 +18,10 @@ const AuthModal = lazy(() => import('../../components/AuthModal'));
 
 export default function Store() {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user: authUser, logout } = useAuth();
   const [showAuth, setShowAuth] = useState(false);
   const [products, setProducts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -71,7 +71,7 @@ export default function Store() {
   // Enhanced product loading with filtering
   const loadProducts = async () => {
     try {
-      setIsLoading(true);
+      setLoading(true);
       
       // Load products from backend API instead of localStorage
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/products`, {
@@ -118,7 +118,7 @@ export default function Store() {
           setFilteredProducts(enhancedProducts);
         }
       }
-      setIsLoading(false);
+      setLoading(false);
     } catch (error) {
       console.error('Error loading products:', error);
       // Fallback to localStorage on network error
@@ -137,7 +137,7 @@ export default function Store() {
         setProducts(enhancedProducts);
         setFilteredProducts(enhancedProducts);
       }
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -382,9 +382,9 @@ export default function Store() {
                 <ShoppingCart size={24} />
               </button>
 
-              {user ? (
+              {authUser ? (
                 <div className="flex items-center gap-3">
-                  <span className="text-gray-700">Welcome, {user.name}</span>
+                  <span className="text-gray-700">Welcome, {authUser.name}</span>
                   <button 
                     onClick={handleUserClick}
                     className="p-2 hover:bg-gray-100 rounded-lg"
@@ -422,114 +422,38 @@ export default function Store() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h2 className="text-3xl font-bold mb-8">Featured Products</h2>
         
-        {isLoading ? (
+        {loading ? (
           <div className="flex justify-center items-center min-h-96">
-            <ProductGridSkeleton count={8} />
+            <p className="text-xl text-gray-600">Loading products...</p>
+          </div>
+        ) : products.length === 0 ? (
+          <div className="flex justify-center items-center min-h-96">
+            <p className="text-xl text-gray-600">No products available</p>
           </div>
         ) : (
-          <>
-            {/* Results Summary */}
-            <div className="flex items-center justify-between mb-6 text-sm text-gray-600">
-              <span>
-                Showing {filteredProducts.length} of {products.length} products
-                {searchQuery && ` for "${searchQuery}"`}
-              </span>
-              {filteredProducts.length === 0 && !isLoading && (
-                <div className="text-center w-full">
-                  <p className="text-gray-500">No products found. Try adjusting your filters.</p>
-                </div>
-              )}
-            </div>
-
-            {/* Enhanced Products Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredProducts.map((product, index) => (
-                <EnhancedProductCard
-                  key={product.id}
-                  product={product}
-                  index={index}
-                  onProductClick={handleQuickView}
-                  onQuickView={handleQuickView}
-                  onAddToWishlist={handleWishlistToggle}
-                  isWishlisted={isInWishlist(product.id)}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {products.map(product => (
+              <div key={product._id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition">
+                <img 
+                  src={product.image} 
+                  alt={product.name} 
+                  className="w-full h-48 object-cover" 
                 />
-              ))}
-            </div>
-
-            {/* Load More / Pagination could go here */}
-            {filteredProducts.length > 12 && (
-              <div className="text-center mt-12">
-                <button className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105">
-                  Load More Products
-                </button>
+                <div className="p-4">
+                  <h3 className="font-bold text-lg mb-2">{product.name}</h3>
+                  <p className="text-gray-600 text-sm mb-4">{product.description?.substring(0, 50)}...</p>
+                  <div className="flex justify-between items-center">
+                    <span className="text-2xl font-bold">৳{product.price}</span>
+                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                      Add to Cart
+                    </button>
+                  </div>
+                </div>
               </div>
-            )}
-          </>
+            ))}
+          </div>
         )}
       </main>
-
-      {/* Wrap lazy-loaded components with Suspense */}
-      {/* Enhanced Modals */}
-      <Suspense fallback={<div>Loading...</div>}>
-        {selectedProduct && (
-          <ProductModal
-            product={selectedProduct}
-            setSelectedProduct={setSelectedProduct}
-            addToCart={addToCart}
-            isAddingToCart={isAddingToCart}
-          />
-        )}
-      </Suspense>
-
-      {/* Quick View Modal */}
-      {showQuickView && quickViewProduct && (
-        <QuickViewModal
-          product={quickViewProduct}
-          onClose={() => setShowQuickView(false)}
-          onAddToCart={(product, size, quantity) => addToCart(product, size)}
-          onAddToWishlist={handleWishlistToggle}
-          isAddingToCart={isAddingToCart}
-          isWishlisted={isInWishlist(quickViewProduct.id)}
-        />
-      )}
-
-      <Suspense fallback={<div>Loading...</div>}>
-        {showCart && (
-          <CartSidebar
-            showCart={showCart}
-            setShowCart={setShowCart}
-            cart={cart}
-            updateQuantity={updateQuantity}
-            removeFromCart={removeFromCart}
-            cartTotal={cartTotal}
-            handleCheckout={handleCheckout}
-          />
-        )}
-      </Suspense>
-
-      <Suspense fallback={<div>Loading...</div>}>
-        <AuthModal
-          showAuth={showAuth}
-          setShowAuth={setShowAuth}
-          handleAuth={handleAuthSubmit}
-          authMode={authMode}
-          setAuthMode={setAuthMode}
-          authForm={authForm}
-          setAuthForm={setAuthForm}
-          onLoginSuccess={handleLoginSuccess}
-        />
-      </Suspense>
-
-
-      {showLogoutConfirm && (
-        <LogoutConfirmationDialog
-          onConfirm={confirmLogout}
-          onCancel={() => setShowLogoutConfirm(false)}
-        />
-      )}
-
-      <BackToTop />
-      <Toaster position="bottom-center" />
     </div>
   );
 }
