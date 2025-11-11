@@ -12,7 +12,8 @@ export default function AuthModal({
   setAuthMode,
   authForm,
   setAuthForm,
-  onLoginSuccess
+  onLoginSuccess,
+  login
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -121,16 +122,21 @@ export default function AuthModal({
       const data = await res.json();
 
       if (res.ok) {
-        // Store tokens properly for the enhanced API service
+        // Use the login function from useAuth hook to properly set user state
+        const token = data.tokens?.accessToken || data.token;
+        if (token && login) {
+          login(data.user, token);
+        } else {
+          // Fallback to manual localStorage setting if login function not available
+          localStorage.setItem('user', JSON.stringify(data.user));
+          localStorage.setItem('token', data.tokens?.accessToken || data.token);
+        }
+
+        // Store additional tokens for enhanced API service
         if (data.tokens) {
           localStorage.setItem('accessToken', data.tokens.accessToken);
           localStorage.setItem('refreshToken', data.tokens.refreshToken);
-        } else if (data.token) {
-          // Fallback for old token format
-          localStorage.setItem('accessToken', data.token);
-          localStorage.setItem('token', data.token);
         }
-        localStorage.setItem('user', JSON.stringify(data.user));
 
         if (onLoginSuccess) {
           onLoginSuccess(data.user);

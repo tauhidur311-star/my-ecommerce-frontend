@@ -17,7 +17,7 @@ export default function Store() {
   const [searchQuery, setSearchQuery] = useState('');
   
   // Auth hook
-  const { user, logout } = useAuth();
+  const { user, logout, login } = useAuth();
 
   // Auth modal state
   const [showAuth, setShowAuth] = useState(false);
@@ -248,6 +248,7 @@ export default function Store() {
           authForm={authForm}
           setAuthForm={setAuthForm}
           onLoginSuccess={handleLoginSuccess}
+          login={login}
         />
       </Suspense>
 
