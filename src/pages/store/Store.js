@@ -87,11 +87,11 @@ export default function Store() {
   };
 
   // Error handler
-  const handleError = (error, action) => {
+  const handleError = useCallback((error, action) => {
     console.error(`Error in ${action}:`, error);
     setError(`Failed to ${action}. Please try again.`);
     toast.error(`Failed to ${action}. Please try again.`);
-  };
+  }, []);
 
   // Add to cart handler with duplicate prevention
   const handleAddToCart = (product, selectedSize = null) => {
@@ -208,20 +208,6 @@ export default function Store() {
   // Wishlist hook (currently unused but may be needed later)
   // const { toggleWishlist, isInWishlist } = useWishlist();
 
-  // Load products
-  useEffect(() => {
-    loadProducts();
-  }, [loadProducts]);
-
-  // Load cart from localStorage on initial render
-  useEffect(() => {
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      setCart(JSON.parse(savedCart));
-    }
-  }, []);
-
-
   // Enhanced product loading with filtering
   const loadProducts = useCallback(async () => {
     try {
@@ -303,6 +289,19 @@ export default function Store() {
       setLoading(false);
     }
   }, [handleError]);
+
+  // Load products
+  useEffect(() => {
+    loadProducts();
+  }, [loadProducts]);
+
+  // Load cart from localStorage on initial render
+  useEffect(() => {
+    const savedCart = localStorage.getItem('cart');
+    if (savedCart) {
+      setCart(JSON.parse(savedCart));
+    }
+  }, []);
 
   // Cart functions (currently unused but may be needed later)
 
