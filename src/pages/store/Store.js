@@ -19,7 +19,8 @@ export default function Store() {
   const [searchQuery, setSearchQuery] = useState('');
   
   // Auth hook
-  const { user, logout, login } = useAuth();
+  const { user, logout, login, validateSession } = useAuth();
+  const [sessionStatus, setSessionStatus] = useState('secure'); // secure, checking, invalid
 
   // Auth modal state
   const [showAuth, setShowAuth] = useState(false);
@@ -303,6 +304,29 @@ export default function Store() {
     }
   }, []);
 
+  // Periodic session validation for logged in users
+  useEffect(() => {
+    if (!user) return;
+
+    const checkSessionPeriodically = async () => {
+      setSessionStatus('checking');
+      const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+      
+      if (token && validateSession) {
+        const isValid = await validateSession(token);
+        setSessionStatus(isValid ? 'secure' : 'invalid');
+      }
+    };
+
+    // Initial check
+    checkSessionPeriodically();
+
+    // Set up periodic validation (every 3 minutes)
+    const interval = setInterval(checkSessionPeriodically, 3 * 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, [user, validateSession]);
+
   // Cart functions (currently unused but may be needed later)
 
   // Save cart to localStorage whenever it changes
@@ -505,6 +529,34 @@ export default function Store() {
         onSearch={setSearchQuery}
         products={products}
       />
+
+      {/* Session Security Status */}
+      {user && (
+        <div className="fixed top-20 right-4 z-40">
+          <div className={`px-3 py-2 rounded-full shadow-lg transition-all duration-300 ${
+            sessionStatus === 'secure' ? 'bg-green-100 border border-green-300' :
+            sessionStatus === 'checking' ? 'bg-yellow-100 border border-yellow-300' :
+            'bg-red-100 border border-red-300'
+          }`}>
+            <div className="flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${
+                sessionStatus === 'secure' ? 'bg-green-500 animate-pulse' :
+                sessionStatus === 'checking' ? 'bg-yellow-500 animate-pulse' :
+                'bg-red-500 animate-pulse'
+              }`}></div>
+              <span className={`text-xs font-medium ${
+                sessionStatus === 'secure' ? 'text-green-800' :
+                sessionStatus === 'checking' ? 'text-yellow-800' :
+                'text-red-800'
+              }`}>
+                {sessionStatus === 'secure' ? 'Session Secure' :
+                 sessionStatus === 'checking' ? 'Checking...' :
+                 'Session Invalid'}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
 
 
       {/* Auth Modal */}

@@ -24,7 +24,7 @@ const bangladeshDivisions = [
 
 export default function UserDashboard() {
   const navigate = useNavigate();
-  const { user, loading: authLoading, logout } = useAuth();
+  const { user, loading: authLoading, logout, terminateAllSessions } = useAuth();
   const [userData, setUserData] = useState({
     name: '',
     address: '',
@@ -957,6 +957,57 @@ export default function UserDashboard() {
                           <p className="px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
                             {user?.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Not available'}
                           </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Session Management */}
+                    <div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <Shield size={20} className="text-green-600" />
+                        Session Management
+                      </h3>
+                      
+                      <div className="space-y-4">
+                        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                            <h4 className="font-medium text-blue-800">Current Session</h4>
+                          </div>
+                          <p className="text-blue-700 text-sm mb-3">
+                            You are currently logged in from this device. Your session is being monitored for security.
+                          </p>
+                          <div className="text-xs text-blue-600 space-y-1">
+                            <p>• IP address is tracked for security</p>
+                            <p>• Session validates automatically</p>
+                            <p>• Invalid sessions are terminated</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center justify-between p-4 border border-orange-200 rounded-lg bg-orange-50">
+                          <div>
+                            <h4 className="font-medium text-orange-900">Terminate All Sessions</h4>
+                            <p className="text-sm text-orange-700">Log out from all devices and browsers</p>
+                          </div>
+                          <button 
+                            onClick={async () => {
+                              if (window.confirm('Are you sure you want to terminate all sessions? You will be logged out from all devices.')) {
+                                try {
+                                  const result = await terminateAllSessions();
+                                  if (result.success) {
+                                    toast.success('All sessions terminated successfully');
+                                  } else {
+                                    toast.error(result.error || 'Failed to terminate sessions');
+                                  }
+                                } catch (error) {
+                                  toast.error('Failed to terminate sessions');
+                                }
+                              }
+                            }}
+                            className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition text-sm font-medium"
+                          >
+                            Terminate All
+                          </button>
                         </div>
                       </div>
                     </div>
