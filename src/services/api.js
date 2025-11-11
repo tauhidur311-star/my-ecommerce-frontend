@@ -261,85 +261,85 @@ class APIService {
 
   // Notifications API
   async getNotifications(page = 1, limit = 20) {
-    return this.request(`/api/notifications?page=${page}&limit=${limit}`);
+    return this.makeRequest(`/notifications?page=${page}&limit=${limit}`);
   }
 
   async getUnreadNotificationCount() {
-    return this.request('/api/notifications/unread-count');
+    return this.makeRequest('/notifications/unread-count');
   }
 
   async markNotificationAsRead(notificationId) {
-    return this.request(`/api/notifications/${notificationId}/read`, {
+    return this.makeRequest(`/notifications/${notificationId}/read`, {
       method: 'PATCH',
     });
   }
 
   async markAllNotificationsAsRead() {
-    return this.request('/api/notifications/mark-all-read', {
+    return this.makeRequest('/notifications/mark-all-read', {
       method: 'PATCH',
     });
   }
 
   async getNotificationPreferences() {
-    return this.request('/api/notifications/preferences');
+    return this.makeRequest('/notifications/preferences');
   }
 
   async updateNotificationPreferences(preferences) {
-    return this.request('/api/notifications/preferences', {
+    return this.makeRequest('/notifications/preferences', {
       method: 'PUT',
       body: JSON.stringify(preferences),
     });
   }
 
-  // Reviews API
+  // Reviews API  
   async getProductReviews(productId, queryParams = '') {
-    return this.request(`/api/reviews/product/${productId}?${queryParams}`);
+    return this.makeRequest(`/reviews/product/${productId}?${queryParams}`);
   }
 
   async getUserReviews(page = 1, limit = 10) {
-    return this.request(`/api/reviews/user?page=${page}&limit=${limit}`);
+    return this.makeRequest(`/reviews/user?page=${page}&limit=${limit}`);
   }
 
   async checkCanReview(productId) {
-    return this.request(`/api/reviews/can-review/${productId}`);
+    return this.makeRequest(`/reviews/can-review/${productId}`);
   }
 
   async createReview(reviewData) {
-    return this.request('/api/reviews', {
+    return this.makeRequest('/reviews', {
       method: 'POST',
       body: JSON.stringify(reviewData),
     });
   }
 
   async updateReview(reviewId, reviewData) {
-    return this.request(`/api/reviews/${reviewId}`, {
+    return this.makeRequest(`/reviews/${reviewId}`, {
       method: 'PUT',
       body: JSON.stringify(reviewData),
     });
   }
 
   async deleteReview(reviewId) {
-    return this.request(`/api/reviews/${reviewId}`, {
+    return this.makeRequest(`/reviews/${reviewId}`, {
       method: 'DELETE',
     });
   }
 
   async voteOnReview(reviewId, voteType) {
-    return this.request(`/api/reviews/${reviewId}/vote`, {
+    return this.makeRequest(`/reviews/${reviewId}/vote`, {
       method: 'POST',
       body: JSON.stringify({ voteType }),
     });
   }
 
   async reportReview(reviewId, reportData) {
-    return this.request(`/api/reviews/${reviewId}/report`, {
+    return this.makeRequest(`/reviews/${reviewId}/report`, {
       method: 'POST',
       body: JSON.stringify(reportData),
     });
   }
 
   async replyToReview(reviewId, message) {
-    return this.request(`/api/reviews/${reviewId}/reply`, {
+    return this.makeRequest(`/reviews/${reviewId}/reply`, {
       method: 'POST',
       body: JSON.stringify({ message }),
     });
@@ -347,41 +347,41 @@ class APIService {
 
   // Two-Factor Authentication API
   async enableTwoFactor() {
-    return this.request('/api/auth/2fa/enable', {
+    return this.makeRequest('/auth/2fa/enable', {
       method: 'POST',
     });
   }
 
   async verifyTwoFactorSetup(code) {
-    return this.request('/api/auth/2fa/verify-setup', {
+    return this.makeRequest('/auth/2fa/verify-setup', {
       method: 'POST',
       body: JSON.stringify({ code }),
     });
   }
 
   async disableTwoFactor(password) {
-    return this.request('/api/auth/2fa/disable', {
+    return this.makeRequest('/auth/2fa/disable', {
       method: 'POST',
       body: JSON.stringify({ password }),
     });
   }
 
   async sendTwoFactorCode(email) {
-    return this.request('/api/auth/2fa/send-code', {
+    return this.makeRequest('/auth/2fa/send-code', {
       method: 'POST',
       body: JSON.stringify({ email }),
     });
   }
 
   async verifyTwoFactorLogin(email, code) {
-    return this.request('/api/auth/2fa/verify-login', {
+    return this.makeRequest('/auth/2fa/verify-login', {
       method: 'POST',
       body: JSON.stringify({ email, code }),
     });
   }
 
   async getTwoFactorStatus() {
-    return this.request('/api/auth/2fa/status');
+    return this.makeRequest('/auth/2fa/status');
   }
 
   // Search API
@@ -390,55 +390,55 @@ class APIService {
       q: query,
       ...filters
     });
-    return this.request(`/api/search/products?${params.toString()}`);
+    return this.makeRequest(`/search/products?${params.toString()}`);
   }
 
   async getSearchSuggestions(query) {
-    return this.request(`/api/search/suggestions?q=${encodeURIComponent(query)}`);
+    return this.makeRequest(`/search/suggestions?q=${encodeURIComponent(query)}`);
   }
 
   async getPopularSearches() {
-    return this.request('/api/search/popular');
+    return this.makeRequest('/search/popular');
   }
 
   // Wishlist API
   async getWishlist() {
-    return this.request('/api/wishlist');
+    return this.makeRequest('/wishlist');
   }
 
   async addToWishlist(productId, productData) {
-    return this.request('/api/wishlist', {
+    return this.makeRequest('/wishlist', {
       method: 'POST',
       body: JSON.stringify({ productId, productData }),
     });
   }
 
   async removeFromWishlist(productId) {
-    return this.request(`/api/wishlist/${productId}`, {
+    return this.makeRequest(`/wishlist/${productId}`, {
       method: 'DELETE',
     });
   }
 
   async clearWishlist() {
-    return this.request('/api/wishlist/clear', {
+    return this.makeRequest('/wishlist/clear', {
       method: 'DELETE',
     });
   }
 
   // Cart API
   async getCart() {
-    return this.request('/api/cart');
+    return this.makeRequest('/cart');
   }
 
   async addToCart(productId, quantity = 1, options = {}) {
-    return this.request('/api/cart/items', {
+    return this.makeRequest('/cart/items', {
       method: 'POST',
       body: JSON.stringify({ productId, quantity, ...options }),
     });
   }
 
   async updateCartItem(productId, quantity, options = {}) {
-    return this.request(`/api/cart/items/${productId}`, {
+    return this.makeRequest(`/cart/items/${productId}`, {
       method: 'PUT',
       body: JSON.stringify({ quantity, ...options }),
     });
