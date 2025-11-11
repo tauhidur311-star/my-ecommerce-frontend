@@ -1,24 +1,46 @@
 import { io } from 'socket.io-client';
+import enhancedApiService from './enhancedApi';
 
 class SocketService {
   constructor() {
     this.socket = null;
     this.isConnected = false;
     this.listeners = {};
+    this.reconnectAttempts = 0;
+    this.maxReconnectAttempts = 3;
   }
 
-  connect(token) {
+  async connect(token) {
     if (this.socket && this.isConnected) {
       return this.socket;
     }
 
+    // If no token provided, try to get from enhancedApiService
+    if (!token) {
+      token = enhancedApiService.accessToken;
+    }
+
+    // If still no token, try localStorage
+    if (!token) {
+      token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+    }
+
+    if (!token) {
+      console.error('No authentication token available for socket connection');
+      return null;
+    }
+
     const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-    
+
     this.socket = io(API_BASE_URL, {
       auth: {
         token: token
       },
-      transports: ['websocket', 'polling']
+      transports: ['websocket', 'polling'],
+      timeout: 20000,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
     });
 
     this.setupEventListeners();

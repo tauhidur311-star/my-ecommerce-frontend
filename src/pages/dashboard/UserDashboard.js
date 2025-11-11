@@ -84,14 +84,10 @@ export default function UserDashboard() {
 
     const fetchUserOrders = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await fetch('/api/orders', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        const data = await response.json();
-        setOrders(data.orders || []);
+        const response = await enhancedApiService.request('/users/orders');
+        if (response.success) {
+          setOrders(response.data || []);
+        }
       } catch (err) {
         console.error('Error fetching orders:', err);
       }

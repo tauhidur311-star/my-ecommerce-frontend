@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Bell, X, Check } from 'lucide-react';
-import { APIService } from '../services/api';
+import enhancedApiService from '../services/enhancedApi';
 import socketService from '../services/socketService';
 import { toast } from 'react-hot-toast';
 
@@ -46,8 +46,8 @@ const NotificationBell = () => {
     try {
       setLoading(true);
       const [notificationsRes, unreadRes] = await Promise.all([
-        APIService.getNotifications(1, 10),
-        APIService.getUnreadNotificationCount()
+        enhancedApiService.request('/notifications?page=1&limit=10'),
+        enhancedApiService.request('/notifications/unread-count')
       ]);
 
       if (notificationsRes.success) {
@@ -66,18 +66,20 @@ const NotificationBell = () => {
 
   const markAsRead = async (notificationId) => {
     try {
-      await APIService.markNotificationAsRead(notificationId);
-      
-      setNotifications(prev => 
-        prev.map(notif => 
-          notif.id === notificationId 
+      await enhancedApiService.request(`/notifications/${notificationId}/read`, {
+        method: 'PATCH',
+      });
+
+      setNotifications(prev =>
+        prev.map(notif =>
+          notif.id === notificationId
             ? { ...notif, isRead: true }
             : notif
         )
       );
 
       setUnreadCount(prev => Math.max(0, prev - 1));
-      
+
       // Also notify socket
       socketService.markNotificationAsRead(notificationId);
     } catch (error) {
@@ -87,12 +89,14 @@ const NotificationBell = () => {
 
   const markAllAsRead = async () => {
     try {
-      await APIService.markAllNotificationsAsRead();
-      
-      setNotifications(prev => 
+      await enhancedApiService.request('/notifications/mark-all-read', {
+        method: 'PATCH',
+      });
+
+      setNotifications(prev =>
         prev.map(notif => ({ ...notif, isRead: true }))
       );
-      
+
       setUnreadCount(0);
       toast.success('All notifications marked as read');
     } catch (error) {
