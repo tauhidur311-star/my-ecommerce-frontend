@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: my-ecommerce-frontend
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm run serve
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
