@@ -107,7 +107,7 @@ export default function UserDashboard() {
       // Fetch user orders
       fetchUserOrders();
     }
-  }, [navigate, isAuthenticated, authLoading, user]);
+  }, [navigate, authLoading, user]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
