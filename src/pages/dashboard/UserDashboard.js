@@ -7,6 +7,8 @@ import {
 import { toast, Toaster } from 'react-hot-toast';
 import Navbar from '../../components/Navbar';
 import NotificationBell from '../../components/NotificationBell';
+import TwoFactorAuth from '../../components/TwoFactorAuth';
+import EnhancedWishlist from '../../components/EnhancedWishlist';
 import { useSocket } from '../../hooks/useSocket';
 import useAuth from '../../hooks/useAuth';
 import enhancedApiService from '../../services/enhancedApi';
@@ -598,84 +600,7 @@ export default function UserDashboard() {
                     <h2 className="text-2xl font-bold text-gray-900">My Wishlist</h2>
                   </div>
                   
-                  {wishlist.length === 0 ? (
-                    <div className="text-center py-12">
-                      <Heart size={64} className="mx-auto mb-4 text-gray-400" />
-                      <h3 className="text-xl font-semibold text-gray-700 mb-2">Your wishlist is empty</h3>
-                      <p className="text-gray-500 mb-6">Add products you love to your wishlist</p>
-                      <Link 
-                        to="/"
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-                      >
-                        <Heart size={20} />
-                        Browse Products
-                      </Link>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {wishlist.map(item => (
-                        <div key={item._id} className="bg-white/60 backdrop-blur-sm rounded-xl shadow-sm p-4 border border-white/20 group hover:shadow-md transition">
-                          <div className="relative mb-4">
-                            <img 
-                              src={item.product?.images?.[0] || item.product?.image || 'https://via.placeholder.com/200?text=No+Image'} 
-                              alt={item.product?.name}
-                              className="w-full h-48 object-cover rounded-lg"
-                              onError={(e) => {
-                                e.target.src = 'https://via.placeholder.com/200?text=No+Image';
-                              }}
-                            />
-                            <button 
-                              onClick={async () => {
-                                try {
-                                  await enhancedApiService.request(`/api/wishlist/${item._id}`, {
-                                    method: 'DELETE'
-                                  });
-                                  setWishlist(prev => prev.filter(w => w._id !== item._id));
-                                  toast.success('Removed from wishlist');
-                                } catch (error) {
-                                  toast.error('Failed to remove from wishlist');
-                                }
-                              }}
-                              className="absolute top-2 right-2 p-2 bg-white/80 rounded-full hover:bg-white transition opacity-0 group-hover:opacity-100"
-                            >
-                              <Heart size={16} className="text-red-500 fill-current" />
-                            </button>
-                          </div>
-                          
-                          <div className="space-y-2">
-                            <h3 className="font-semibold text-lg line-clamp-2">{item.product?.name || 'Product'}</h3>
-                            <p className="text-gray-600 text-sm line-clamp-2">
-                              {item.product?.description || 'No description available'}
-                            </p>
-                            <div className="flex items-center justify-between">
-                              <span className="text-xl font-bold text-blue-600">
-                                ৳{item.product?.price || 0}
-                              </span>
-                              {item.product?.stock > 0 ? (
-                                <button 
-                                  onClick={async () => {
-                                    try {
-                                      // Add to cart logic here
-                                      toast.success(`${item.product.name} added to cart!`);
-                                    } catch (error) {
-                                      toast.error('Failed to add to cart');
-                                    }
-                                  }}
-                                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm"
-                                >
-                                  Add to Cart
-                                </button>
-                              ) : (
-                                <span className="px-4 py-2 bg-gray-300 text-gray-500 rounded-lg text-sm">
-                                  Out of Stock
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  <EnhancedWishlist user={user} />
                 </div>
               )}
 
@@ -857,6 +782,9 @@ export default function UserDashboard() {
                   </div>
                   
                   <div className="space-y-8">
+                    {/* Two-Factor Authentication Section */}
+                    <TwoFactorAuth user={user} />
+                    
                     {/* Password Change Section */}
                     <div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 border border-white/20">
                       <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">

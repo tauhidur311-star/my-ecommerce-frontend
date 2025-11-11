@@ -194,6 +194,24 @@ class APIService {
     return this.makeRequest(`/orders${queryString ? `?${queryString}` : ''}`);
   }
 
+  async getOrder(orderId) {
+    return this.makeRequest(`/orders/${orderId}`);
+  }
+
+  async cancelOrder(orderId, reason = '') {
+    return this.makeRequest(`/orders/${orderId}/cancel`, {
+      method: 'POST',
+      body: JSON.stringify({ reason }),
+    });
+  }
+
+  async requestReturn(orderId, items, reason) {
+    return this.makeRequest(`/orders/${orderId}/return`, {
+      method: 'POST',
+      body: JSON.stringify({ items, reason }),
+    });
+  }
+
   async createOrder(orderData) {
     return this.makeRequest('/orders', {
       method: 'POST',
@@ -270,6 +288,140 @@ class APIService {
     return this.request('/api/notifications/preferences', {
       method: 'PUT',
       body: JSON.stringify(preferences),
+    });
+  }
+
+  // Reviews API
+  async getProductReviews(productId, queryParams = '') {
+    return this.request(`/api/reviews/product/${productId}?${queryParams}`);
+  }
+
+  async getUserReviews(page = 1, limit = 10) {
+    return this.request(`/api/reviews/user?page=${page}&limit=${limit}`);
+  }
+
+  async checkCanReview(productId) {
+    return this.request(`/api/reviews/can-review/${productId}`);
+  }
+
+  async createReview(reviewData) {
+    return this.request('/api/reviews', {
+      method: 'POST',
+      body: JSON.stringify(reviewData),
+    });
+  }
+
+  async updateReview(reviewId, reviewData) {
+    return this.request(`/api/reviews/${reviewId}`, {
+      method: 'PUT',
+      body: JSON.stringify(reviewData),
+    });
+  }
+
+  async deleteReview(reviewId) {
+    return this.request(`/api/reviews/${reviewId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async voteOnReview(reviewId, voteType) {
+    return this.request(`/api/reviews/${reviewId}/vote`, {
+      method: 'POST',
+      body: JSON.stringify({ voteType }),
+    });
+  }
+
+  async reportReview(reviewId, reportData) {
+    return this.request(`/api/reviews/${reviewId}/report`, {
+      method: 'POST',
+      body: JSON.stringify(reportData),
+    });
+  }
+
+  async replyToReview(reviewId, message) {
+    return this.request(`/api/reviews/${reviewId}/reply`, {
+      method: 'POST',
+      body: JSON.stringify({ message }),
+    });
+  }
+
+  // Two-Factor Authentication API
+  async enableTwoFactor() {
+    return this.request('/api/auth/2fa/enable', {
+      method: 'POST',
+    });
+  }
+
+  async verifyTwoFactorSetup(code) {
+    return this.request('/api/auth/2fa/verify-setup', {
+      method: 'POST',
+      body: JSON.stringify({ code }),
+    });
+  }
+
+  async disableTwoFactor(password) {
+    return this.request('/api/auth/2fa/disable', {
+      method: 'POST',
+      body: JSON.stringify({ password }),
+    });
+  }
+
+  async sendTwoFactorCode(email) {
+    return this.request('/api/auth/2fa/send-code', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  }
+
+  async verifyTwoFactorLogin(email, code) {
+    return this.request('/api/auth/2fa/verify-login', {
+      method: 'POST',
+      body: JSON.stringify({ email, code }),
+    });
+  }
+
+  async getTwoFactorStatus() {
+    return this.request('/api/auth/2fa/status');
+  }
+
+  // Search API
+  async searchProducts(query, filters = {}) {
+    const params = new URLSearchParams({
+      q: query,
+      ...filters
+    });
+    return this.request(`/api/search/products?${params.toString()}`);
+  }
+
+  async getSearchSuggestions(query) {
+    return this.request(`/api/search/suggestions?q=${encodeURIComponent(query)}`);
+  }
+
+  async getPopularSearches() {
+    return this.request('/api/search/popular');
+  }
+
+  // Wishlist API
+  async getWishlist() {
+    return this.request('/api/wishlist');
+  }
+
+  async addToWishlist(productId, productData) {
+    return this.request('/api/wishlist', {
+      method: 'POST',
+      body: JSON.stringify({ productId, productData }),
+    });
+  }
+
+  async removeFromWishlist(productId) {
+    return this.request(`/api/wishlist/${productId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async clearWishlist() {
+    return this.request('/api/wishlist/clear', {
+      method: 'DELETE',
     });
   }
 
