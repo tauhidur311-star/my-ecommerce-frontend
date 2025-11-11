@@ -10,7 +10,6 @@ import { ProductGridSkeleton } from '../../components/EnhancedProductSkeleton';
 import { useWishlist } from '../../hooks/useWishlist';
 import { useAuth } from '../../hooks/useAuth';
 import Auth from '../../Auth';
-import '../../styles/animations.css';
 
 const ProductModal = lazy(() => import('../../components/ProductModal'));
 const CartSidebar = lazy(() => import('../../components/CartSidebar'));
@@ -18,8 +17,6 @@ const AuthModal = lazy(() => import('../../components/AuthModal'));
 
 export default function Store() {
   const navigate = useNavigate();
-  const { user: authUser, logout } = useAuth();
-  const [showAuth, setShowAuth] = useState(false);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState([]);
@@ -260,11 +257,6 @@ export default function Store() {
     }
   };
 
-  const showAuthModal = () => {
-    setShowAuth(true);
-    setAuthMode('login');
-  };
-
   // Enhanced filtering and sorting logic
   const applyFiltersAndSort = (products, searchQuery, filters, sortBy) => {
     let filtered = [...products];
@@ -364,7 +356,7 @@ export default function Store() {
         user={user}
         cart={cart}
         onLogout={() => setShowLogoutConfirm(true)}
-        onLogin={showAuthModal}
+        onLogin={() => setShowAuth(true)}
         onCartClick={() => setShowCart(true)}
         onCheckout={handleCheckout}
         onSearch={setSearchQuery}
@@ -385,20 +377,20 @@ export default function Store() {
                 <ShoppingCart size={24} />
               </button>
 
-              {authUser ? (
+              {user ? (
                 <div className="flex items-center gap-3">
                   <span className="text-gray-700 text-sm md:text-base">
-                    Welcome, {authUser.name}
+                    Welcome, {user.name}
                   </span>
                   <button 
-                    onClick={handleUserClick}
+                    onClick={() => navigate('/dashboard')}
                     className="p-2 hover:bg-gray-100 rounded-lg transition"
                     aria-label="User Dashboard"
                   >
                     <User size={24} />
                   </button>
                   <button 
-                    onClick={handleLogout}
+                    onClick={() => setShowLogoutConfirm(true)}
                     className="flex items-center gap-2 px-3 md:px-4 py-2 text-xs md:text-sm font-medium text-red-600 hover:bg-red-50 rounded-md transition"
                   >
                     <LogOut size={18} />
@@ -407,7 +399,7 @@ export default function Store() {
                 </div>
               ) : (
                 <button 
-                  onClick={handleUserClick}
+                  onClick={() => setShowAuth(true)}
                   className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md transition"
                 >
                   <User size={20} />
@@ -420,9 +412,17 @@ export default function Store() {
       </header>
 
       {/* Auth Modal */}
-      {showAuth && (
-        <Auth onClose={() => setShowAuth(false)} />
-      )}
+      <Suspense>
+        <AuthModal
+          showAuth={showAuth}
+          setShowAuth={setShowAuth}
+          handleAuth={handleAuthSubmit}
+          authMode={authMode}
+          setAuthMode={setAuthMode}
+          authForm={authForm}
+          setAuthForm={setAuthForm}
+        />
+      </Suspense>
 
       {/* Products Section */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
