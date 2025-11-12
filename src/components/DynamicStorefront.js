@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import SectionRenderer from './sections/SectionRenderer';
 import { publicAPI } from '../services/themeAPI';
+import Navbar from './Navbar';
 
 const DynamicStorefront = ({ pageType = 'home', slug = null }) => {
   const [layout, setLayout] = useState(null);
@@ -188,6 +189,10 @@ const DynamicStorefront = ({ pageType = 'home', slug = null }) => {
 
   return (
     <div className="dynamic-storefront">
+      {/* Include Navbar for store pages */}
+      <Navbar />
+      
+      {/* Render theme sections */}
       {layout.sections.map((section, index) => (
         <SectionRenderer
           key={section.id || `section-${index}`}
