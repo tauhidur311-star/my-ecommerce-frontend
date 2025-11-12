@@ -22,19 +22,43 @@ api.interceptors.request.use(
 export const themeAPI = {
   // Theme management
   getThemes: async () => {
-    const response = await api.get('/api/admin/themes');
-    return response.data.data;
+    try {
+      console.log('API: Getting themes from', `${API_URL}/api/admin/themes`);
+      const response = await api.get('/api/admin/themes');
+      console.log('API: Themes response:', response);
+      return response.data.data || response.data || [];
+    } catch (error) {
+      console.error('API: Error getting themes:', error);
+      console.error('API: Error response:', error.response?.data);
+      throw error;
+    }
   },
 
   createTheme: async (themeData) => {
-    const response = await api.post('/api/admin/themes', themeData);
-    return response.data.data;
+    try {
+      console.log('API: Creating theme with data:', themeData);
+      const response = await api.post('/api/admin/themes', themeData);
+      console.log('API: Create theme response:', response);
+      return response.data.data || response.data;
+    } catch (error) {
+      console.error('API: Error creating theme:', error);
+      console.error('API: Error response:', error.response?.data);
+      throw error;
+    }
   },
 
   // Template management
   getTemplates: async (themeId) => {
-    const response = await api.get(`/api/admin/themes/${themeId}/templates`);
-    return response.data.data;
+    try {
+      console.log('API: Getting templates for theme:', themeId);
+      const response = await api.get(`/api/admin/themes/${themeId}/templates`);
+      console.log('API: Templates response:', response);
+      return response.data.data || response.data || [];
+    } catch (error) {
+      console.error('API: Error getting templates:', error);
+      console.error('API: Error response:', error.response?.data);
+      throw error;
+    }
   },
 
   getTemplate: async (templateId) => {

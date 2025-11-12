@@ -29,8 +29,21 @@ const ThemeEditor = () => {
 
   const loadActiveTheme = async () => {
     try {
+      console.log('Loading themes...');
       const themes = await themeAPI.getThemes();
-      const activeTheme = themes.find(theme => theme.isActive) || themes[0];
+      console.log('Themes loaded:', themes);
+      
+      let activeTheme = themes.find(theme => theme.isActive) || themes[0];
+      
+      // If no themes exist, create a default one
+      if (!activeTheme) {
+        console.log('No themes found, creating default theme...');
+        activeTheme = await themeAPI.createTheme({
+          name: 'Default Theme',
+          description: 'Auto-generated default theme'
+        });
+        console.log('Default theme created:', activeTheme);
+      }
       
       if (activeTheme) {
         setCurrentTheme(activeTheme);
@@ -38,23 +51,67 @@ const ThemeEditor = () => {
       }
     } catch (error) {
       console.error('Error loading theme:', error);
-      toast.error('Failed to load theme');
+      console.error('Error details:', error.response?.data);
+      toast.error('Failed to load theme: ' + (error.message || 'Unknown error'));
+      
+      // Create fallback local state if API fails
+      createFallbackTheme();
     }
   };
 
   const loadHomeTemplate = async (themeId) => {
     try {
+      console.log('Loading templates for theme:', themeId);
       const templates = await themeAPI.getTemplates(themeId);
-      const homeTemplate = templates.find(t => t.pageType === 'home');
+      console.log('Templates loaded:', templates);
       
-      if (homeTemplate) {
-        setCurrentTemplate(homeTemplate);
-        setSections(homeTemplate.json?.sections || []);
+      let homeTemplate = templates.find(t => t.pageType === 'home');
+      
+      // If no home template exists, create a fallback
+      if (!homeTemplate) {
+        console.log('No home template found, creating fallback...');
+        homeTemplate = {
+          _id: 'temp-home',
+          pageType: 'home',
+          json: { sections: [] },
+          status: 'draft'
+        };
       }
+      
+      setCurrentTemplate(homeTemplate);
+      setSections(homeTemplate.json?.sections || []);
+      console.log('Template loaded, sections:', homeTemplate.json?.sections || []);
     } catch (error) {
       console.error('Error loading template:', error);
-      toast.error('Failed to load template');
+      console.error('Error details:', error.response?.data);
+      toast.error('Failed to load template: ' + (error.message || 'Unknown error'));
+      
+      // Create fallback template if API fails
+      createFallbackTemplate();
     }
+  };
+
+  const createFallbackTheme = () => {
+    console.log('Creating fallback theme...');
+    const fallbackTheme = {
+      _id: 'fallback-theme',
+      name: 'Local Theme',
+      isActive: true
+    };
+    setCurrentTheme(fallbackTheme);
+    createFallbackTemplate();
+  };
+
+  const createFallbackTemplate = () => {
+    console.log('Creating fallback template...');
+    const fallbackTemplate = {
+      _id: 'fallback-home',
+      pageType: 'home',
+      json: { sections: [] },
+      status: 'draft'
+    };
+    setCurrentTemplate(fallbackTemplate);
+    setSections([]);
   };
 
   const handleDragEnd = (event) => {
