@@ -100,7 +100,10 @@ const Inspector = ({ section, onUpdateSection, onOpenAssetPicker, onClose }) => 
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 />
                 <button
-                  onClick={() => onOpenAssetPicker((asset) => updateSettings('backgroundImage', asset.url))}
+                  onClick={() => onOpenAssetPicker((asset) => {
+                    const imageUrl = asset?.url || asset;
+                    updateSettings('backgroundImage', typeof imageUrl === 'string' ? imageUrl : '');
+                  })}
                   className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
                 >
                   <Image className="w-4 h-4" />
@@ -234,7 +237,10 @@ const Inspector = ({ section, onUpdateSection, onOpenAssetPicker, onClose }) => 
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 />
                 <button
-                  onClick={() => onOpenAssetPicker((asset) => updateSettings('image', asset.url))}
+                  onClick={() => onOpenAssetPicker((asset) => {
+                    const imageUrl = asset?.url || asset;
+                    updateSettings('image', typeof imageUrl === 'string' ? imageUrl : '');
+                  })}
                   className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
                 >
                   <Image className="w-4 h-4" />
