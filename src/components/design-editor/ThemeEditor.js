@@ -464,7 +464,10 @@ const ThemeEditor = () => {
                     sections={sections}
                     selectedSection={selectedSection}
                     onSelectSection={setSelectedSection}
-                    onUpdateSection={updateSection}
+                    onUpdateSection={(sectionId, updates) => {
+                      console.log('Canvas prop: updateSection called with:', { sectionId, updates });
+                      updateSection(sectionId, updates);
+                    }}
                     onDeleteSection={deleteSection}
                     onOpenAssetPicker={openAssetPicker}
                     previewMode={previewMode}
@@ -477,7 +480,10 @@ const ThemeEditor = () => {
             {selectedSection && (
               <Inspector
                 section={selectedSection}
-                onUpdateSection={updateSection}
+                onUpdateSection={(updates) => {
+                  console.log('Inspector prop: updateSection called with section:', selectedSection.id, 'updates:', updates);
+                  updateSection(selectedSection.id, updates);
+                }}
                 onOpenAssetPicker={openAssetPicker}
                 onClose={() => setSelectedSection(null)}
               />
