@@ -94,7 +94,7 @@ const Inspector = ({ section, onUpdateSection, onOpenAssetPicker, onClose }) => 
               <div className="flex space-x-2">
                 <input
                   type="text"
-                  value={section.settings.backgroundImage || ''}
+                  value={getSetting('backgroundImage', '')}
                   onChange={(e) => updateSettings('backgroundImage', e.target.value)}
                   placeholder="Image URL"
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
