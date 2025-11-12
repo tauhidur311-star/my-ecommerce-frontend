@@ -180,8 +180,14 @@ const DynamicStorefront = ({ pageType = 'home', slug = null }) => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Page Under Construction</h2>
-          <p className="text-gray-600">This page is being designed and will be available soon.</p>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Theme Preview Not Available</h2>
+          <p className="text-gray-600">The theme system is still being configured.</p>
+          <a 
+            href="/" 
+            className="mt-4 inline-block bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+          >
+            Go to Main Store
+          </a>
         </div>
       </div>
     );

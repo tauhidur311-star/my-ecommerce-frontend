@@ -47,10 +47,10 @@ function App() {
       {showAuth && <Auth onClose={() => setShowAuth(false)} />}
       <Routes>
         {/* Public routes */}
-        <Route path="/" element={<DynamicStorefront pageType="home" />} />
-        <Route path="/store-legacy" element={<Store />} />
-        <Route path="/about" element={<DynamicStorefront pageType="about" />} />
-        <Route path="/contact" element={<DynamicStorefront pageType="contact" />} />
+        <Route path="/" element={<Store />} />
+        <Route path="/theme-preview" element={<DynamicStorefront pageType="home" />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="/cart" element={<Store />} /> {/* Cart is handled within Store component */}
         
         {/* Protected user routes */}
