@@ -5,6 +5,9 @@ const ProductGridSection = ({ section, settings, isEditing, previewMode }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Ensure settings exist
+  const safeSettings = settings || {};
+
   const {
     title = 'Featured Products',
     subtitle = 'Check out our latest collection',
@@ -13,7 +16,7 @@ const ProductGridSection = ({ section, settings, isEditing, previewMode }) => {
     sort = 'featured',
     showTitle = true,
     showFilters = false
-  } = settings;
+  } = safeSettings;
 
   useEffect(() => {
     loadProducts();
@@ -219,7 +222,7 @@ const ProductGridSection = ({ section, settings, isEditing, previewMode }) => {
         {/* Products Grid */}
         {loading ? (
           renderLoadingGrid()
-        ) : products.length > 0 ? (
+        ) : (products && products.length > 0) ? (
           <div className={`grid ${getGridColumns()} gap-6`}>
             {products.map(renderProductCard)}
           </div>
