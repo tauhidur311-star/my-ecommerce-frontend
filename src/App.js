@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Store from './pages/store/Store';
+import DynamicStorefront from './components/DynamicStorefront';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import UserDashboard from './pages/dashboard/UserDashboard';
 import AboutPage from './pages/store/AboutPage';
@@ -46,9 +47,10 @@ function App() {
       {showAuth && <Auth onClose={() => setShowAuth(false)} />}
       <Routes>
         {/* Public routes */}
-        <Route path="/" element={<Store />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/" element={<DynamicStorefront pageType="home" />} />
+        <Route path="/store-legacy" element={<Store />} />
+        <Route path="/about" element={<DynamicStorefront pageType="about" />} />
+        <Route path="/contact" element={<DynamicStorefront pageType="contact" />} />
         <Route path="/cart" element={<Store />} /> {/* Cart is handled within Store component */}
         
         {/* Protected user routes */}

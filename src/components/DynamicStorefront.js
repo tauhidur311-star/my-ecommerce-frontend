@@ -17,7 +17,9 @@ const DynamicStorefront = ({ pageType = 'home', slug = null }) => {
       setLoading(true);
       setError(null);
       
+      console.log('DynamicStorefront: Fetching published theme for:', pageType, slug);
       const data = await publicAPI.getPublishedTheme(pageType, slug);
+      console.log('DynamicStorefront: Received data:', data);
       
       setLayout(data.layout);
       setSeoData(data.seo || {});
