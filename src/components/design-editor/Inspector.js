@@ -94,7 +94,7 @@ const Inspector = ({ section, onUpdateSection, onOpenAssetPicker, onClose }) => 
               <div className="flex space-x-2">
                 <input
                   type="text"
-                  value={getSetting('backgroundImage', '')}
+                  value={section.settings.backgroundImage || ''}
                   onChange={(e) => updateSettings('backgroundImage', e.target.value)}
                   placeholder="Image URL"
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
@@ -361,7 +361,7 @@ const Inspector = ({ section, onUpdateSection, onOpenAssetPicker, onClose }) => 
               <label className="block text-sm font-medium text-gray-700 mb-2">Button Text</label>
               <input
                 type="text"
-                value={getSetting('buttonText', 'Subscribe')}
+                value={section.settings.buttonText || 'Subscribe'}
                 onChange={(e) => updateSettings('buttonText', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Enter button text..."
