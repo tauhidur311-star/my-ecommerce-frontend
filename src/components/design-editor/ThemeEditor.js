@@ -25,16 +25,6 @@ const ThemeEditor = () => {
   // Load initial theme and template
   useEffect(() => {
     loadActiveTheme();
-    
-    // Auto-fallback after 10 seconds if API doesn't respond
-    const fallbackTimer = setTimeout(() => {
-      if (!currentTheme || !currentTemplate) {
-        console.log('Auto-falling back to offline mode after timeout...');
-        createFallbackTheme();
-      }
-    }, 10000);
-    
-    return () => clearTimeout(fallbackTimer);
   }, []);
 
   const loadActiveTheme = async () => {
@@ -374,7 +364,7 @@ const ThemeEditor = () => {
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0">
           {/* Toolbar */}
-          <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between flex-shrink-0">
+          <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between flex-shrink-0 relative z-50">
             <div className="flex items-center space-x-4">
               <h1 className="text-xl font-semibold text-gray-900">
                 {currentTemplate.pageType.charAt(0).toUpperCase() + currentTemplate.pageType.slice(1)} Template
