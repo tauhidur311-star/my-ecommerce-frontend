@@ -158,6 +158,14 @@ const ThemeEditor = () => {
           : section
       );
       console.log('ThemeEditor: sections updated', newSections);
+      
+      // Update the selected section to prevent Inspector re-render with old data
+      if (selectedSection?.id === sectionId) {
+        const updatedSelectedSection = { ...selectedSection, ...updates };
+        console.log('ThemeEditor: updating selectedSection to:', updatedSelectedSection);
+        setSelectedSection(updatedSelectedSection);
+      }
+      
       return newSections;
     });
     setIsDirty(true);
