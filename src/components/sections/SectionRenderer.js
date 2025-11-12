@@ -30,6 +30,12 @@ const SectionRenderer = ({
   isEditing = false, 
   previewMode = 'desktop' 
 }) => {
+  // Ensure section has settings object to prevent crashes
+  const safeSection = {
+    ...section,
+    settings: section.settings || {}
+  };
+
   const SectionComponent = SECTION_MAP[section.type];
 
   if (!SectionComponent) {
@@ -71,8 +77,8 @@ const SectionRenderer = ({
       style={sectionStyles}
     >
       <SectionComponent
-        section={section}
-        settings={section.settings || {}}
+        section={safeSection}
+        settings={safeSection.settings}
         onUpdate={onUpdate}
         onOpenAssetPicker={onOpenAssetPicker}
         isEditing={isEditing}
