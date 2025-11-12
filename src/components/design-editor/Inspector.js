@@ -292,6 +292,84 @@ const Inspector = ({ section, onUpdateSection, onOpenAssetPicker, onClose }) => 
           </div>
         );
 
+      case 'gallery':
+        return (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Gallery Title</label>
+              <input
+                type="text"
+                value={getSetting('title', 'Image Gallery')}
+                onChange={(e) => updateSettings('title', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter gallery title..."
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Images Per Row</label>
+              <select
+                value={getSetting('columns', 3)}
+                onChange={(e) => updateSettings('columns', parseInt(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value={2}>2 Columns</option>
+                <option value={3}>3 Columns</option>
+                <option value={4}>4 Columns</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Show Lightbox</label>
+              <input
+                type="checkbox"
+                checked={getSetting('showLightbox', true)}
+                onChange={(e) => updateSettings('showLightbox', e.target.checked)}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span className="ml-2 text-sm text-gray-600">Enable image popup on click</span>
+            </div>
+          </div>
+        );
+
+      case 'newsletter':
+        return (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
+              <input
+                type="text"
+                value={getSetting('title', 'Subscribe to Our Newsletter')}
+                onChange={(e) => updateSettings('title', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter newsletter title..."
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+              <textarea
+                value={getSetting('description', 'Stay updated with our latest news and offers')}
+                onChange={(e) => updateSettings('description', e.target.value)}
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter description..."
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Button Text</label>
+              <input
+                type="text"
+                value={getSetting('buttonText', 'Subscribe')}
+                onChange={(e) => updateSettings('buttonText', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter button text..."
+              />
+            </div>
+          </div>
+        );
+
       default:
         return (
           <div className="text-center py-8">
