@@ -49,6 +49,7 @@ function App() {
         {/* Public routes */}
         <Route path="/" element={<Store />} />
         <Route path="/theme-preview" element={<DynamicStorefront pageType="home" />} />
+        <Route path="/theme-home" element={<DynamicStorefront pageType="home" />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/cart" element={<Store />} /> {/* Cart is handled within Store component */}
