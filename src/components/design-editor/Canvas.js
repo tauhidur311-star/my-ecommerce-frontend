@@ -102,7 +102,10 @@ const SortableSection = ({
       <div className={`${section.settings?.hidden ? 'hidden' : ''}`}>
         <SectionRenderer
           section={section}
-          onUpdate={(updates) => onUpdate(section.id, updates)}
+          onUpdate={(updates) => {
+            console.log('Canvas: Section update requested:', updates);
+            onUpdate(section.id, updates);
+          }}
           onOpenAssetPicker={onOpenAssetPicker}
           isEditing={isSelected}
           previewMode={previewMode}

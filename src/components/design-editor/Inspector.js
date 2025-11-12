@@ -4,7 +4,10 @@ import { X, Image, Palette, Layout, Type, Link } from 'lucide-react';
 const Inspector = ({ section, onUpdateSection, onOpenAssetPicker, onClose }) => {
   const [activeTab, setActiveTab] = useState('content');
 
+  console.log('Inspector opened for section:', section);
+
   const updateSettings = (key, value) => {
+    console.log('Updating setting:', key, 'to:', value);
     onUpdateSection({
       settings: {
         ...section.settings,

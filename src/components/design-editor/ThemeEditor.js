@@ -25,6 +25,16 @@ const ThemeEditor = () => {
   // Load initial theme and template
   useEffect(() => {
     loadActiveTheme();
+    
+    // Auto-fallback after 10 seconds if API doesn't respond
+    const fallbackTimer = setTimeout(() => {
+      if (!currentTheme || !currentTemplate) {
+        console.log('Auto-falling back to offline mode after timeout...');
+        createFallbackTheme();
+      }
+    }, 10000);
+    
+    return () => clearTimeout(fallbackTimer);
   }, []);
 
   const loadActiveTheme = async () => {
@@ -150,13 +160,16 @@ const ThemeEditor = () => {
   };
 
   const updateSection = (sectionId, updates) => {
-    setSections(sections =>
-      sections.map(section =>
+    console.log('ThemeEditor: updateSection called', { sectionId, updates });
+    setSections(sections => {
+      const newSections = sections.map(section =>
         section.id === sectionId
           ? { ...section, ...updates }
           : section
-      )
-    );
+      );
+      console.log('ThemeEditor: sections updated', newSections);
+      return newSections;
+    });
     setIsDirty(true);
   };
 
@@ -331,8 +344,13 @@ const ThemeEditor = () => {
             }}
             className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
           >
-            Skip Loading (Debug)
+            Continue Without API (Offline Mode)
           </button>
+          
+          {/* Auto-skip after 10 seconds */}
+          <p className="mt-2 text-xs text-gray-400">
+            Will automatically continue in offline mode after 10 seconds...
+          </p>
         </div>
       </div>
     );
