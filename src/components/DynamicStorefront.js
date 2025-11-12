@@ -177,7 +177,7 @@ const DynamicStorefront = ({ pageType = 'home', slug = null }) => {
     );
   }
 
-  if (!layout?.sections || layout.sections.length === 0) {
+  if (!layout?.sections || !Array.isArray(layout.sections) || layout.sections.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -200,14 +200,26 @@ const DynamicStorefront = ({ pageType = 'home', slug = null }) => {
       <Navbar />
       
       {/* Render theme sections */}
-      {layout.sections.map((section, index) => (
-        <SectionRenderer
-          key={section.id || `section-${index}`}
-          section={section}
-          isEditing={false}
-          previewMode="desktop"
-        />
-      ))}
+      {layout?.sections && Array.isArray(layout.sections) ? (
+        layout.sections.map((section, index) => (
+          <SectionRenderer
+            key={section.id || `section-${index}`}
+            section={section}
+            isEditing={false}
+            previewMode="desktop"
+          />
+        ))
+      ) : (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">No Sections Found</h2>
+            <p className="text-gray-600 mb-4">The published theme has no sections to display.</p>
+            <pre className="text-xs bg-gray-100 p-4 rounded mt-4 text-left">
+              {JSON.stringify(layout, null, 2)}
+            </pre>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
