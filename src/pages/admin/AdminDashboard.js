@@ -812,7 +812,7 @@ export default function AdminDashboard() {
         )}
 
         {activeTab === 'design' && (
-          <div className="fixed inset-0 bg-white z-50">
+          <div className="fixed inset-0 bg-white z-50 overflow-hidden">
             <ThemeEditor />
           </div>
         )}

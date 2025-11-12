@@ -323,7 +323,7 @@ const ThemeEditor = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex">
+    <div className="h-screen bg-gray-100 flex overflow-hidden">
       <DndContext
         collisionDetection={closestCorners}
         onDragStart={handleDragStart}
@@ -338,9 +338,9 @@ const ThemeEditor = () => {
         />
 
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-w-0">
           {/* Toolbar */}
-          <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+          <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center space-x-4">
               <h1 className="text-xl font-semibold text-gray-900">
                 {currentTemplate.pageType.charAt(0).toUpperCase() + currentTemplate.pageType.slice(1)} Template
@@ -402,8 +402,8 @@ const ThemeEditor = () => {
           </div>
 
           {/* Canvas Area */}
-          <div className="flex-1 flex">
-            <div className="flex-1 p-6">
+          <div className="flex-1 flex min-h-0">
+            <div className="flex-1 p-6 overflow-y-auto">
               <div 
                 className="mx-auto bg-white shadow-lg rounded-lg overflow-hidden transition-all duration-300"
                 style={{ width: getPreviewWidth(), maxWidth: '100%' }}
