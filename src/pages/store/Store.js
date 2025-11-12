@@ -8,6 +8,7 @@ import { User, ShoppingCart, LogOut, Star, Package, TrendingUp } from 'lucide-re
 import Navbar from '../../components/Navbar';
 // import { useWishlist } from '../../hooks/useWishlist';
 import useAuth from '../../hooks/useAuth';
+import { publicAPI } from '../../services/themeAPI';
 
 const AuthModal = lazy(() => import('../../components/AuthModal'));
 
@@ -19,6 +20,10 @@ export default function Store() {
   const [cartLoading, setCartLoading] = useState(false);
   const [cart, setCart] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Theme integration
+  const [publishedTheme, setPublishedTheme] = useState(null);
+  const [showThemeToggle, setShowThemeToggle] = useState(false);
   
   // Auth hook
   const { user, logout, login, validateSession } = useAuth();
@@ -358,7 +363,22 @@ export default function Store() {
   // Load products
   useEffect(() => {
     loadProducts();
+    loadPublishedTheme();
   }, [loadProducts]);
+
+  // Load published theme
+  const loadPublishedTheme = async () => {
+    try {
+      const data = await publicAPI.getPublishedTheme('home');
+      if (data?.layout?.sections && data.layout.sections.length > 0) {
+        setPublishedTheme(data);
+        setShowThemeToggle(true);
+        console.log('Store.js: Published theme loaded:', data.layout.sections.length, 'sections');
+      }
+    } catch (error) {
+      console.log('Store.js: No published theme available');
+    }
+  };
 
   // Load cart from localStorage on initial render
   useEffect(() => {
@@ -605,12 +625,60 @@ export default function Store() {
 
 
   // Wrap lazy-loaded components with Suspense
+  // Simple theme section renderer
+  const renderThemeSection = (section) => {
+    if (section.type === 'hero') {
+      const settings = section.settings || {};
+      return (
+        <section 
+          key={section.id}
+          className="py-20 px-4 text-center"
+          style={{ 
+            backgroundColor: settings.backgroundColor || '#1f2937',
+            color: settings.textColor || '#ffffff'
+          }}
+        >
+          <div className="max-w-4xl mx-auto">
+            <h1 className="text-5xl font-bold mb-6">{settings.title || 'Welcome'}</h1>
+            <p className="text-xl mb-8">{settings.subtitle || 'Subtitle'}</p>
+            {settings.buttonText && (
+              <button 
+                onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
+                className="bg-white text-gray-900 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100"
+              >
+                {settings.buttonText}
+              </button>
+            )}
+          </div>
+        </section>
+      );
+    }
+    return (
+      <div key={section.id} className="py-8 px-4 bg-gray-100 text-center border-2 border-dashed border-gray-300">
+        <h3 className="font-medium text-gray-700">{section.type.replace('-', ' ').toUpperCase()} Section</h3>
+        <p className="text-sm text-gray-500 mt-2">Content from theme editor</p>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen">
       {/* WebGL background disabled for performance */}
       <div className="fixed inset-0 -z-10 bg-gradient-to-br from-blue-50 to-purple-100">
         {/* Simple CSS gradient background instead of heavy WebGL animation */}
       </div>
+
+      {/* Theme Toggle Button */}
+      {showThemeToggle && (
+        <div className="fixed top-20 right-4 z-50">
+          <button
+            onClick={() => setShowThemeToggle(!showThemeToggle)}
+            className="bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-green-700 text-sm"
+          >
+            🎨 Theme Editor Active
+          </button>
+        </div>
+      )}
 
       {/* Navigation */}
       <Navbar
