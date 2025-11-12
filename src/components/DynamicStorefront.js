@@ -40,7 +40,8 @@ const DynamicStorefront = ({ pageType = 'home', slug = null }) => {
       
     } catch (error) {
       console.error('Error loading published layout:', error);
-      setError('Failed to load page layout');
+      console.error('Full error details:', error.response?.data || error.message);
+      setError('Failed to load page layout: ' + (error.response?.data?.message || error.message));
       
       // Load fallback layout
       setLayout(getFallbackLayout(pageType));
