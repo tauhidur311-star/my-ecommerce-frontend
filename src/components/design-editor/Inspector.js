@@ -16,6 +16,11 @@ const Inspector = ({ section, onUpdateSection, onOpenAssetPicker, onClose }) => 
     });
   };
 
+  // Helper function to get current setting value
+  const getSetting = (key, defaultValue = '') => {
+    return section.settings?.[key] ?? defaultValue;
+  };
+
   const updatePadding = (side, value) => {
     onUpdateSection({
       settings: {
@@ -37,19 +42,29 @@ const Inspector = ({ section, onUpdateSection, onOpenAssetPicker, onClose }) => 
               <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
               <input
                 type="text"
-                value={section.settings.title || ''}
-                onChange={(e) => updateSettings('title', e.target.value)}
+                value={getSetting('title', 'Your Amazing Title')}
+                onChange={(e) => {
+                  console.log('Title input change:', e.target.value);
+                  updateSettings('title', e.target.value);
+                }}
+                onBlur={(e) => console.log('Title input blur:', e.target.value)}
+                onFocus={(e) => console.log('Title input focus:', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter title..."
               />
             </div>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Subtitle</label>
               <textarea
-                value={section.settings.subtitle || ''}
-                onChange={(e) => updateSettings('subtitle', e.target.value)}
+                value={getSetting('subtitle', 'Compelling subtitle goes here')}
+                onChange={(e) => {
+                  console.log('Subtitle input change:', e.target.value);
+                  updateSettings('subtitle', e.target.value);
+                }}
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter subtitle..."
               />
             </div>
             
