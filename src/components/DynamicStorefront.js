@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import SectionRenderer from './sections/SectionRenderer';
+import SafeSectionRenderer from './SafeSectionRenderer';
 import { publicAPI } from '../services/themeAPI';
 import Navbar from './Navbar';
 
@@ -199,14 +200,12 @@ const DynamicStorefront = ({ pageType = 'home', slug = null }) => {
       {/* Include Navbar for store pages */}
       <Navbar />
       
-      {/* Render theme sections */}
+      {/* Render theme sections with safe renderer */}
       {layout?.sections && Array.isArray(layout.sections) ? (
         layout.sections.map((section, index) => (
-          <SectionRenderer
+          <SafeSectionRenderer
             key={section.id || `section-${index}`}
             section={section}
-            isEditing={false}
-            previewMode="desktop"
           />
         ))
       ) : (
