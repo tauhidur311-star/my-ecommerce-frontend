@@ -34,7 +34,9 @@ const Inspector = ({ section, onUpdateSection, onOpenAssetPicker, onClose }) => 
   };
 
   const renderContentTab = () => {
-    switch (section.type) {
+    // Emergency safety wrapper to prevent charAt errors
+    try {
+      switch (section.type) {
       case 'hero':
         return (
           <div className="space-y-4">
@@ -382,6 +384,21 @@ const Inspector = ({ section, onUpdateSection, onOpenAssetPicker, onClose }) => 
             <p className="text-gray-500">No content settings available for this section type.</p>
           </div>
         );
+      }
+    } catch (error) {
+      console.error('Inspector content rendering error:', error);
+      return (
+        <div className="text-center text-red-500 py-8 px-4">
+          <p className="mb-4">⚠️ Error loading section settings</p>
+          <p className="text-sm mb-4">Section: {section?.type || 'unknown'}</p>
+          <button 
+            onClick={onClose}
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Close Inspector
+          </button>
+        </div>
+      );
     }
   };
 
