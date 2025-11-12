@@ -502,7 +502,15 @@ const ThemeEditor = () => {
       {/* Asset Picker Modal */}
       {showAssetPicker && (
         <AssetPicker
-          onSelect={handleAssetSelect}
+          onSelect={(asset) => {
+            try {
+              const imageUrl = typeof asset === 'string' ? asset : asset?.url || '';
+              handleAssetSelect(imageUrl);
+            } catch (error) {
+              console.error('Asset picker error:', error);
+              handleAssetSelect('');
+            }
+          }}
           onClose={() => setShowAssetPicker(false)}
         />
       )}

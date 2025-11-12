@@ -70,11 +70,23 @@ const EnhancedAssetPicker = ({ onSelect, onClose, allowMultiple = false }) => {
       const data = await response.json();
       
       if (data.success) {
-        setAssets(data.data);
+        // Ensure assets is always an array and each asset has required properties
+        const safeAssets = Array.isArray(data.data) ? data.data.map(asset => ({
+          ...asset,
+          _id: asset._id || asset.id || Date.now().toString(),
+          name: typeof asset.name === 'string' ? asset.name : 'Unnamed Asset',
+          type: typeof asset.type === 'string' ? asset.type : 'application/octet-stream',
+          url: typeof asset.url === 'string' ? asset.url : '',
+          alt: typeof asset.alt === 'string' ? asset.alt : '',
+          tags: Array.isArray(asset.tags) ? asset.tags : [],
+          size: typeof asset.size === 'number' ? asset.size : 0
+        })) : [];
+        
+        setAssets(safeAssets);
         setPagination(prev => ({
           ...prev,
-          total: data.pagination.total,
-          pages: data.pagination.pages
+          total: data.pagination?.total || 0,
+          pages: data.pagination?.pages || 0
         }));
       } else {
         throw new Error(data.message);
@@ -217,10 +229,15 @@ const EnhancedAssetPicker = ({ onSelect, onClose, allowMultiple = false }) => {
   };
 
   const getAssetPreview = (asset) => {
+    // Safety check for asset and asset.type
+    if (!asset || typeof asset.type !== 'string') {
+      return null;
+    }
+    
     if (asset.type.startsWith('image/')) {
-      return asset.thumbnailUrl || asset.url;
+      return asset.thumbnailUrl || asset.url || null;
     } else if (asset.type === 'application/pdf') {
-      return '/api/assets/pdf-preview/' + asset._id;
+      return '/api/assets/pdf-preview/' + (asset._id || '');
     } else {
       return null;
     }
