@@ -82,7 +82,7 @@ const Inspector = ({ section, onUpdateSection, onOpenAssetPicker, onClose }) => 
               <label className="block text-sm font-medium text-gray-700 mb-2">Button Link</label>
               <input
                 type="text"
-                value={section.settings.buttonLink || ''}
+                value={getSetting('buttonLink', '#products')}
                 onChange={(e) => updateSettings('buttonLink', e.target.value)}
                 placeholder="#products"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
