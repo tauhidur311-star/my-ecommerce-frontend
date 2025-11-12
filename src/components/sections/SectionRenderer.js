@@ -63,10 +63,15 @@ const SectionRenderer = ({
     }
   };
 
-  // Apply section-level styling
+  // Apply section-level styling - but don't override component's own background
   const sectionStyles = {
-    backgroundColor: section.settings?.backgroundColor || 'transparent',
-    color: section.settings?.textColor || 'inherit',
+    // Only apply background if it's explicitly set and different from transparent
+    ...(section.settings?.backgroundColor && section.settings.backgroundColor !== 'transparent' 
+        ? { backgroundColor: section.settings.backgroundColor } 
+        : {}),
+    ...(section.settings?.textColor && section.settings.textColor !== 'inherit'
+        ? { color: section.settings.textColor }
+        : {}),
     paddingTop: `${section.settings?.padding?.top || 0}px`,
     paddingBottom: `${section.settings?.padding?.bottom || 0}px`,
   };
