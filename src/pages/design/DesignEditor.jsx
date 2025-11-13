@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import {
-  ArrowLeft, Save, Eye, Settings, Layers, Palette,
-  Layout, Type, Image, Plus, Trash2, Copy, Move
-} from 'lucide-react';
-import EnhancedButton from '../../components/ui/EnhancedButton';
+// Redirect to new enhanced design editor
+import EnhancedDesignEditor from './EnhancedDesignEditor';
+
+// Export the enhanced version as default
+export default EnhancedDesignEditor;
+
+// Keep the old component for reference but redirect to new one
+import React from 'react';
 
 const DesignEditor = () => {
   const [selectedComponent, setSelectedComponent] = useState(null);
