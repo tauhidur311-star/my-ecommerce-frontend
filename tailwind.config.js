@@ -40,6 +40,7 @@ module.exports = {
         'slide-up': 'slideUp 0.5s ease-out',
         'bounce-gentle': 'bounceGentle 2s infinite',
         'gradientMove': 'gradientMove 15s ease infinite',
+        'gradient-slow': 'gradientMove 15s ease infinite',
         'float-slow': 'floatSlow 6s ease-in-out infinite',
         'float-medium': 'floatMedium 4s ease-in-out infinite',
         'float-fast': 'floatFast 3s ease-in-out infinite',
@@ -60,9 +61,8 @@ module.exports = {
           '50%': { transform: 'translateY(-5px)' },
         },
         gradientMove: {
-          '0%': { backgroundPosition: '0% 50%' },
+          '0%, 100%': { backgroundPosition: '0% 50%' },
           '50%': { backgroundPosition: '100% 50%' },
-          '100%': { backgroundPosition: '0% 50%' },
         },
         floatSlow: {
           '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },

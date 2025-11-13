@@ -618,7 +618,7 @@ export default function AdminDashboard() {
 
   return (
     <NotificationProvider>
-      <AnimatedBackground>
+      <AnimatedBackground section={activeTab}>
         {/* Back to Storefront Button */}
         <button
           onClick={() => navigate('/')}
