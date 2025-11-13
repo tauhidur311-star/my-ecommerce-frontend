@@ -36,14 +36,23 @@ const AssetPicker = ({ onSelect, onClose }) => {
       }
 
       const response = await assetAPI.getAssets(params);
-      setAssets(response.data);
+      
+      // Handle different response structures
+      const assetsData = response.data || response.assets || [];
+      const paginationData = response.pagination || { 
+        total: assetsData.length, 
+        pages: Math.ceil(assetsData.length / pagination.limit) 
+      };
+      
+      setAssets(Array.isArray(assetsData) ? assetsData : []);
       setPagination(prev => ({
         ...prev,
-        total: response.pagination.total,
-        pages: response.pagination.pages
+        total: paginationData.total || 0,
+        pages: paginationData.pages || 1
       }));
     } catch (error) {
       console.error('Error loading assets:', error);
+      setAssets([]);
       toast.error('Failed to load assets');
     } finally {
       setLoading(false);
@@ -52,10 +61,12 @@ const AssetPicker = ({ onSelect, onClose }) => {
 
   const loadFolders = async () => {
     try {
-      const folderList = await assetAPI.getFolders();
-      setFolders(folderList);
+      const response = await assetAPI.getFolders();
+      const folderList = response.data || response || [];
+      setFolders(Array.isArray(folderList) ? folderList : []);
     } catch (error) {
       console.error('Error loading folders:', error);
+      setFolders([]);
     }
   };
 
