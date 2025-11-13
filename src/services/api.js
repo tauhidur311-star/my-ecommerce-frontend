@@ -647,3 +647,6 @@ const apiService = new APIService();
 // Export both the class and instance
 export default apiService;
 export { APIService, apiService };
+
+// Also export as 'api' for backward compatibility
+export { apiService as api };
