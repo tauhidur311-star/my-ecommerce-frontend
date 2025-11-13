@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Mail, Send, Calendar, Users, TrendingUp, Eye, Click,
+  Mail, Send, Calendar, Users, TrendingUp, Eye, MousePointer,
   PlayCircle, PauseCircle, Square, Edit3, Trash2, Plus,
   Target, BarChart3, Clock, CheckCircle, AlertCircle
 } from 'lucide-react';
@@ -526,7 +526,7 @@ const CampaignManager = () => {
               <MetricCard
                 title="Clicked"
                 value={selectedCampaign.analytics?.clicked || 0}
-                icon={Click}
+                icon={MousePointer}
                 color="purple"
               />
               <MetricCard
