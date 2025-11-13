@@ -7,7 +7,7 @@ import {
 import { toast, Toaster } from 'react-hot-toast';
 import Navbar from '../../components/Navbar';
 import NotificationBell from '../../components/NotificationBell';
-import TwoFactorAuth from '../../components/TwoFactorAuth';
+import EnhancedTwoFactorAuth from '../../components/EnhancedTwoFactorAuth';
 import EnhancedWishlist from '../../components/EnhancedWishlist';
 import { useSocket } from '../../hooks/useSocket';
 import useAuth from '../../hooks/useAuth';
@@ -783,7 +783,7 @@ export default function UserDashboard() {
                   
                   <div className="space-y-8">
                     {/* Two-Factor Authentication Section */}
-                    <TwoFactorAuth user={user} />
+                    <EnhancedTwoFactorAuth user={user} />
                     
                     {/* Password Change Section */}
                     <div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 border border-white/20">
@@ -1296,24 +1296,20 @@ export default function UserDashboard() {
                 </div>
               )}
 
-              {(activeTab === 'security' || activeTab === 'notifications') && (
+              {activeTab === 'notifications' && (
                 <div className="animate-fade-in-up">
                   <div className="flex items-center gap-3 mb-8">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                      activeTab === 'security' ? 'bg-gradient-to-r from-orange-500 to-red-600' : 'bg-gradient-to-r from-purple-500 to-pink-600'
-                    }`}>
-                      {activeTab === 'security' ? <Shield size={20} className="text-white" /> : <Bell size={20} className="text-white" />}
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-r from-purple-500 to-pink-600">
+                      <Bell size={20} className="text-white" />
                     </div>
-                    <h2 className="text-2xl font-bold text-gray-900">
-                      {activeTab === 'security' ? 'Security Settings' : 'Notification Preferences'}
-                    </h2>
+                    <h2 className="text-2xl font-bold text-gray-900">Notification Preferences</h2>
                   </div>
                   <div className="text-center py-16">
                     <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center">
                       <Settings size={48} className="text-gray-400" />
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900 mb-4">Coming Soon</h3>
-                    <p className="text-gray-600 mb-8">We're working on enhanced security and notification features.</p>
+                    <p className="text-gray-600 mb-8">We're working on enhanced notification features.</p>
                     <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-600 font-semibold rounded-xl">
                       <Settings size={18} />
                       Under Development
