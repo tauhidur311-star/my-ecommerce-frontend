@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import AnimatedBackground from "../components/admin/AnimatedBackground";
 import DarkModeToggle from "../components/DarkModeToggle";
-import NotificationBell from "../components/NotificationBell";
+import RealNotificationSystem from '../components/admin/RealNotificationSystem';
 
 export default function DashboardLayout({ children, section = "dashboard", title = "Admin Dashboard" }) {
   const navigate = useNavigate();
@@ -45,7 +45,7 @@ export default function DashboardLayout({ children, section = "dashboard", title
           </div>
 
           <div className="flex items-center space-x-4">
-            <NotificationBell />
+            <RealNotificationSystem />
             <DarkModeToggle />
             <div className="w-px h-6 bg-white/20"></div>
             <motion.button

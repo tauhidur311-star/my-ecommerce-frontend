@@ -17,7 +17,7 @@ import AnalyticsDashboard from '../../components/analytics/AnalyticsDashboard';
 import useKeyboardShortcuts from '../../hooks/useKeyboardShortcuts';
 import DarkModeToggle from '../../components/DarkModeToggle';
 import NotificationProvider from '../../contexts/NotificationContext';
-import NotificationBell from '../../components/NotificationBell';
+import RealNotificationSystem from '../../components/admin/RealNotificationSystem';
 import InventoryManagement from '../../components/InventoryManagement';
 import EmailNotificationSystem from '../../components/EmailNotificationSystem';
 import ThemeEditor from '../../components/design-editor/ThemeEditor';
@@ -639,12 +639,50 @@ export default function AdminDashboard() {
     }
   };
 
-  // Dashboard layout configuration
+  // Real dashboard data - replace hardcoded values
+  const [dashboardStats, setDashboardStats] = useState({
+    ordersToday: 0,
+    revenue: 0,
+    visitors: 0
+  });
+
+  // Load real dashboard stats
+  useEffect(() => {
+    const loadDashboardStats = async () => {
+      try {
+        // Try to fetch real analytics data from backend
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/admin/analytics/summary`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('accessToken') || localStorage.getItem('token')}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            setDashboardStats({
+              ordersToday: data.data.todaySubmissions || 0,
+              revenue: data.data.revenue || 0,
+              visitors: data.data.todayViews || 0
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error loading dashboard stats:', error);
+        // Keep zero values as fallback
+      }
+    };
+
+    loadDashboardStats();
+  }, []);
+
+  // Dashboard layout configuration with real data
   const dashboardLayout = [
     { id: 'products', title: 'Total Products', value: products.length, theme: 'blue' },
-    { id: 'orders', title: 'Orders Today', value: '12', theme: 'green' },
-    { id: 'revenue', title: 'Revenue', value: '$2,340', theme: 'purple' },
-    { id: 'visitors', title: 'Visitors', value: '1,234', theme: 'orange' }
+    { id: 'orders', title: 'Orders Today', value: dashboardStats.ordersToday, theme: 'green' },
+    { id: 'revenue', title: 'Revenue', value: dashboardStats.revenue > 0 ? `৳${dashboardStats.revenue}` : '৳0', theme: 'purple' },
+    { id: 'visitors', title: 'Visitors', value: dashboardStats.visitors, theme: 'orange' }
   ];
 
   const getDashboardTitle = () => {

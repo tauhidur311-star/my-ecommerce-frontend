@@ -277,7 +277,7 @@ const AssetPicker = ({ onSelect, onClose }) => {
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
           <div className="flex items-center space-x-4">
             {/* Upload Button */}
-            <label className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer transition-colors">
+            <label className="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 cursor-pointer transition-colors shadow-md border border-blue-700">
               <Upload className="w-4 h-4 mr-2" />
               {uploading ? 'Uploading...' : 'Upload Files'}
               <input
@@ -358,7 +358,7 @@ const AssetPicker = ({ onSelect, onClose }) => {
             <button
               onClick={() => selectedAsset && onSelect(selectedAsset)}
               disabled={!selectedAsset}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md border border-blue-700"
             >
               Select Asset
             </button>

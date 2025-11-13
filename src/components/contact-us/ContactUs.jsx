@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { ArrowLeft, Home } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import ContactForm from './ContactForm';
 import ContactInfo from './ContactInfo';
 import MapEmbed from './MapEmbed';
@@ -23,6 +25,18 @@ const ContactUs = () => {
   return (
     <div className="py-12 relative z-10">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Back to Store Button */}
+        <div className="mb-8">
+          <Link 
+            to="/"
+            className="inline-flex items-center px-6 py-3 bg-white/10 backdrop-blur-md border border-white/30 text-white font-semibold rounded-lg hover:bg-white/20 transition-all duration-200 shadow-lg group"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
+            <Home className="w-5 h-5 mr-2" />
+            Back to Store
+          </Link>
+        </div>
+
         {/* Header Section */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-white mb-4">
