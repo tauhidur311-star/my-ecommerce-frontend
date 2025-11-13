@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar,
-  PieChart as RechartsPie, Cell, XAxis, YAxis, CartesianGrid,
+  PieChart as RechartsPie, Pie, Cell, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import GlassCard from '../ui/glass/GlassCard';

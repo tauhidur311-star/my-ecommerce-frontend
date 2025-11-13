@@ -17,16 +17,16 @@ import LoadingSkeleton from '../../components/ui/LoadingSkeleton';
 // Lazy load components for better performance
 const EnhancedAnalyticsDashboard = lazy(() => import('../../components/analytics/EnhancedAnalyticsDashboard'));
 const InventoryTable = lazy(() => import('../../components/inventory/InventoryTable'));
-const ProductsManagement = lazy(() => import('../../components/admin/ProductsManagement'));
-const UserManagement = lazy(() => import('../../components/admin/UserManagement'));
-const SegmentationPanel = lazy(() => import('../../components/customers/SegmentationPanel'));
-const ContactSubmissions = lazy(() => import('../../components/admin/ContactSubmissions'));
-const OrdersManagement = lazy(() => import('../../components/admin/OrdersManagement'));
-const CampaignManager = lazy(() => import('../../components/marketing/CampaignManager'));
-const PerformanceMonitor = lazy(() => import('../../components/admin/PerformanceMonitor'));
-const FinancialReports = lazy(() => import('../../components/admin/FinancialReports'));
-const ReviewsManagement = lazy(() => import('../../components/admin/ReviewsManagement'));
-const ContentManagement = lazy(() => import('../../components/admin/ContentManagement'));
+const ProductsManagement = lazy(() => import('../../components/admin/ProductsManagement.jsx'));
+const UserManagement = lazy(() => import('../../components/admin/UserManagement.jsx'));
+const SegmentationPanel = lazy(() => import('../../components/customers/SegmentationPanel.jsx'));
+const ContactSubmissions = lazy(() => import('../../components/admin/ContactSubmissions.jsx'));
+const OrdersManagement = lazy(() => import('../../components/admin/OrdersManagement.jsx'));
+const CampaignManager = lazy(() => import('../../components/marketing/CampaignManager.jsx'));
+const PerformanceMonitor = lazy(() => import('../../components/admin/PerformanceMonitor.jsx'));
+const FinancialReports = lazy(() => import('../../components/admin/FinancialReports.jsx'));
+const ReviewsManagement = lazy(() => import('../../components/admin/ReviewsManagement.jsx'));
+const ContentManagement = lazy(() => import('../../components/admin/ContentManagement.jsx'));
 
 const EnhancedAdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
