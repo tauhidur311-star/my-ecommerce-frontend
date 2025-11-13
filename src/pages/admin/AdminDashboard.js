@@ -19,6 +19,8 @@ import GlassCard, { StatsCard } from '../../components/ui/GlassCard';
 import FloatingWidget, { QuickActionWidget } from '../../components/ui/FloatingWidget';
 import ContactSubmissions from '../../components/admin/ContactSubmissions';
 import ContactInfoSettings from '../../components/admin/ContactInfoSettings';
+import EmailTemplateEditor from '../../components/admin/EmailTemplateEditor';
+import NotificationBanner from '../../components/admin/NotificationBanner';
 import '../../styles/contactUs.css';
 // import '../../styles/mobile-responsive.css';
 
@@ -732,7 +734,8 @@ export default function AdminDashboard() {
                 { key: 'design', icon: Grid, label: 'Design' },
                 { key: 'settings', icon: StoreIcon, label: 'Store Settings' },
                 { key: 'contact-submissions', icon: null, label: '📧 Contact Submissions' },
-                { key: 'contact-settings', icon: null, label: '📞 Contact Settings' }
+                { key: 'contact-settings', icon: null, label: '📞 Contact Settings' },
+                { key: 'email-templates', icon: Mail, label: '📄 Email Templates' }
               ].map(({ key, icon: Icon, label }) => (
                 <motion.button
                   key={key}
@@ -986,7 +989,23 @@ export default function AdminDashboard() {
               <ContactInfoSettings />
             </motion.div>
           )}
+
+          {/* Email Templates Tab */}
+          {activeTab === 'email-templates' && (
+            <motion.div
+              key="email-templates"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <EmailTemplateEditor />
+            </motion.div>
+          )}
         </AnimatePresence>
+
+        {/* Notification Banner */}
+        <NotificationBanner />
 
       {/* Add/Edit Product Modal */}
       {showForm && (
