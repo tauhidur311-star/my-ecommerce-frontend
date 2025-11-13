@@ -56,8 +56,8 @@ const ContactInfo = () => {
   ];
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">
+    <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg shadow-xl p-6 hover:bg-white/15 transition-all duration-300">
+      <h2 className="text-2xl font-bold text-white mb-6">
         Contact Information
       </h2>
       
@@ -65,22 +65,22 @@ const ContactInfo = () => {
       <div className="space-y-6 mb-8">
         {contactDetails.map((detail, index) => (
           <div key={index} className="flex items-start space-x-4 group">
-            <div className="inline-flex items-center justify-center w-10 h-10 bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-colors duration-200">
-              <span className="text-xl text-indigo-600">{detail.icon}</span>
+            <div className="inline-flex items-center justify-center w-10 h-10 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30 group-hover:bg-white/30 transition-all duration-200">
+              <span className="text-xl text-white">{detail.icon}</span>
             </div>
             <div className="flex-1">
-              <h3 className="text-sm font-semibold text-gray-900 mb-1">
+              <h3 className="text-sm font-semibold text-white mb-1">
                 {detail.label}
               </h3>
               {detail.link ? (
                 <a
                   href={detail.link}
-                  className="text-gray-700 hover:text-indigo-600 transition-colors duration-200 font-medium"
+                  className="text-white/80 hover:text-white transition-colors duration-200 font-medium"
                 >
                   {detail.value}
                 </a>
               ) : (
-                <p className="text-gray-700 whitespace-pre-line">
+                <p className="text-white/70 whitespace-pre-line">
                   {detail.value}
                 </p>
               )}
@@ -90,8 +90,8 @@ const ContactInfo = () => {
       </div>
 
       {/* Social Media Links */}
-      <div className="border-t border-gray-200 pt-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+      <div className="border-t border-white/20 pt-6">
+        <h3 className="text-lg font-semibold text-white mb-4">
           Follow Us
         </h3>
         <div className="flex space-x-4">
@@ -101,29 +101,29 @@ const ContactInfo = () => {
               href={social.url}
               target="_blank"
               rel="noopener noreferrer"
-              className={`inline-flex items-center justify-center w-10 h-10 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all duration-200 transform hover:scale-110 ${social.color}`}
+              className="inline-flex items-center justify-center w-10 h-10 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg hover:bg-white/30 transition-all duration-200 transform hover:scale-110"
               title={`Follow us on ${social.name}`}
             >
-              <span className="text-lg">{social.icon}</span>
+              <span className="text-lg text-white">{social.icon}</span>
             </a>
           ))}
         </div>
       </div>
 
       {/* Emergency Contact */}
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4 mt-6">
+      <div className="bg-red-500/20 backdrop-blur-sm border border-red-400/30 rounded-lg p-4 mt-6">
         <div className="flex items-center space-x-2 mb-2">
-          <span className="text-red-600 text-lg">🚨</span>
-          <h3 className="text-sm font-semibold text-red-800">
+          <span className="text-red-300 text-lg">🚨</span>
+          <h3 className="text-sm font-semibold text-red-200">
             Emergency Support
           </h3>
         </div>
-        <p className="text-sm text-red-700">
+        <p className="text-sm text-red-100">
           For urgent technical issues affecting your business, call our emergency hotline:
         </p>
         <a
           href="tel:+15551239999"
-          className="text-red-800 font-bold hover:text-red-900 transition-colors duration-200"
+          className="text-red-200 font-bold hover:text-white transition-colors duration-200"
         >
           +1 (555) 123-9999
         </a>
