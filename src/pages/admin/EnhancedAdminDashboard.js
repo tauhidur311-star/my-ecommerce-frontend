@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   BarChart3, Users, Package, Mail, Settings, Shield,
   Bell, Search, Menu, X, Home, TrendingUp, AlertTriangle,
-  MessageCircle, Calendar, Download, RefreshCw, Activity
+  MessageCircle, Calendar, Download, RefreshCw, Activity,
+  ShoppingBag, DollarSign, Star, FileText
 } from 'lucide-react';
 import { useAnalyticsData } from '../../hooks/useAnalyticsData';
 import { useNotifications, useRealTimeNotifications } from '../../hooks/useNotifications';
@@ -16,10 +17,16 @@ import LoadingSkeleton from '../../components/ui/LoadingSkeleton';
 // Lazy load components for better performance
 const EnhancedAnalyticsDashboard = lazy(() => import('../../components/analytics/EnhancedAnalyticsDashboard'));
 const InventoryTable = lazy(() => import('../../components/inventory/InventoryTable'));
+const ProductsManagement = lazy(() => import('../../components/admin/ProductsManagement'));
+const UserManagement = lazy(() => import('../../components/admin/UserManagement'));
 const SegmentationPanel = lazy(() => import('../../components/customers/SegmentationPanel'));
 const ContactSubmissions = lazy(() => import('../../components/admin/ContactSubmissions'));
+const OrdersManagement = lazy(() => import('../../components/admin/OrdersManagement'));
 const CampaignManager = lazy(() => import('../../components/marketing/CampaignManager'));
 const PerformanceMonitor = lazy(() => import('../../components/admin/PerformanceMonitor'));
+const FinancialReports = lazy(() => import('../../components/admin/FinancialReports'));
+const ReviewsManagement = lazy(() => import('../../components/admin/ReviewsManagement'));
+const ContentManagement = lazy(() => import('../../components/admin/ContentManagement'));
 
 const EnhancedAdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -48,10 +55,16 @@ const EnhancedAdminDashboard = () => {
   const navigationItems = [
     { id: 'overview', label: 'Overview', icon: Home },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    { id: 'orders', label: 'Orders', icon: ShoppingBag },
+    { id: 'products', label: 'Products', icon: Package },
     { id: 'inventory', label: 'Inventory', icon: Package },
+    { id: 'users', label: 'Users', icon: Users },
     { id: 'customers', label: 'Customers', icon: Users },
     { id: 'contacts', label: 'Contact Us', icon: MessageCircle },
     { id: 'marketing', label: 'Marketing', icon: Mail },
+    { id: 'reports', label: 'Financial Reports', icon: DollarSign },
+    { id: 'reviews', label: 'Reviews', icon: Star },
+    { id: 'content', label: 'Content', icon: FileText },
     { id: 'performance', label: 'Performance', icon: Activity },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
@@ -238,10 +251,31 @@ const EnhancedAdminDashboard = () => {
           </Suspense>
         );
 
+      case 'orders':
+        return (
+          <Suspense fallback={<LoadingSkeleton />}>
+            <OrdersManagement />
+          </Suspense>
+        );
+
+      case 'products':
+        return (
+          <Suspense fallback={<LoadingSkeleton />}>
+            <ProductsManagement />
+          </Suspense>
+        );
+
       case 'inventory':
         return (
           <Suspense fallback={<LoadingSkeleton />}>
             <InventoryTable />
+          </Suspense>
+        );
+
+      case 'users':
+        return (
+          <Suspense fallback={<LoadingSkeleton />}>
+            <UserManagement />
           </Suspense>
         );
 
@@ -263,6 +297,27 @@ const EnhancedAdminDashboard = () => {
         return (
           <Suspense fallback={<LoadingSkeleton />}>
             <CampaignManager />
+          </Suspense>
+        );
+
+      case 'reports':
+        return (
+          <Suspense fallback={<LoadingSkeleton />}>
+            <FinancialReports />
+          </Suspense>
+        );
+
+      case 'reviews':
+        return (
+          <Suspense fallback={<LoadingSkeleton />}>
+            <ReviewsManagement />
+          </Suspense>
+        );
+
+      case 'content':
+        return (
+          <Suspense fallback={<LoadingSkeleton />}>
+            <ContentManagement />
           </Suspense>
         );
 
