@@ -93,9 +93,11 @@ export const useRealTimeNotifications = () => {
   const [recentNotifications, setRecentNotifications] = useState([]);
 
   useEffect(() => {
-    // Connect to WebSocket for real-time notifications
-    const wsUrl = `${process.env.REACT_APP_WS_URL || 'wss://my-ecommerce-api-b9t4.onrender.com'}/notifications`;
-    const ws = new WebSocket(wsUrl);
+    // Connect to WebSocket for real-time notifications (with error handling)
+    let ws;
+    try {
+      const wsUrl = `${process.env.REACT_APP_WS_URL || 'wss://my-ecommerce-api-b9t4.onrender.com'}/notifications`;
+      ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
       setIsConnected(true);
@@ -122,13 +124,20 @@ export const useRealTimeNotifications = () => {
       console.log('Disconnected from notification stream');
     };
 
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        setIsConnected(false);
+      };
+
+    } catch (error) {
+      console.error('Failed to initialize WebSocket:', error);
       setIsConnected(false);
-    };
+    }
 
     return () => {
-      ws.close();
+      if (ws) {
+        ws.close();
+      }
     };
   }, []);
 
