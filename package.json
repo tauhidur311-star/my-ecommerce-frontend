@@ -29,7 +29,7 @@
     "react-router-dom": "^7.9.5",
     "react-scripts": "5.0.1",
     "react-toastify": "^11.0.5",
-    "react-virtual": "^2.10.4",
+    "@tanstack/react-virtual": "^3.0.0",
     "react-zoom-pan-pinch": "^3.3.0",
     "socket.io-client": "^4.8.1",
     "web-vitals": "^2.1.4",
@@ -41,11 +41,13 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "set \"GENERATE_SOURCEMAP=false\" && react-scripts build",
+    "build": "GENERATE_SOURCEMAP=false react-scripts build",
+    "build:windows": "set \"GENERATE_SOURCEMAP=false\" && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "postbuild": "node scripts/postbuild.js",
-    "serve": "node server.js"
+    "serve": "node server.js",
+    "install:legacy": "npm install --legacy-peer-deps"
   },
   "homepage": "/",
   "eslintConfig": {
@@ -65,5 +67,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "overrides": {
+    "react-virtual": "@tanstack/react-virtual"
   }
 }
