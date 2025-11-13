@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import soundManager from './utils/soundManager';
 import Store from './pages/store/Store';
 import DynamicStorefront from './components/DynamicStorefront';
-import AdminDashboard from './pages/admin/AdminDashboard';
+import EnhancedAdminDashboard from './pages/admin/EnhancedAdminDashboard';
 import UserDashboard from './pages/dashboard/UserDashboard';
 import AboutPage from './pages/store/AboutPage';
 import ContactPage from './pages/store/ContactPage';
@@ -103,7 +103,7 @@ function App() {
           {/* Protected admin routes */}
           <Route path="/admin" element={
             <ProtectedRoute requireAdmin={true}>
-              <AdminDashboard />
+              <EnhancedAdminDashboard />
             </ProtectedRoute>
           } />
           
