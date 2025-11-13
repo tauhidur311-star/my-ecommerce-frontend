@@ -4,6 +4,7 @@ import './index.css';
 import App from './App';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import reportWebVitals from './reportWebVitals';
+import { register as registerSW } from './utils/serviceWorkerRegistration';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -13,6 +14,16 @@ root.render(
     </GoogleOAuthProvider>
   </React.StrictMode>
 );
+
+// Register service worker for offline functionality
+registerSW({
+  onSuccess: (registration) => {
+    console.log('Service Worker registered successfully:', registration);
+  },
+  onUpdate: (registration) => {
+    console.log('Service Worker updated:', registration);
+  }
+});
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

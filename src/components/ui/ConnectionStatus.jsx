@@ -1,99 +1,95 @@
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Wifi, WifiOff, AlertCircle, CheckCircle, RotateCcw } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Wifi, WifiOff, Activity, Settings } from 'lucide-react';
+import useRealTimeConnection from '../../hooks/useRealTimeConnection';
+import { getServiceWorkerStatus } from '../../utils/serviceWorkerRegistration';
 
-const ConnectionStatus = ({ 
-  isConnected, 
-  connectionStats, 
-  error, 
-  onReconnect,
-  className = '',
-  showDetails = false 
-}) => {
-  const getStatusInfo = () => {
-    if (error) {
-      return {
-        icon: AlertCircle,
-        color: 'text-red-500',
-        bgColor: 'bg-red-50 border-red-200',
-        text: 'Connection Error',
-        description: 'Failed to connect to server'
-      };
-    }
-    
-    if (isConnected) {
-      return {
-        icon: CheckCircle,
-        color: 'text-green-500',
-        bgColor: 'bg-green-50 border-green-200',
-        text: 'Connected',
-        description: 'Real-time updates active'
-      };
-    }
-    
-    return {
-      icon: WifiOff,
-      color: 'text-yellow-500',
-      bgColor: 'bg-yellow-50 border-yellow-200',
-      text: 'Reconnecting...',
-      description: `Attempt ${connectionStats?.attempts || 0}`
+const ConnectionStatus = ({ className = '' }) => {
+  const { isConnected, connectionStatus } = useRealTimeConnection();
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [serviceWorkerStatus, setServiceWorkerStatus] = useState('Checking...');
+
+  // Monitor online/offline status
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
     };
+  }, []);
+
+  // Check service worker status
+  useEffect(() => {
+    const checkSWStatus = async () => {
+      try {
+        const status = await getServiceWorkerStatus();
+        setServiceWorkerStatus(status);
+      } catch (error) {
+        setServiceWorkerStatus('Error');
+      }
+    };
+
+    checkSWStatus();
+    const interval = setInterval(checkSWStatus, 10000); // Check every 10 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const getStatusIcon = (status, isActive) => {
+    if (isActive) {
+      return <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />;
+    } else {
+      return <div className="w-2 h-2 bg-red-500 rounded-full" />;
+    }
   };
 
-  const status = getStatusInfo();
-  const Icon = status.icon;
+  const getStatusColor = (status, isActive) => {
+    if (isActive) return 'text-green-600';
+    return 'text-red-600';
+  };
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.9 }}
-        className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${status.bgColor} ${className}`}
-      >
-        <motion.div
-          animate={!isConnected && !error ? { rotate: 360 } : { rotate: 0 }}
-          transition={{ 
-            duration: 2, 
-            repeat: !isConnected && !error ? Infinity : 0,
-            ease: "linear" 
-          }}
-        >
-          <Icon size={16} className={status.color} />
-        </motion.div>
-        
-        <div className="flex-1">
-          <span className={`text-sm font-medium ${status.color}`}>
-            {status.text}
-          </span>
-          {showDetails && (
-            <div className="text-xs text-gray-500 mt-1">
-              {status.description}
-              {connectionStats?.lastConnected && (
-                <span className="block">
-                  Last connected: {new Date(connectionStats.lastConnected).toLocaleTimeString()}
-                </span>
-              )}
-              {connectionStats?.totalMessages > 0 && (
-                <span className="block">
-                  Messages received: {connectionStats.totalMessages}
-                </span>
-              )}
-            </div>
-          )}
-        </div>
-        
-        {error && onReconnect && (
-          <button
-            onClick={onReconnect}
-            className="p-1 text-gray-400 hover:text-gray-600 rounded transition-colors"
-            title="Retry connection"
-          >
-            <RotateCcw size={14} />
-          </button>
+    <div className={`flex items-center space-x-6 text-sm ${className}`}>
+      {/* Online Status */}
+      <div className="flex items-center space-x-2">
+        {isOnline ? (
+          <Wifi className="w-4 h-4 text-green-600" />
+        ) : (
+          <WifiOff className="w-4 h-4 text-red-600" />
         )}
-      </motion.div>
-    </AnimatePresence>
+        <span className={getStatusColor('online', isOnline)}>
+          {isOnline ? 'Online' : 'Offline'}
+        </span>
+      </div>
+
+      {/* Real-time Connection Status */}
+      <div className="flex items-center space-x-2">
+        <Activity className="w-4 h-4 text-blue-600" />
+        <span>Real-time:</span>
+        <div className="flex items-center space-x-1">
+          {getStatusIcon('realtime', isConnected)}
+          <span className={getStatusColor('realtime', isConnected)}>
+            {connectionStatus}
+          </span>
+        </div>
+      </div>
+
+      {/* Service Worker Status */}
+      <div className="flex items-center space-x-2">
+        <Settings className="w-4 h-4 text-purple-600" />
+        <span>Service Worker:</span>
+        <div className="flex items-center space-x-1">
+          {getStatusIcon('sw', serviceWorkerStatus === 'Active')}
+          <span className={getStatusColor('sw', serviceWorkerStatus === 'Active')}>
+            {serviceWorkerStatus}
+          </span>
+        </div>
+      </div>
+    </div>
   );
 };
 
