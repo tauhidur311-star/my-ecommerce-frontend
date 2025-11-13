@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useRef } from 'react';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { publicAPI } from '../services/themeAPI';
 
 /**
