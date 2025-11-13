@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   BarChart3, Users, Package, Mail, Settings, Shield,
   Bell, Search, Menu, X, Home, TrendingUp, AlertTriangle,
-  MessageCircle, Calendar, Download, RefreshCw
+  MessageCircle, Calendar, Download, RefreshCw, Activity
 } from 'lucide-react';
 import { useAnalyticsData } from '../../hooks/useAnalyticsData';
 import { useNotifications, useRealTimeNotifications } from '../../hooks/useNotifications';
@@ -50,7 +50,7 @@ const EnhancedAdminDashboard = () => {
     { id: 'inventory', label: 'Inventory', icon: Package },
     { id: 'customers', label: 'Customers', icon: Users },
     { id: 'marketing', label: 'Marketing', icon: Mail },
-    { id: 'performance', label: 'Performance', icon: TrendingUp },
+    { id: 'performance', label: 'Performance', icon: Activity },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
