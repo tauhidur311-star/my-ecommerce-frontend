@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Edit2, Trash2, Save, X, Upload, Package, Grid, Tag, List, Store as StoreIcon, Expand, Loader2 } from 'lucide-react';
 import ImageCropper from '../../components/ImageCropper';
-// WebGL animation disabled for performance
-// import Silk from '../../components/Silk';
-// import { LoadingButton, SmartLoader, OverlayLoader } from '../../components/LoadingStates';
-// import { Input, Textarea, Select, Checkbox } from '../../components/ui/FormField';
 import OrderManagement from '../../components/OrderManagement';
 import AdvancedAnalytics from '../../components/AdvancedAnalytics';
 import useKeyboardShortcuts from '../../hooks/useKeyboardShortcuts';
@@ -16,7 +13,8 @@ import NotificationBell from '../../components/NotificationBell';
 import InventoryManagement from '../../components/InventoryManagement';
 import EmailNotificationSystem from '../../components/EmailNotificationSystem';
 import ThemeEditor from '../../components/design-editor/ThemeEditor';
-import AnimatedBackground from '../../components/admin/AnimatedBackground';
+import DashboardLayout from '../../layouts/DashboardLayout';
+import MotionWrapper, { MotionCard, MotionGrid } from '../../components/MotionWrapper';
 import ContactSubmissions from '../../components/admin/ContactSubmissions';
 import ContactInfoSettings from '../../components/admin/ContactInfoSettings';
 import '../../styles/contactUs.css';
@@ -616,242 +614,247 @@ export default function AdminDashboard() {
     }
   };
 
+  const getDashboardTitle = () => {
+    const titles = {
+      'products': 'Products Management',
+      'orders': 'Orders Dashboard', 
+      'analytics': 'Analytics Center',
+      'inventory': 'Inventory Management',
+      'emails': 'Email System',
+      'design': 'Design Editor',
+      'settings': 'Store Settings',
+      'contact-submissions': 'Contact Submissions',
+      'contact-settings': 'Contact Settings'
+    };
+    return titles[activeTab] || 'Admin Dashboard';
+  };
+
   return (
     <NotificationProvider>
-      <AnimatedBackground section={activeTab}>
-        {/* Back to Storefront Button */}
-        <button
-          onClick={() => navigate('/')}
-          className="fixed top-6 right-8 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-5 rounded-full shadow-md transition-all transform hover:scale-105 hover:shadow-lg z-50"
-        >
-          ← Back to Storefront
-        </button>
-
-        <div className="min-h-screen">
+      <DashboardLayout section={activeTab} title={getDashboardTitle()}>
+        <div className="min-h-screen relative">
 
       <Toaster position="bottom-center" />
-      {/* Header */}
-      <header className="bg-white shadow-md sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
+      
+      {/* Enhanced Action Bar */}
+      <MotionWrapper delay={0.1}>
+        <div className="bg-white/90 backdrop-blur-md rounded-xl shadow-lg border border-gray-200/50 p-4 mb-6">
+          <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-4">
-              <Link 
-                to="/" 
-                className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                <StoreIcon size={20} />
-                <span>View Store</span>
-              </Link>
-              <button 
+              <motion.button 
                 onClick={() => setShowForm(true)} 
-                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md"
                 title="Add New Product (Ctrl+N)"
+                whileHover={{ scale: 1.02, y: -1 }}
+                whileTap={{ scale: 0.98 }}
               >
                 <Plus size={20} />
                 Add New Product
-              </button>
+              </motion.button>
               
-              <button
+              <motion.button
                 onClick={showShortcutsHelp}
-                className="flex items-center gap-2 px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+                className="flex items-center gap-2 px-3 py-2 border border-gray-300/50 text-gray-700 rounded-lg hover:bg-gray-50/50 transition-all backdrop-blur-sm"
                 title="Keyboard Shortcuts (Ctrl+?)"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                ⌨️
-              </button>
-              
-              <NotificationBell />
-              <DarkModeToggle />
+                ⌨️ Shortcuts
+              </motion.button>
+            </div>
+            
+            <div className="text-sm text-gray-600 bg-white/50 px-3 py-1 rounded-full">
+              Last updated: {new Date().toLocaleTimeString()}
             </div>
           </div>
         </div>
-      </header>
+      </MotionWrapper>
 
-      {/* Stats */}
-      <div className="container mx-auto px-4 py-6 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
+      {/* Enhanced Stats */}
+      <MotionWrapper delay={0.2}>
+        <MotionGrid columns={4} staggerDelay={0.1}>
+          <div className="bg-white/90 backdrop-blur-md rounded-xl shadow-lg p-6 border border-gray-200/50 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm">Total Products</p>
-                <p className="text-3xl font-bold text-gray-800">{products.length}</p>
+                <p className="text-gray-500 text-sm font-medium">Total Products</p>
+                <p className="text-3xl font-bold text-gray-800 mt-2">{products.length}</p>
+                <p className="text-xs text-gray-400 mt-1">All inventory items</p>
               </div>
-              <Package className="text-blue-600" size={40} />
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Package className="text-white" size={24} />
+              </div>
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
+          
+          <div className="bg-white/90 backdrop-blur-md rounded-xl shadow-lg p-6 border border-gray-200/50 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm">In Stock</p>
-                <p className="text-3xl font-bold text-green-600">
+                <p className="text-gray-500 text-sm font-medium">In Stock</p>
+                <p className="text-3xl font-bold text-green-600 mt-2">
                   {products.filter(p => p.inStock).length}
                 </p>
+                <p className="text-xs text-gray-400 mt-1">Available items</p>
               </div>
-              <Tag className="text-green-600" size={40} />
+              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Tag className="text-white" size={24} />
+              </div>
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
+          
+          <div className="bg-white/90 backdrop-blur-md rounded-xl shadow-lg p-6 border border-gray-200/50 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm">Out of Stock</p>
-                <p className="text-3xl font-bold text-red-600">
+                <p className="text-gray-500 text-sm font-medium">Out of Stock</p>
+                <p className="text-3xl font-bold text-red-600 mt-2">
                   {products.filter(p => !p.inStock).length}
                 </p>
+                <p className="text-xs text-gray-400 mt-1">Need restocking</p>
               </div>
-              <List className="text-red-600" size={40} />
+              <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-rose-600 rounded-xl flex items-center justify-center shadow-lg">
+                <List className="text-white" size={24} />
+              </div>
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
+          
+          <div className="bg-white/90 backdrop-blur-md rounded-xl shadow-lg p-6 border border-gray-200/50 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm">Categories</p>
-                <p className="text-3xl font-bold text-purple-600">
+                <p className="text-gray-500 text-sm font-medium">Categories</p>
+                <p className="text-3xl font-bold text-purple-600 mt-2">
                   {new Set(products.map(p => p.category)).size}
                 </p>
+                <p className="text-xs text-gray-400 mt-1">Product types</p>
               </div>
-              <Grid className="text-purple-600" size={40} />
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Grid className="text-white" size={24} />
+              </div>
             </div>
           </div>
-        </div>
+        </MotionGrid>
+      </MotionWrapper>
 
           {/* Enhanced Tab Navigation */}
-          <div className="tab-navigation mb-6 border-b border-gray-200 bg-white rounded-lg shadow-sm">
-            <div className="flex px-4 sm:px-6 overflow-x-auto scrollbar-hide">
-              <button 
-                onClick={() => setActiveTab('products')} 
-                className={`tab-button px-4 py-3 font-semibold text-sm whitespace-nowrap transition-colors duration-200 ${
-                  activeTab === 'products' 
-                    ? 'border-b-2 border-blue-600 text-blue-600' 
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                <Package className="w-4 h-4 mr-2 inline" />
-                Products
-              </button>
-              <button 
-                onClick={() => setActiveTab('orders')} 
-                className={`tab-button px-4 py-3 font-semibold text-sm whitespace-nowrap transition-colors duration-200 ${
-                  activeTab === 'orders' 
-                    ? 'border-b-2 border-blue-600 text-blue-600' 
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                <List className="w-4 h-4 mr-2 inline" />
-                Orders
-              </button>
-              <button 
-                onClick={() => setActiveTab('analytics')} 
-                className={`tab-button px-4 py-3 font-semibold text-sm whitespace-nowrap transition-colors duration-200 ${
-                  activeTab === 'analytics' 
-                    ? 'border-b-2 border-blue-600 text-blue-600' 
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                <Grid className="w-4 h-4 mr-2 inline" />
-                Analytics
-              </button>
-              <button 
-                onClick={() => setActiveTab('inventory')} 
-                className={`tab-button px-4 py-3 font-semibold text-sm whitespace-nowrap transition-colors duration-200 ${
-                  activeTab === 'inventory' 
-                    ? 'border-b-2 border-blue-600 text-blue-600' 
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                <Package className="w-4 h-4 mr-2 inline" />
-                Inventory
-              </button>
-              <button 
-                onClick={() => setActiveTab('emails')} 
-                className={`tab-button px-4 py-3 font-semibold text-sm whitespace-nowrap transition-colors duration-200 ${
-                  activeTab === 'emails' 
-                    ? 'border-b-2 border-blue-600 text-blue-600' 
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                <Upload className="w-4 h-4 mr-2 inline" />
-                Emails
-              </button>
-              <button 
-                onClick={() => setActiveTab('design')} 
-                className={`tab-button px-4 py-3 font-semibold text-sm whitespace-nowrap transition-colors duration-200 ${
-                  activeTab === 'design' 
-                    ? 'border-b-2 border-blue-600 text-blue-600' 
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                <Grid className="w-4 h-4 mr-2 inline" />
-                Design
-              </button>
-              <button 
-                onClick={() => setActiveTab('settings')} 
-                className={`tab-button px-4 py-3 font-semibold text-sm whitespace-nowrap transition-colors duration-200 ${
-                  activeTab === 'settings' 
-                    ? 'border-b-2 border-blue-600 text-blue-600' 
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                <StoreIcon className="w-4 h-4 mr-2 inline" />
-                Store Settings
-              </button>
-              <button 
-                onClick={() => setActiveTab('contact-submissions')} 
-                className={`tab-button px-4 py-3 font-semibold text-sm whitespace-nowrap transition-colors duration-200 ${
-                  activeTab === 'contact-submissions' 
-                    ? 'border-b-2 border-blue-600 text-blue-600' 
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                📧 Contact Submissions
-              </button>
-              <button 
-                onClick={() => setActiveTab('contact-settings')} 
-                className={`tab-button px-4 py-3 font-semibold text-sm whitespace-nowrap transition-colors duration-200 ${
-                  activeTab === 'contact-settings' 
-                    ? 'border-b-2 border-blue-600 text-blue-600' 
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                📞 Contact Settings
-              </button>
+          <MotionWrapper delay={0.3}>
+            <div className="tab-navigation mb-6 border-b border-gray-200/50 bg-white/90 backdrop-blur-md rounded-xl shadow-lg">
+              <div className="flex px-4 sm:px-6 overflow-x-auto scrollbar-hide">
+                <motion.button 
+                  onClick={() => setActiveTab('products')} 
+                  className={`tab-button px-4 py-3 font-semibold text-sm whitespace-nowrap transition-all duration-200 rounded-t-lg ${
+                    activeTab === 'products' 
+                      ? 'border-b-2 border-blue-600 text-blue-600 bg-blue-50/50' 
+                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50/50'
+                  }`}
+                  whileHover={{ y: -1 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Package className="w-4 h-4 mr-2 inline" />
+                  Products
+                </motion.button>
+              {[
+                { key: 'orders', icon: List, label: 'Orders' },
+                { key: 'analytics', icon: Grid, label: 'Analytics' },
+                { key: 'inventory', icon: Package, label: 'Inventory' },
+                { key: 'emails', icon: Upload, label: 'Emails' },
+                { key: 'design', icon: Grid, label: 'Design' },
+                { key: 'settings', icon: StoreIcon, label: 'Store Settings' },
+                { key: 'contact-submissions', icon: null, label: '📧 Contact Submissions' },
+                { key: 'contact-settings', icon: null, label: '📞 Contact Settings' }
+              ].map(({ key, icon: Icon, label }) => (
+                <motion.button
+                  key={key}
+                  onClick={() => setActiveTab(key)}
+                  className={`tab-button px-4 py-3 font-semibold text-sm whitespace-nowrap transition-all duration-200 rounded-t-lg ${
+                    activeTab === key
+                      ? 'border-b-2 border-blue-600 text-blue-600 bg-blue-50/50'
+                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50/50'
+                  }`}
+                  whileHover={{ y: -1 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  {Icon && <Icon className="w-4 h-4 mr-2 inline" />}
+                  {label}
+                </motion.button>
+              ))}
+              </div>
             </div>
-          </div>
+          </MotionWrapper>
 
-        {activeTab === 'orders' && (
-          <div>
-            <OrderManagement isAdmin={true} />
-          </div>
-        )}
+        {/* Main Content Sections with AnimatePresence */}
+        <AnimatePresence mode="wait">
+          {activeTab === 'orders' && (
+            <motion.div
+              key="orders"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <OrderManagement isAdmin={true} />
+            </motion.div>
+          )}
 
-        {activeTab === 'analytics' && (
-          <div>
-            <AdvancedAnalytics />
-          </div>
-        )}
+          {activeTab === 'analytics' && (
+            <motion.div
+              key="analytics"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <AdvancedAnalytics />
+            </motion.div>
+          )}
 
-        {activeTab === 'inventory' && (
-          <div>
-            <InventoryManagement />
-          </div>
-        )}
+          {activeTab === 'inventory' && (
+            <motion.div
+              key="inventory"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <InventoryManagement />
+            </motion.div>
+          )}
 
-        {activeTab === 'emails' && (
-          <div>
-            <EmailNotificationSystem />
-          </div>
-        )}
+          {activeTab === 'emails' && (
+            <motion.div
+              key="emails"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <EmailNotificationSystem />
+            </motion.div>
+          )}
 
-        {activeTab === 'design' && (
-          <div className="fixed inset-0 bg-white z-[60] overflow-hidden">
-            <ThemeEditor />
-          </div>
-        )}
+          {activeTab === 'design' && (
+            <motion.div
+              key="design"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.05 }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+              className="fixed inset-0 bg-white z-[60] overflow-hidden"
+            >
+              <ThemeEditor />
+            </motion.div>
+          )}
 
-        {activeTab === 'products' && (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-bold">Products List</h2>
-            </div>
+          {activeTab === 'products' && (
+            <motion.div
+              key="products"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="bg-white/90 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-gray-200/50"
+            >
+              <div className="px-6 py-4 border-b border-gray-200/50 bg-gradient-to-r from-blue-50 to-indigo-50">
+                <h2 className="text-xl font-bold text-gray-800">Products List</h2>
+                <p className="text-gray-600 text-sm mt-1">Manage your product inventory</p>
+              </div>
             
             {products.length === 0 ? (
               <div className="text-center py-12">
@@ -944,11 +947,19 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {activeTab === 'settings' && (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-bold">Store Settings</h2>
-            </div>
+          {activeTab === 'settings' && (
+            <motion.div
+              key="settings"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="bg-white/90 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-gray-200/50"
+            >
+              <div className="px-6 py-4 border-b border-gray-200/50 bg-gradient-to-r from-purple-50 to-pink-50">
+                <h2 className="text-xl font-bold text-gray-800">Store Settings</h2>
+                <p className="text-gray-600 text-sm mt-1">Configure your store preferences</p>
+              </div>
             <form onSubmit={handleSettingsSubmit} className="p-6 space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Brand Name</label>
@@ -976,16 +987,32 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* Contact Submissions Tab */}
-        {activeTab === 'contact-submissions' && (
-          <ContactSubmissions />
-        )}
+          {/* Contact Submissions Tab */}
+          {activeTab === 'contact-submissions' && (
+            <motion.div
+              key="contact-submissions"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <ContactSubmissions />
+            </motion.div>
+          )}
 
-        {/* Contact Settings Tab */}
-        {activeTab === 'contact-settings' && (
-          <ContactInfoSettings />
-        )}
-      </div>
+          {/* Contact Settings Tab */}
+          {activeTab === 'contact-settings' && (
+            <motion.div
+              key="contact-settings"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <ContactInfoSettings />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
       {/* Add/Edit Product Modal */}
       {showForm && (
@@ -1328,9 +1355,10 @@ export default function AdminDashboard() {
             </div>
           </div>
         </div>
-      )}
-      </div>
-      </AnimatedBackground>
+        )}
+        
+        </div>
+      </DashboardLayout>
     </NotificationProvider>
   );
 }
