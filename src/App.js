@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import Store from './pages/store/Store';
 import DynamicStorefront from './components/DynamicStorefront';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -11,6 +12,18 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Auth from './Auth';
 // Error logging simplified for better performance
 import './App.css';
+
+// Create a QueryClient instance
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      cacheTime: 1000 * 60 * 10, // 10 minutes
+      refetchOnWindowFocus: false,
+      retry: 3,
+    },
+  },
+});
 
 function App() {
   const [showAuth, setShowAuth] = useState(false);
@@ -43,45 +56,51 @@ function App() {
   }, []);
 
   return (
-    <Router>
-      {showAuth && <Auth onClose={() => setShowAuth(false)} />}
-      <Routes>
-        {/* Public routes */}
-        <Route path="/" element={<Store />} />
-        <Route path="/theme-preview" element={<DynamicStorefront pageType="home" />} />
-        <Route path="/theme-home" element={<DynamicStorefront pageType="home" />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/contact" element={<ContactPage />} />
-        <Route path="/cart" element={<Store />} /> {/* Cart is handled within Store component */}
-        
-        {/* Protected user routes */}
-        <Route path="/dashboard" element={
-          <ProtectedRoute>
-            <UserDashboard />
-          </ProtectedRoute>
-        } />
-        <Route path="/dashboard/:tab" element={
-          <ProtectedRoute>
-            <UserDashboard />
-          </ProtectedRoute>
-        } />
-        <Route path="/wishlist" element={
-          <ProtectedRoute>
-            <WishlistPage />
-          </ProtectedRoute>
-        } />
-        
-        {/* Protected admin routes */}
-        <Route path="/admin" element={
-          <ProtectedRoute requireAdmin={true}>
-            <AdminDashboard />
-          </ProtectedRoute>
-        } />
-        
-        {/* Catch-all route for SPA routing - redirects unknown routes to home */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        {showAuth && <Auth onClose={() => setShowAuth(false)} />}
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<Store />} />
+          <Route path="/theme-preview" element={<DynamicStorefront pageType="home" />} />
+          <Route path="/theme-home" element={<DynamicStorefront pageType="home" />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/cart" element={<Store />} /> {/* Cart is handled within Store component */}
+          
+          {/* Preview routes for theme editor */}
+          <Route path="/preview" element={<Store />} />
+          <Route path="/preview/:pageType" element={<Store />} />
+          
+          {/* Protected user routes */}
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <UserDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard/:tab" element={
+            <ProtectedRoute>
+              <UserDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/wishlist" element={
+            <ProtectedRoute>
+              <WishlistPage />
+            </ProtectedRoute>
+          } />
+          
+          {/* Protected admin routes */}
+          <Route path="/admin" element={
+            <ProtectedRoute requireAdmin={true}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
+          
+          {/* Catch-all route for SPA routing - redirects unknown routes to home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+    </QueryClientProvider>
   );
 }
 
