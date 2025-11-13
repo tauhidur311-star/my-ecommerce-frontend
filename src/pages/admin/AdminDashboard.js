@@ -3,6 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Edit2, Trash2, Save, X, Upload, Package, Grid, Tag, List, Store as StoreIcon, Expand, Loader2, Activity, Mail } from 'lucide-react';
+import EnhancedButton from '../../components/ui/EnhancedButton';
+import PageTransition from '../../components/animations/PageTransition';
+import { playSuccess } from '../../utils/soundManager';
 import ImageCropper from '../../components/ImageCropper';
 import OrderManagement from '../../components/OrderManagement';
 import AdvancedAnalytics from '../../components/AdvancedAnalytics';
@@ -646,26 +649,25 @@ export default function AdminDashboard() {
         <div className="bg-white/90 backdrop-blur-md rounded-xl shadow-lg border border-gray-200/50 p-4 mb-6">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-4">
-              <motion.button 
-                onClick={() => setShowForm(true)} 
-                className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md"
+              <EnhancedButton 
+                onClick={() => setShowForm(true)}
+                variant="primary"
+                size="md"
+                className="shadow-md"
                 title="Add New Product (Ctrl+N)"
-                whileHover={{ scale: 1.02, y: -1 }}
-                whileTap={{ scale: 0.98 }}
               >
                 <Plus size={20} />
                 Add New Product
-              </motion.button>
+              </EnhancedButton>
               
-              <motion.button
+              <EnhancedButton
                 onClick={showShortcutsHelp}
-                className="flex items-center gap-2 px-3 py-2 border border-gray-300/50 text-gray-700 rounded-lg hover:bg-gray-50/50 transition-all backdrop-blur-sm"
+                variant="secondary"
+                size="md"
                 title="Keyboard Shortcuts (Ctrl+?)"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
               >
                 ⌨️ Shortcuts
-              </motion.button>
+              </EnhancedButton>
             </div>
             
             <div className="text-sm text-gray-600 bg-white/50 px-3 py-1 rounded-full">
@@ -761,39 +763,21 @@ export default function AdminDashboard() {
         {/* Main Content Sections with AnimatePresence */}
         <AnimatePresence mode="wait">
           {activeTab === 'orders' && (
-            <motion.div
-              key="orders"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            >
+            <PageTransition type="slideUp" key="orders">
               <OrderManagement isAdmin={true} />
-            </motion.div>
+            </PageTransition>
           )}
 
           {activeTab === 'analytics' && (
-            <motion.div
-              key="analytics"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            >
+            <PageTransition type="slideUp" key="analytics">
               <AdvancedAnalytics />
-            </motion.div>
+            </PageTransition>
           )}
 
           {activeTab === 'realtime-analytics' && (
-            <motion.div
-              key="realtime-analytics"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            >
+            <PageTransition type="slideUp" key="realtime-analytics">
               <AnalyticsDashboard />
-            </motion.div>
+            </PageTransition>
           )}
 
           {activeTab === 'inventory' && (
@@ -969,10 +953,14 @@ export default function AdminDashboard() {
                 <input type="text" value={storeSettings.settingsMenu.contact.text} onChange={(e) => setStoreSettings(s => ({ ...s, settingsMenu: { ...s.settingsMenu, contact: { ...s.settingsMenu.contact, text: e.target.value } } }))} className="w-full px-4 py-2 border border-gray-300 rounded-lg" />
               </div>
               <div className="flex justify-end">
-                <button type="submit" className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                <EnhancedButton 
+                  type="submit" 
+                  variant="success"
+                  onClick={() => playSuccess()}
+                >
                   <Save size={20} />
                   Save Settings
-                </button>
+                </EnhancedButton>
               </div>
             </form>
           </div>

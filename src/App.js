@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import soundManager from './utils/soundManager';
 import Store from './pages/store/Store';
 import DynamicStorefront from './components/DynamicStorefront';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -28,8 +29,16 @@ const queryClient = new QueryClient({
 function App() {
   const [showAuth, setShowAuth] = useState(false);
 
-  // Simplified error handling to prevent browser freeze
+  // Initialize sound manager and error handling
   useEffect(() => {
+    // Initialize sound manager
+    try {
+      soundManager.preloadAll();
+      console.log('🎵 Sound manager initialized');
+    } catch (error) {
+      console.warn('Sound manager initialization failed:', error);
+    }
+
     // Simple error handlers for better performance
     const handleGlobalError = (event) => {
       console.error('Global JavaScript Error:', event.error?.message || event.message);
@@ -45,7 +54,7 @@ function App() {
 
     // Simple initialization message
     if (process.env.NODE_ENV === 'development') {
-      console.log('🚀 App initialized - Error logging simplified for performance');
+      console.log('🚀 App initialized with enhanced UX features');
     }
 
     // Cleanup function
