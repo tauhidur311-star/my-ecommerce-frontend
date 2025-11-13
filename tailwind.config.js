@@ -39,6 +39,12 @@ module.exports = {
         'fade-in': 'fadeIn 0.5s ease-in-out',
         'slide-up': 'slideUp 0.5s ease-out',
         'bounce-gentle': 'bounceGentle 2s infinite',
+        'gradientMove': 'gradientMove 15s ease infinite',
+        'float-slow': 'floatSlow 6s ease-in-out infinite',
+        'float-medium': 'floatMedium 4s ease-in-out infinite',
+        'float-fast': 'floatFast 3s ease-in-out infinite',
+        'fadeIn': 'fadeIn 0.3s ease-out',
+        'slideUp': 'slideUp 0.3s ease-out',
       },
       keyframes: {
         fadeIn: {
@@ -52,6 +58,23 @@ module.exports = {
         bounceGentle: {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-5px)' },
+        },
+        gradientMove: {
+          '0%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+          '100%': { backgroundPosition: '0% 50%' },
+        },
+        floatSlow: {
+          '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
+          '50%': { transform: 'translateY(-20px) rotate(180deg)' },
+        },
+        floatMedium: {
+          '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
+          '50%': { transform: 'translateY(-15px) rotate(180deg)' },
+        },
+        floatFast: {
+          '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
+          '50%': { transform: 'translateY(-10px) rotate(180deg)' },
         }
       },
       spacing: {
@@ -69,6 +92,9 @@ module.exports = {
         '80': '80',
         '90': '90',
         '100': '100',
+      },
+      backgroundSize: {
+        '200': '200% 200%',
       }
     },
   },

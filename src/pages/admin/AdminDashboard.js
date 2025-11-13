@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import { Plus, Edit2, Trash2, Save, X, Upload, Package, Grid, Tag, List, Store as StoreIcon, Expand, Loader2 } from 'lucide-react';
 import ImageCropper from '../../components/ImageCropper';
@@ -16,6 +16,10 @@ import NotificationBell from '../../components/NotificationBell';
 import InventoryManagement from '../../components/InventoryManagement';
 import EmailNotificationSystem from '../../components/EmailNotificationSystem';
 import ThemeEditor from '../../components/design-editor/ThemeEditor';
+import AnimatedBackground from '../../components/admin/AnimatedBackground';
+import ContactSubmissions from '../../components/admin/ContactSubmissions';
+import ContactInfoSettings from '../../components/admin/ContactInfoSettings';
+import '../../styles/contactUs.css';
 // import '../../styles/mobile-responsive.css';
 
 const IMGBB_API_KEY = 'YOUR_API_KEY_HERE'; // Replace with your ImageBB API key
@@ -90,6 +94,7 @@ const getCroppedImg = async (imageSrc, crop) => {
 };
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -122,7 +127,7 @@ export default function AdminDashboard() {
       contact: { text: '', href: '/contact' }
     }
   });
-  const [activeTab, setActiveTab] = useState('products'); // 'products' or 'settings'
+  const [activeTab, setActiveTab] = useState('products'); // 'products', 'settings', 'contact-submissions', 'contact-settings'
   // const [loading, setLoading] = useState(false);
   // const [formErrors, setFormErrors] = useState({});
   // const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -613,11 +618,16 @@ export default function AdminDashboard() {
 
   return (
     <NotificationProvider>
-      <div className="min-h-screen">
-      {/* WebGL background disabled for performance */}
-      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-blue-50 to-purple-100">
-        {/* Simple CSS gradient background instead of heavy WebGL animation */}
-      </div>
+      <AnimatedBackground>
+        {/* Back to Storefront Button */}
+        <button
+          onClick={() => navigate('/')}
+          className="fixed top-6 right-8 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-5 rounded-full shadow-md transition-all transform hover:scale-105 hover:shadow-lg z-50"
+        >
+          ← Back to Storefront
+        </button>
+
+        <div className="min-h-screen">
 
       <Toaster position="bottom-center" />
       {/* Header */}
@@ -784,6 +794,26 @@ export default function AdminDashboard() {
                 <StoreIcon className="w-4 h-4 mr-2 inline" />
                 Store Settings
               </button>
+              <button 
+                onClick={() => setActiveTab('contact-submissions')} 
+                className={`tab-button px-4 py-3 font-semibold text-sm whitespace-nowrap transition-colors duration-200 ${
+                  activeTab === 'contact-submissions' 
+                    ? 'border-b-2 border-blue-600 text-blue-600' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                📧 Contact Submissions
+              </button>
+              <button 
+                onClick={() => setActiveTab('contact-settings')} 
+                className={`tab-button px-4 py-3 font-semibold text-sm whitespace-nowrap transition-colors duration-200 ${
+                  activeTab === 'contact-settings' 
+                    ? 'border-b-2 border-blue-600 text-blue-600' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                📞 Contact Settings
+              </button>
             </div>
           </div>
 
@@ -944,6 +974,16 @@ export default function AdminDashboard() {
               </div>
             </form>
           </div>
+        )}
+
+        {/* Contact Submissions Tab */}
+        {activeTab === 'contact-submissions' && (
+          <ContactSubmissions />
+        )}
+
+        {/* Contact Settings Tab */}
+        {activeTab === 'contact-settings' && (
+          <ContactInfoSettings />
         )}
       </div>
 
@@ -1290,6 +1330,7 @@ export default function AdminDashboard() {
         </div>
       )}
       </div>
+      </AnimatedBackground>
     </NotificationProvider>
   );
 }

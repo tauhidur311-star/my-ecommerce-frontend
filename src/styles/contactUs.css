@@ -1,5 +1,11 @@
 /* Contact Us Page - Additional CSS for animations and enhancements */
 
+/* Admin Dashboard Animated Background */
+.animate-gradientMove {
+  background-size: 200% 200%;
+  animation: gradientMove 15s ease infinite;
+}
+
 /* Fade in animation for success/error messages */
 @keyframes fadeIn {
   from {
