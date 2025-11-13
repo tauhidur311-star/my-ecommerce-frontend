@@ -8,6 +8,7 @@ import Sidebar from './Sidebar';
 import Canvas from './Canvas';
 import Inspector from './Inspector';
 import AssetPicker from './AssetPicker';
+import SidebarToggle from './SidebarToggle';
 import { themeAPI } from '../../services/themeAPI';
 import useThemeUpdates from '../../hooks/useThemeUpdates';
 import { useInvalidateTheme } from '../../hooks/useThemeData';
@@ -25,6 +26,8 @@ const ThemeEditor = () => {
   const [draggedSection, setDraggedSection] = useState(null);
   const [showLivePreview, setShowLivePreview] = useState(false);
   const [lastSaveTime, setLastSaveTime] = useState(null);
+  const [showLeftSidebar, setShowLeftSidebar] = useState(true);
+  const [showRightSidebar, setShowRightSidebar] = useState(true);
   
   // Refs for real-time preview
   const previewIframeRef = useRef(null);
@@ -451,12 +454,22 @@ const ThemeEditor = () => {
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        {/* Sidebar */}
-        <Sidebar 
-          onAddSection={addSection}
-          sections={sections}
-          selectedSection={selectedSection}
-          onSelectSection={setSelectedSection}
+        {/* Left Sidebar */}
+        {showLeftSidebar && (
+          <Sidebar 
+            onAddSection={addSection}
+            sections={sections}
+            selectedSection={selectedSection}
+            onSelectSection={setSelectedSection}
+          />
+        )}
+
+        {/* Left Sidebar Toggle */}
+        <SidebarToggle
+          isOpen={showLeftSidebar}
+          onToggle={() => setShowLeftSidebar(!showLeftSidebar)}
+          position="left"
+          label="Design Editor Sidebar"
         />
 
         {/* Main Content Area */}
@@ -617,7 +630,7 @@ const ThemeEditor = () => {
             )}
 
             {/* Inspector Panel */}
-            {selectedSection && (
+            {selectedSection && showRightSidebar && (
               <Inspector
                 section={selectedSection}
                 onUpdateSection={(updates) => {
@@ -626,6 +639,16 @@ const ThemeEditor = () => {
                 }}
                 onOpenAssetPicker={openAssetPicker}
                 onClose={() => setSelectedSection(null)}
+              />
+            )}
+
+            {/* Right Sidebar Toggle */}
+            {selectedSection && (
+              <SidebarToggle
+                isOpen={showRightSidebar}
+                onToggle={() => setShowRightSidebar(!showRightSidebar)}
+                position="right"
+                label="Settings Panel"
               />
             )}
           </div>

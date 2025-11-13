@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingCart, Star, Mail, Phone } from 'lucide-react';
+import { ShoppingCart, Star, Mail, Phone, Eye } from 'lucide-react';
 
 const SafeSectionRenderer = ({ section, products = [], onAddToCart }) => {
   try {
@@ -224,16 +224,278 @@ const SafeSectionRenderer = ({ section, products = [], onAddToCart }) => {
       );
     }
 
-    // For other section types, show placeholder
+    // Footer Section
+    if (section.type === 'footer') {
+      const {
+        companyName = 'Your Company',
+        description = 'Short description of your company',
+        links = [
+          { text: 'About', url: '/about' },
+          { text: 'Contact', url: '/contact' }
+        ],
+        socialLinks = {
+          facebook: '',
+          twitter: '',
+          instagram: ''
+        },
+        backgroundColor = '#1f2937',
+        textColor = '#ffffff'
+      } = settings;
+
+      return (
+        <footer className="py-12" style={{ backgroundColor, color: textColor }}>
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Company Info */}
+              <div>
+                <h3 className="text-xl font-bold mb-4">{companyName}</h3>
+                <p className="opacity-80">{description}</p>
+              </div>
+
+              {/* Quick Links */}
+              <div>
+                <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
+                <ul className="space-y-2">
+                  {links.map((link, index) => (
+                    <li key={index}>
+                      <a 
+                        href={link.url}
+                        className="opacity-80 hover:opacity-100 transition-opacity"
+                      >
+                        {link.text}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Social Links */}
+              <div>
+                <h4 className="text-lg font-semibold mb-4">Follow Us</h4>
+                <div className="flex space-x-4">
+                  {socialLinks.facebook && (
+                    <a 
+                      href={socialLinks.facebook} 
+                      className="opacity-80 hover:opacity-100 transition-opacity"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Facebook
+                    </a>
+                  )}
+                  {socialLinks.twitter && (
+                    <a 
+                      href={socialLinks.twitter} 
+                      className="opacity-80 hover:opacity-100 transition-opacity"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Twitter
+                    </a>
+                  )}
+                  {socialLinks.instagram && (
+                    <a 
+                      href={socialLinks.instagram} 
+                      className="opacity-80 hover:opacity-100 transition-opacity"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Instagram
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Copyright */}
+            <div className="border-t border-current border-opacity-20 mt-8 pt-8 text-center">
+              <p className="opacity-80">
+                © {new Date().getFullYear()} {companyName}. All rights reserved.
+              </p>
+            </div>
+          </div>
+        </footer>
+      );
+    }
+
+    // Video Section
+    if (section.type === 'video') {
+      const {
+        title = 'Video Section',
+        subtitle = 'Watch our featured video',
+        videoUrl = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        videoType = 'mp4', // 'mp4', 'youtube', 'vimeo'
+        autoplay = false,
+        loop = false,
+        controls = true,
+        muted = true,
+        aspectRatio = '16:9',
+        backgroundColor = '#ffffff',
+        textColor = '#1f2937'
+      } = settings;
+
+      const getAspectRatioClass = () => {
+        switch (aspectRatio) {
+          case '4:3': return 'aspect-[4/3]';
+          case '1:1': return 'aspect-square';
+          case '21:9': return 'aspect-[21/9]';
+          default: return 'aspect-video'; // 16:9
+        }
+      };
+
+      const renderVideoEmbed = () => {
+        if (videoType === 'youtube') {
+          const videoId = videoUrl.includes('youtube.com') 
+            ? videoUrl.split('v=')[1]?.split('&')[0] 
+            : videoUrl.split('youtu.be/')[1]?.split('?')[0];
+          
+          if (videoId) {
+            return (
+              <iframe
+                src={`https://www.youtube.com/embed/${videoId}?autoplay=${autoplay ? 1 : 0}&loop=${loop ? 1 : 0}&mute=${muted ? 1 : 0}&controls=${controls ? 1 : 0}`}
+                title={title}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full"
+              />
+            );
+          }
+        }
+
+        if (videoType === 'vimeo') {
+          const videoId = videoUrl.split('vimeo.com/')[1]?.split('?')[0];
+          
+          if (videoId) {
+            return (
+              <iframe
+                src={`https://player.vimeo.com/video/${videoId}?autoplay=${autoplay ? 1 : 0}&loop=${loop ? 1 : 0}&muted=${muted ? 1 : 0}&controls=${controls ? 1 : 0}`}
+                title={title}
+                frameBorder="0"
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full"
+              />
+            );
+          }
+        }
+
+        // Default to HTML5 video
+        return (
+          <video
+            src={videoUrl}
+            autoPlay={autoplay}
+            loop={loop}
+            controls={controls}
+            muted={muted}
+            className="w-full h-full object-cover"
+          >
+            <source src={videoUrl} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        );
+      };
+
+      return (
+        <section className="py-16 px-4" style={{ backgroundColor, color: textColor }}>
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">{title}</h2>
+              <p className="text-lg opacity-80">{subtitle}</p>
+            </div>
+
+            <div className={`relative ${getAspectRatioClass()} bg-gray-900 rounded-lg overflow-hidden shadow-lg`}>
+              {renderVideoEmbed()}
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    // Gallery Section
+    if (section.type === 'gallery') {
+      const {
+        title = 'Image Gallery',
+        subtitle = 'Browse our collection',
+        images = [
+          { url: 'https://picsum.photos/400/300?random=1', alt: 'Gallery Image 1' },
+          { url: 'https://picsum.photos/400/300?random=2', alt: 'Gallery Image 2' },
+          { url: 'https://picsum.photos/400/300?random=3', alt: 'Gallery Image 3' },
+          { url: 'https://picsum.photos/400/300?random=4', alt: 'Gallery Image 4' }
+        ],
+        columns = 3,
+        spacing = 4,
+        lightbox = true,
+        backgroundColor = '#ffffff',
+        textColor = '#1f2937'
+      } = settings;
+
+      const getGridCols = () => {
+        switch (columns) {
+          case 2: return 'grid-cols-1 md:grid-cols-2';
+          case 4: return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4';
+          case 5: return 'grid-cols-1 md:grid-cols-3 lg:grid-cols-5';
+          default: return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
+        }
+      };
+
+      return (
+        <section className="py-16 px-4" style={{ backgroundColor, color: textColor }}>
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">{title}</h2>
+              <p className="text-lg opacity-80">{subtitle}</p>
+            </div>
+
+            <div className={`grid ${getGridCols()} gap-${spacing}`}>
+              {images.map((image, index) => (
+                <div
+                  key={index}
+                  className="relative aspect-square bg-gray-200 rounded-lg overflow-hidden group cursor-pointer hover:shadow-lg transition-all duration-300"
+                  onClick={() => {
+                    if (lightbox) {
+                      // Simple lightbox implementation
+                      const lightboxDiv = document.createElement('div');
+                      lightboxDiv.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
+                      lightboxDiv.innerHTML = `
+                        <div class="max-w-4xl max-h-4xl p-4">
+                          <img src="${image.url}" alt="${image.alt}" class="max-w-full max-h-full object-contain rounded-lg" />
+                          <button class="absolute top-4 right-4 text-white text-2xl" onclick="this.parentElement.parentElement.remove()">&times;</button>
+                        </div>
+                      `;
+                      document.body.appendChild(lightboxDiv);
+                    }
+                  }}
+                >
+                  <img
+                    src={image.url}
+                    alt={image.alt}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  {lightbox && (
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                      <Eye className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" size={24} />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    // For other section types, show placeholder (remove JSON output)
     return (
       <div className="py-8 px-4 bg-gray-100 border-2 border-dashed border-gray-300 text-center">
         <h3 className="text-lg font-medium text-gray-700 mb-2">
           {section.type.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())} Section
         </h3>
-        <p className="text-sm text-gray-500">Section loaded successfully</p>
-        <pre className="text-xs bg-white p-2 rounded mt-2 max-w-md mx-auto overflow-auto">
-          {JSON.stringify(section, null, 2)}
-        </pre>
+        <p className="text-sm text-gray-500 mb-4">This section type is not yet implemented</p>
+        <div className="text-xs text-gray-400">
+          <p>Section ID: {section.id}</p>
+          <p>Type: {section.type}</p>
+        </div>
       </div>
     );
   } catch (error) {

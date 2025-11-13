@@ -378,6 +378,443 @@ const Inspector = ({ section, onUpdateSection, onOpenAssetPicker, onClose }) => 
           </div>
         );
 
+      case 'footer':
+        return (
+          <div className="space-y-6">
+            {/* Company Information */}
+            <div className="space-y-4">
+              <h4 className="font-medium text-gray-900 border-b pb-2">Company Information</h4>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
+                <input
+                  type="text"
+                  value={section.settings.companyName || 'Your Company'}
+                  onChange={(e) => updateSettings('companyName', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter company name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea
+                  value={section.settings.description || 'Short description of your company'}
+                  onChange={(e) => updateSettings('description', e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Company description"
+                />
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            <div className="space-y-4">
+              <h4 className="font-medium text-gray-900 border-b pb-2">Quick Links</h4>
+              {(section.settings.links || [{ text: 'About', url: '/about' }, { text: 'Contact', url: '/contact' }]).map((link, index) => (
+                <div key={index} className="grid grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    value={link.text || ''}
+                    onChange={(e) => {
+                      const newLinks = [...(section.settings.links || [])];
+                      newLinks[index] = { ...link, text: e.target.value };
+                      updateSettings('links', newLinks);
+                    }}
+                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Link text"
+                  />
+                  <input
+                    type="text"
+                    value={link.url || ''}
+                    onChange={(e) => {
+                      const newLinks = [...(section.settings.links || [])];
+                      newLinks[index] = { ...link, url: e.target.value };
+                      updateSettings('links', newLinks);
+                    }}
+                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="URL"
+                  />
+                </div>
+              ))}
+              <button
+                onClick={() => {
+                  const newLinks = [...(section.settings.links || []), { text: 'New Link', url: '#' }];
+                  updateSettings('links', newLinks);
+                }}
+                className="w-full px-3 py-2 border border-dashed border-gray-300 rounded-md text-gray-600 hover:bg-gray-50"
+              >
+                + Add Link
+              </button>
+            </div>
+
+            {/* Social Links */}
+            <div className="space-y-4">
+              <h4 className="font-medium text-gray-900 border-b pb-2">Social Media</h4>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Facebook URL</label>
+                <input
+                  type="url"
+                  value={section.settings.socialLinks?.facebook || ''}
+                  onChange={(e) => updateSettings('socialLinks', { 
+                    ...section.settings.socialLinks, 
+                    facebook: e.target.value 
+                  })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="https://facebook.com/yourpage"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Twitter URL</label>
+                <input
+                  type="url"
+                  value={section.settings.socialLinks?.twitter || ''}
+                  onChange={(e) => updateSettings('socialLinks', { 
+                    ...section.settings.socialLinks, 
+                    twitter: e.target.value 
+                  })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="https://twitter.com/yourhandle"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Instagram URL</label>
+                <input
+                  type="url"
+                  value={section.settings.socialLinks?.instagram || ''}
+                  onChange={(e) => updateSettings('socialLinks', { 
+                    ...section.settings.socialLinks, 
+                    instagram: e.target.value 
+                  })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="https://instagram.com/yourhandle"
+                />
+              </div>
+            </div>
+
+            {/* Colors */}
+            <div className="space-y-4">
+              <h4 className="font-medium text-gray-900 border-b pb-2">Colors</h4>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Background Color</label>
+                <input
+                  type="color"
+                  value={section.settings.backgroundColor || '#1f2937'}
+                  onChange={(e) => updateSettings('backgroundColor', e.target.value)}
+                  className="w-full h-10 rounded-md border border-gray-300"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Text Color</label>
+                <input
+                  type="color"
+                  value={section.settings.textColor || '#ffffff'}
+                  onChange={(e) => updateSettings('textColor', e.target.value)}
+                  className="w-full h-10 rounded-md border border-gray-300"
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'gallery':
+        return (
+          <div className="space-y-6">
+            {/* Content */}
+            <div className="space-y-4">
+              <h4 className="font-medium text-gray-900 border-b pb-2">Content</h4>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                <input
+                  type="text"
+                  value={section.settings.title || 'Image Gallery'}
+                  onChange={(e) => updateSettings('title', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Subtitle</label>
+                <input
+                  type="text"
+                  value={section.settings.subtitle || 'Browse our collection'}
+                  onChange={(e) => updateSettings('subtitle', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
+            {/* Gallery Images */}
+            <div className="space-y-4">
+              <h4 className="font-medium text-gray-900 border-b pb-2">Images</h4>
+              {(section.settings.images || []).map((image, index) => (
+                <div key={index} className="border border-gray-200 rounded-md p-3 space-y-2">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                    <div className="flex space-x-2">
+                      <input
+                        type="text"
+                        value={image.url || ''}
+                        onChange={(e) => {
+                          const newImages = [...(section.settings.images || [])];
+                          newImages[index] = { ...image, url: e.target.value };
+                          updateSettings('images', newImages);
+                        }}
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Image URL"
+                      />
+                      <button
+                        onClick={() => onOpenAssetPicker && onOpenAssetPicker((assetUrl) => {
+                          const newImages = [...(section.settings.images || [])];
+                          newImages[index] = { ...image, url: assetUrl };
+                          updateSettings('images', newImages);
+                        })}
+                        className="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                      >
+                        Browse
+                      </button>
+                    </div>
+                  </div>
+                  <input
+                    type="text"
+                    value={image.alt || ''}
+                    onChange={(e) => {
+                      const newImages = [...(section.settings.images || [])];
+                      newImages[index] = { ...image, alt: e.target.value };
+                      updateSettings('images', newImages);
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Alt text"
+                  />
+                  <button
+                    onClick={() => {
+                      const newImages = (section.settings.images || []).filter((_, i) => i !== index);
+                      updateSettings('images', newImages);
+                    }}
+                    className="text-red-600 text-sm hover:underline"
+                  >
+                    Remove Image
+                  </button>
+                </div>
+              ))}
+              <button
+                onClick={() => {
+                  const newImages = [...(section.settings.images || []), { 
+                    url: `https://picsum.photos/400/300?random=${Date.now()}`, 
+                    alt: 'Gallery Image' 
+                  }];
+                  updateSettings('images', newImages);
+                }}
+                className="w-full px-3 py-2 border border-dashed border-gray-300 rounded-md text-gray-600 hover:bg-gray-50"
+              >
+                + Add Image
+              </button>
+            </div>
+
+            {/* Layout Settings */}
+            <div className="space-y-4">
+              <h4 className="font-medium text-gray-900 border-b pb-2">Layout</h4>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Images Per Row</label>
+                <select
+                  value={section.settings.columns || 3}
+                  onChange={(e) => updateSettings('columns', parseInt(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value={2}>2 columns</option>
+                  <option value={3}>3 columns</option>
+                  <option value={4}>4 columns</option>
+                  <option value={5}>5 columns</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Spacing</label>
+                <select
+                  value={section.settings.spacing || 4}
+                  onChange={(e) => updateSettings('spacing', parseInt(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value={2}>Small</option>
+                  <option value={4}>Medium</option>
+                  <option value={6}>Large</option>
+                </select>
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="lightbox"
+                  checked={section.settings.lightbox || false}
+                  onChange={(e) => updateSettings('lightbox', e.target.checked)}
+                  className="mr-2"
+                />
+                <label htmlFor="lightbox" className="text-sm font-medium text-gray-700">
+                  Enable Lightbox
+                </label>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'video':
+        return (
+          <div className="space-y-6">
+            {/* Content */}
+            <div className="space-y-4">
+              <h4 className="font-medium text-gray-900 border-b pb-2">Content</h4>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                <input
+                  type="text"
+                  value={section.settings.title || 'Video Section'}
+                  onChange={(e) => updateSettings('title', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Subtitle</label>
+                <input
+                  type="text"
+                  value={section.settings.subtitle || 'Watch our featured video'}
+                  onChange={(e) => updateSettings('subtitle', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
+            {/* Video Source */}
+            <div className="space-y-4">
+              <h4 className="font-medium text-gray-900 border-b pb-2">Video Source</h4>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Video Type</label>
+                <select
+                  value={section.settings.videoType || 'mp4'}
+                  onChange={(e) => updateSettings('videoType', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="mp4">MP4 Video</option>
+                  <option value="youtube">YouTube</option>
+                  <option value="vimeo">Vimeo</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {section.settings.videoType === 'youtube' ? 'YouTube URL' : 
+                   section.settings.videoType === 'vimeo' ? 'Vimeo URL' : 'Video URL'}
+                </label>
+                <div className="flex space-x-2">
+                  <input
+                    type="url"
+                    value={section.settings.videoUrl || ''}
+                    onChange={(e) => updateSettings('videoUrl', e.target.value)}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder={
+                      section.settings.videoType === 'youtube' ? 'https://www.youtube.com/watch?v=...' :
+                      section.settings.videoType === 'vimeo' ? 'https://vimeo.com/...' :
+                      'https://example.com/video.mp4'
+                    }
+                  />
+                  {section.settings.videoType === 'mp4' && onOpenAssetPicker && (
+                    <button
+                      onClick={() => onOpenAssetPicker((assetUrl) => {
+                        updateSettings('videoUrl', assetUrl);
+                      })}
+                      className="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    >
+                      Browse
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Playback Settings */}
+            <div className="space-y-4">
+              <h4 className="font-medium text-gray-900 border-b pb-2">Playback Options</h4>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Aspect Ratio</label>
+                <select
+                  value={section.settings.aspectRatio || '16:9'}
+                  onChange={(e) => updateSettings('aspectRatio', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="16:9">16:9 (Widescreen)</option>
+                  <option value="4:3">4:3 (Standard)</option>
+                  <option value="1:1">1:1 (Square)</option>
+                  <option value="21:9">21:9 (Ultrawide)</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="autoplay"
+                    checked={section.settings.autoplay || false}
+                    onChange={(e) => updateSettings('autoplay', e.target.checked)}
+                    className="mr-2"
+                  />
+                  <label htmlFor="autoplay" className="text-sm font-medium text-gray-700">
+                    Autoplay
+                  </label>
+                </div>
+
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="loop"
+                    checked={section.settings.loop || false}
+                    onChange={(e) => updateSettings('loop', e.target.checked)}
+                    className="mr-2"
+                  />
+                  <label htmlFor="loop" className="text-sm font-medium text-gray-700">
+                    Loop
+                  </label>
+                </div>
+
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="controls"
+                    checked={section.settings.controls !== false}
+                    onChange={(e) => updateSettings('controls', e.target.checked)}
+                    className="mr-2"
+                  />
+                  <label htmlFor="controls" className="text-sm font-medium text-gray-700">
+                    Show Controls
+                  </label>
+                </div>
+
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="muted"
+                    checked={section.settings.muted !== false}
+                    onChange={(e) => updateSettings('muted', e.target.checked)}
+                    className="mr-2"
+                  />
+                  <label htmlFor="muted" className="text-sm font-medium text-gray-700">
+                    Muted by Default
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
       default:
         return (
           <div className="text-center py-8">
