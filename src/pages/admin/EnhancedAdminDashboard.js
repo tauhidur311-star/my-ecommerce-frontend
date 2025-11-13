@@ -6,6 +6,7 @@ import {
   MessageCircle, Calendar, Download, RefreshCw, Activity,
   ShoppingBag, DollarSign, Star, FileText
 } from 'lucide-react';
+import ConnectionStatus from '../../components/ui/ConnectionStatus';
 import { useAnalyticsData } from '../../hooks/useAnalyticsData';
 import { useNotifications, useRealTimeNotifications } from '../../hooks/useNotifications';
 import { useOfflineCache, useServiceWorker } from '../../hooks/useOfflineCache';

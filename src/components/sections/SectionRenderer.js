@@ -1,6 +1,7 @@
 import React from 'react';
 import HeroSection from './HeroSection';
 import ProductGridSection from './ProductGridSection';
+import FeaturesSection from './FeaturesSection';
 import ImageTextSection from './ImageTextSection';
 import TestimonialsSection from './TestimonialsSection';
 import FooterSection from './FooterSection';
@@ -13,12 +14,14 @@ const SECTION_MAP = {
   hero: HeroSection,
   'product-grid': ProductGridSection,
   'featured-product': ProductGridSection,
+  features: FeaturesSection,
   'image-text': ImageTextSection,
   testimonials: TestimonialsSection,
   footer: FooterSection,
   html: CustomHTMLSection,
   gallery: GallerySection,
   newsletter: NewsletterSection,
+  contact: ContactFormSection,
   'contact-form': ContactFormSection,
   video: CustomHTMLSection, // Can be handled as HTML for now
 };

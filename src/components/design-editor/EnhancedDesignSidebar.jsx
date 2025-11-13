@@ -11,7 +11,7 @@ import useDesignStore, { AVAILABLE_SECTIONS } from '../../stores/designStore';
 import EnhancedButton from '../ui/EnhancedButton';
 
 // Draggable Section Item for the sidebar
-const DraggableSection = ({ section, isActive }) => {
+const DraggableSection = ({ section, isActive, onAddSection }) => {
   const [isDraggedOver, setIsDraggedOver] = useState(false);
   
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
@@ -33,19 +33,38 @@ const DraggableSection = ({ section, isActive }) => {
 
   const Icon = iconMap[section.icon] || Plus;
 
+  // Handle direct click to add section
+  const handleClick = (e) => {
+    // Prevent click when dragging
+    if (isDragging) return;
+    
+    e.preventDefault();
+    e.stopPropagation();
+    onAddSection(section.id);
+  };
+
   return (
     <motion.div
       ref={setNodeRef}
-      {...listeners}
-      {...attributes}
       whileHover={{ scale: isDragging ? 1 : 1.02 }}
       whileTap={{ scale: 0.98 }}
-      className={`p-4 border border-gray-200 rounded-lg cursor-grab active:cursor-grabbing transition-all ${
-        isDragging ? 'opacity-50 scale-105 shadow-lg' : 'hover:border-blue-300 hover:shadow-md'
+      className={`p-4 border border-gray-200 rounded-lg transition-all relative ${
+        isDragging ? 'opacity-50 scale-105 shadow-lg cursor-grabbing' : 'hover:border-blue-300 hover:shadow-md cursor-pointer'
       } ${isActive ? 'border-blue-500 bg-blue-50' : 'bg-white'}`}
       onMouseEnter={() => setIsDraggedOver(true)}
       onMouseLeave={() => setIsDraggedOver(false)}
+      onClick={handleClick}
     >
+      {/* Drag Handle */}
+      <div 
+        {...listeners}
+        {...attributes}
+        className="absolute top-2 right-2 p-1 rounded opacity-0 hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <Layout className="w-4 h-4 text-gray-400" />
+      </div>
+
       <div className="text-center">
         <div className={`w-12 h-12 mx-auto mb-3 rounded-lg flex items-center justify-center ${
           isActive ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'
@@ -54,6 +73,9 @@ const DraggableSection = ({ section, isActive }) => {
         </div>
         <h4 className="font-medium text-gray-900 text-sm mb-1">{section.name}</h4>
         <p className="text-xs text-gray-500">{section.description}</p>
+        <div className="mt-2 text-xs text-blue-600 font-medium">
+          Click to add or drag to position
+        </div>
       </div>
       
       {isDragging && (
@@ -361,7 +383,7 @@ const MediaPanel = ({ onSelectMedia }) => {
 };
 
 const EnhancedDesignSidebar = ({ onSelectMedia }) => {
-  const { sidebarMode, setSidebarMode } = useDesignStore();
+  const { sidebarMode, setSidebarMode, addSection } = useDesignStore();
 
   const sidebarItems = [
     { id: 'layout', label: 'Layout', icon: Layout },
@@ -387,6 +409,7 @@ const EnhancedDesignSidebar = ({ onSelectMedia }) => {
                   key={section.id}
                   section={section}
                   isActive={false}
+                  onAddSection={addSection}
                 />
               ))}
             </div>
