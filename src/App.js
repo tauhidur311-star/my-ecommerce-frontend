@@ -12,6 +12,7 @@ import WishlistPage from './pages/WishlistPage';
 import GlassUIShowcase from './components/examples/GlassUIShowcase';
 import ProtectedRoute from './components/ProtectedRoute';
 import Auth from './Auth';
+import NotificationToast from './components/notifications/NotificationToast';
 // Error logging simplified for better performance
 import './App.css';
 
@@ -112,6 +113,7 @@ function App() {
           {/* Catch-all route for SPA routing - redirects unknown routes to home */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <NotificationToast position="top-right" />
       </Router>
     </QueryClientProvider>
   );
