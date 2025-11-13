@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Activity, Server, Database, Clock, Memory, 
+  Activity, Server, Database, Clock, HardDrive, 
   Cpu, AlertTriangle, CheckCircle, TrendingUp,
   RefreshCw, BarChart3, Zap
 } from 'lucide-react';
@@ -199,7 +199,7 @@ const PerformanceMonitor = () => {
             title="Memory Usage"
             value={`${realTimeMetrics.memory.usagePercentage}%`}
             subtitle={`${realTimeMetrics.memory.heapUsedMB}MB / ${realTimeMetrics.memory.heapTotalMB}MB`}
-            icon={Memory}
+            icon={HardDrive}
             color={getMemoryStatus() === 'good' ? 'blue' : getMemoryStatus() === 'warning' ? 'yellow' : 'red'}
             status={getMemoryStatus()}
             delay={0.2}
