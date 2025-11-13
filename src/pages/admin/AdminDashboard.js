@@ -986,7 +986,8 @@ export default function AdminDashboard() {
                 </table>
               </div>
             )}
-          </div>
+            </motion.div>
+          )}
         )}
 
           {activeTab === 'settings' && (
