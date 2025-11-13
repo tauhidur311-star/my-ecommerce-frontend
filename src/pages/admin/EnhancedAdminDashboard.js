@@ -18,6 +18,7 @@ const EnhancedAnalyticsDashboard = lazy(() => import('../../components/analytics
 const InventoryTable = lazy(() => import('../../components/inventory/InventoryTable'));
 const SegmentationPanel = lazy(() => import('../../components/customers/SegmentationPanel'));
 const CampaignManager = lazy(() => import('../../components/marketing/CampaignManager'));
+const PerformanceMonitor = lazy(() => import('../../components/admin/PerformanceMonitor'));
 
 const EnhancedAdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -49,6 +50,7 @@ const EnhancedAdminDashboard = () => {
     { id: 'inventory', label: 'Inventory', icon: Package },
     { id: 'customers', label: 'Customers', icon: Users },
     { id: 'marketing', label: 'Marketing', icon: Mail },
+    { id: 'performance', label: 'Performance', icon: TrendingUp },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
@@ -252,6 +254,13 @@ const EnhancedAdminDashboard = () => {
         return (
           <Suspense fallback={<LoadingSkeleton />}>
             <CampaignManager />
+          </Suspense>
+        );
+
+      case 'performance':
+        return (
+          <Suspense fallback={<LoadingSkeleton />}>
+            <PerformanceMonitor />
           </Suspense>
         );
 
