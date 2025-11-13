@@ -403,22 +403,8 @@ export default function Store() {
   // Load products
   useEffect(() => {
     loadProducts();
-    loadPublishedTheme();
   }, [loadProducts]);
 
-  // Load published theme
-  const loadPublishedTheme = async () => {
-    try {
-      const data = await publicAPI.getPublishedTheme('home');
-      if (data?.layout?.sections && data.layout.sections.length > 0) {
-        setPublishedTheme(data);
-        setShowThemeToggle(true);
-        console.log('Store.js: Published theme loaded:', data.layout.sections.length, 'sections');
-      }
-    } catch (error) {
-      console.log('Store.js: No published theme available');
-    }
-  };
 
   // Load cart from localStorage on initial render
   useEffect(() => {
@@ -708,17 +694,6 @@ export default function Store() {
         {/* Simple CSS gradient background instead of heavy WebGL animation */}
       </div>
 
-      {/* Theme Toggle Button */}
-      {showThemeToggle && (
-        <div className="fixed top-20 right-4 z-50">
-          <button
-            onClick={() => setShowThemeToggle(!showThemeToggle)}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-green-700 text-sm"
-          >
-            🎨 Theme Editor Active
-          </button>
-        </div>
-      )}
 
       {/* Navigation */}
       <Navbar
@@ -867,50 +842,8 @@ export default function Store() {
         />
       </Suspense>
 
-      {/* Products Section */}
+      {/* Original Store Content - Now handled by theme sections above */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Published Theme Content */}
-        {publishedTheme && publishedTheme.layout?.sections && (
-          <div className="theme-content mb-12">
-            <div className="bg-green-100 border border-green-500 text-green-800 px-4 py-2 text-center text-sm rounded-lg mb-6">
-              <strong>🎉 THEME EDITOR CONTENT ACTIVE!</strong> Content from Design Editor
-            </div>
-            {publishedTheme.layout.sections.map((section) => {
-              if (section.type === 'hero') {
-                const settings = section.settings || {};
-                return (
-                  <section 
-                    key={section.id}
-                    className="py-20 px-4 text-center rounded-lg mb-6 shadow-lg"
-                    style={{ 
-                      backgroundColor: settings.backgroundColor || '#1f2937',
-                      color: settings.textColor || '#ffffff'
-                    }}
-                  >
-                    <div className="max-w-4xl mx-auto">
-                      <h1 className="text-5xl font-bold mb-6">{settings.title || 'Welcome'}</h1>
-                      <p className="text-xl mb-8 opacity-90">{settings.subtitle || 'Subtitle'}</p>
-                      {settings.buttonText && (
-                        <button className="bg-white text-gray-900 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-md">
-                          {settings.buttonText}
-                        </button>
-                      )}
-                    </div>
-                  </section>
-                );
-              }
-              return (
-                <div key={section.id} className="py-8 px-4 bg-gray-100 text-center border border-gray-300 rounded-lg mb-4">
-                  <h3 className="font-medium text-gray-700 mb-2">{section.type.replace('-', ' ').toUpperCase()} Section</h3>
-                  <p className="text-sm text-gray-500">From theme editor</p>
-                </div>
-              );
-            })}
-            <div className="bg-blue-100 border border-blue-500 text-blue-800 px-4 py-2 text-center text-sm rounded-lg">
-              <strong>⬇️ Original store content below ⬇️</strong>
-            </div>
-          </div>
-        )}
         <div className="mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Featured Products</h2>
           <p className="text-gray-600">Discover our latest collection of premium products</p>
