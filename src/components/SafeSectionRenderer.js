@@ -144,6 +144,86 @@ const SafeSectionRenderer = ({ section, products = [], onAddToCart }) => {
       );
     }
 
+    // Featured Product Section
+    if (section.type === 'featured-product') {
+      const {
+        title = 'Featured Product',
+        subtitle = 'Check out our bestseller',
+        backgroundColor = '#ffffff',
+        textColor = '#1f2937',
+        buttonColor = '#3b82f6'
+      } = settings;
+
+      // Get the first product or use a placeholder
+      const featuredProduct = products[0] || {
+        _id: 'placeholder',
+        name: 'Sample Featured Product',
+        price: 99.99,
+        image: 'https://via.placeholder.com/400x400?text=Featured+Product',
+        description: 'This is a sample featured product description.'
+      };
+
+      return (
+        <section 
+          className="py-16 px-4"
+          style={{ backgroundColor, color: textColor }}
+        >
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">{title}</h2>
+              <p className="text-lg opacity-80">{subtitle}</p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              {/* Product Image */}
+              <div className="aspect-square bg-gray-200 rounded-lg overflow-hidden">
+                <img 
+                  src={featuredProduct.image || featuredProduct.images?.[0] || 'https://via.placeholder.com/400x400?text=Featured+Product'}
+                  alt={featuredProduct.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              {/* Product Details */}
+              <div className="space-y-6">
+                <h3 className="text-2xl md:text-3xl font-bold">{featuredProduct.name}</h3>
+                <p className="text-lg opacity-80">{featuredProduct.description}</p>
+                
+                <div className="flex items-center space-x-4">
+                  <span className="text-3xl font-bold" style={{ color: buttonColor }}>
+                    ৳{featuredProduct.price}
+                  </span>
+                  {featuredProduct.rating && (
+                    <div className="flex items-center space-x-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star 
+                          key={i} 
+                          className={`w-5 h-5 ${
+                            i < Math.floor(featuredProduct.rating) 
+                              ? 'text-yellow-400 fill-current' 
+                              : 'text-gray-300'
+                          }`} 
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  onClick={() => onAddToCart?.(featuredProduct)}
+                  className="inline-flex items-center px-8 py-4 rounded-lg font-semibold text-white text-lg transition-colors"
+                  style={{ backgroundColor: buttonColor }}
+                >
+                  <ShoppingCart className="w-5 h-5 mr-2" />
+                  Add to Cart
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
     // For other section types, show placeholder
     return (
       <div className="py-8 px-4 bg-gray-100 border-2 border-dashed border-gray-300 text-center">
