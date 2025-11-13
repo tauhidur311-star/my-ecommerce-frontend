@@ -5,7 +5,7 @@ import {
   Search, Filter, Eye, Trash2, Star, Archive, RefreshCw,
   Download, CheckCircle, AlertCircle, Clock, MessageSquare
 } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
+import useAuth from '../../hooks/useAuth';
 import GlassCard from '../ui/glass/GlassCard';
 import EnhancedButton from '../ui/EnhancedButton';
 import LoadingSkeleton from '../ui/LoadingSkeleton';
