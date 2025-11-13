@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Monitor, Tablet, Smartphone, ExternalLink, Share2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import DraggableCanvas from './DraggableCanvas';
 import EnhancedButton from '../ui/EnhancedButton';
 
