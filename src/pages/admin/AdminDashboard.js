@@ -1031,8 +1031,8 @@ export default function AdminDashboard() {
                 </EnhancedButton>
               </div>
             </form>
-          </div>
-        )}
+            </motion.div>
+          )}
 
           {/* Contact Submissions Tab */}
           {activeTab === 'contact-submissions' && (
