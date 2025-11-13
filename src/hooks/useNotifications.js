@@ -94,7 +94,7 @@ export const useRealTimeNotifications = () => {
 
   useEffect(() => {
     // Connect to WebSocket for real-time notifications
-    const wsUrl = `${process.env.REACT_APP_WS_URL || 'ws://localhost:5000'}/notifications`;
+    const wsUrl = `${process.env.REACT_APP_WS_URL || 'wss://my-ecommerce-api-b9t4.onrender.com'}/notifications`;
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {

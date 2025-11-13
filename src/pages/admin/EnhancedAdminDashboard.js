@@ -17,6 +17,7 @@ import LoadingSkeleton from '../../components/ui/LoadingSkeleton';
 const EnhancedAnalyticsDashboard = lazy(() => import('../../components/analytics/EnhancedAnalyticsDashboard'));
 const InventoryTable = lazy(() => import('../../components/inventory/InventoryTable'));
 const SegmentationPanel = lazy(() => import('../../components/customers/SegmentationPanel'));
+const ContactSubmissions = lazy(() => import('../../components/admin/ContactSubmissions'));
 const CampaignManager = lazy(() => import('../../components/marketing/CampaignManager'));
 const PerformanceMonitor = lazy(() => import('../../components/admin/PerformanceMonitor'));
 
@@ -49,6 +50,7 @@ const EnhancedAdminDashboard = () => {
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'inventory', label: 'Inventory', icon: Package },
     { id: 'customers', label: 'Customers', icon: Users },
+    { id: 'contacts', label: 'Contact Us', icon: MessageCircle },
     { id: 'marketing', label: 'Marketing', icon: Mail },
     { id: 'performance', label: 'Performance', icon: Activity },
     { id: 'settings', label: 'Settings', icon: Settings },
@@ -250,6 +252,13 @@ const EnhancedAdminDashboard = () => {
           </Suspense>
         );
 
+      case 'contacts':
+        return (
+          <Suspense fallback={<LoadingSkeleton />}>
+            <ContactSubmissions />
+          </Suspense>
+        );
+
       case 'marketing':
         return (
           <Suspense fallback={<LoadingSkeleton />}>
@@ -370,6 +379,26 @@ const EnhancedAdminDashboard = () => {
                     className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/80"
                   />
                 </div>
+
+                {/* View Store Button */}
+                <EnhancedButton
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.open('/', '_blank')}
+                >
+                  <Home size={16} />
+                  View Store
+                </EnhancedButton>
+
+                {/* Design Button */}
+                <EnhancedButton
+                  variant="primary"
+                  size="sm"
+                  onClick={() => window.location.href = '/design'}
+                >
+                  <Settings size={16} />
+                  Design
+                </EnhancedButton>
 
                 <EnhancedButton
                   variant="outline"
