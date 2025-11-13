@@ -450,7 +450,8 @@ const GlassDashboardItem = ({ id, title, type, component, onRemove }) => {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id });
+  } = require('@dnd-kit/sortable').useSortable({ id });
+  const CSS = require('@dnd-kit/utilities').CSS;
 
   const style = {
     transform: CSS.Transform.toString(transform),

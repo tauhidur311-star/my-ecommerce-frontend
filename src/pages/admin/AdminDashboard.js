@@ -6,7 +6,7 @@ import { Plus, Edit2, Trash2, Save, X, Upload, Package, Grid, Tag, List, Store a
 import EnhancedButton from '../../components/ui/EnhancedButton';
 import PageTransition from '../../components/animations/PageTransition';
 import { playSuccess } from '../../utils/soundManager';
-import GlassCard, { MetricGlassCard, DashboardGlassCard } from '../../components/ui/glass/GlassCard';
+import { MetricGlassCard, DashboardGlassCard } from '../../components/ui/glass/GlassCard';
 import GlassModal, { ConfirmationModal } from '../../components/ui/glass/GlassModal';
 import GlassDropdown from '../../components/ui/glass/GlassDropdown';
 import GlassDragDropProvider, { GlassGridContainer } from '../../components/ui/glass/GlassDragDropProvider';
@@ -23,7 +23,7 @@ import EmailNotificationSystem from '../../components/EmailNotificationSystem';
 import ThemeEditor from '../../components/design-editor/ThemeEditor';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import MotionWrapper, { MotionCard, MotionGrid } from '../../components/MotionWrapper';
-import GlassCard, { StatsCard } from '../../components/ui/GlassCard';
+import { StatsCard } from '../../components/ui/GlassCard';
 import FloatingWidget, { QuickActionWidget } from '../../components/ui/FloatingWidget';
 import ContactSubmissions from '../../components/admin/ContactSubmissions';
 import ContactInfoSettings from '../../components/admin/ContactInfoSettings';
@@ -138,6 +138,7 @@ export default function AdminDashboard() {
     }
   });
   const [activeTab, setActiveTab] = useState('products'); // 'products', 'settings', 'contact-submissions', 'contact-settings'
+  const [deleteModal, setDeleteModal] = useState({ show: false, product: null });
   // const [loading, setLoading] = useState(false);
   // const [formErrors, setFormErrors] = useState({});
   // const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -637,6 +638,14 @@ export default function AdminDashboard() {
       setIsResizing(false);
     }
   };
+
+  // Dashboard layout configuration
+  const dashboardLayout = [
+    { id: 'products', title: 'Total Products', value: products.length, theme: 'blue' },
+    { id: 'orders', title: 'Orders Today', value: '12', theme: 'green' },
+    { id: 'revenue', title: 'Revenue', value: '$2,340', theme: 'purple' },
+    { id: 'visitors', title: 'Visitors', value: '1,234', theme: 'orange' }
+  ];
 
   const getDashboardTitle = () => {
     const titles = {
