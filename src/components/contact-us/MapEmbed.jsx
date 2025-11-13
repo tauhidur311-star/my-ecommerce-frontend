@@ -11,12 +11,12 @@ const MapEmbed = () => {
   const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
 
   return (
-    <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-      <div className="p-4 border-b border-gray-200">
-        <h2 className="text-xl font-bold text-gray-900 mb-2">
+    <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg shadow-xl overflow-hidden hover:bg-white/15 transition-all duration-300">
+      <div className="p-4 border-b border-white/20">
+        <h2 className="text-xl font-bold text-white mb-2">
           Find Us Here
         </h2>
-        <p className="text-gray-600 text-sm">
+        <p className="text-white/70 text-sm">
           Click on the map to open directions in Google Maps
         </p>
       </div>
@@ -52,8 +52,8 @@ const MapEmbed = () => {
           {/* Overlay for interactivity */}
           <div className="absolute inset-0 bg-transparent hover:bg-black hover:bg-opacity-10 transition-all duration-200 cursor-pointer flex items-center justify-center group"
                onClick={() => window.open(googleMapsUrl, '_blank')}>
-            <div className="bg-white bg-opacity-90 px-4 py-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 transform group-hover:scale-105">
-              <span className="text-sm font-medium text-gray-800 flex items-center">
+            <div className="bg-white/20 backdrop-blur-md border border-white/30 px-4 py-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 transform group-hover:scale-105">
+              <span className="text-sm font-medium text-white flex items-center">
                 <span className="mr-2">🧭</span>
                 Open in Google Maps
               </span>
@@ -62,13 +62,13 @@ const MapEmbed = () => {
         </div>
         
         {/* Map Actions */}
-        <div className="p-4 bg-gray-50 border-t border-gray-200">
+        <div className="p-4 bg-white/5 backdrop-blur-sm border-t border-white/20">
           <div className="flex flex-wrap gap-3">
             <a
               href={googleMapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors duration-200 transform hover:scale-105"
+              className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 text-white text-sm font-medium rounded-lg hover:bg-white/30 transition-all duration-200 transform hover:scale-105"
             >
               <span className="mr-2">🧭</span>
               Get Directions
@@ -76,7 +76,7 @@ const MapEmbed = () => {
             
             <button
               onClick={() => setShowFullMap(!showFullMap)}
-              className="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors duration-200"
+              className="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/30 text-white/80 text-sm font-medium rounded-lg hover:bg-white/20 hover:text-white transition-all duration-200"
             >
               <span className="mr-2">{showFullMap ? '📍' : '🔍'}</span>
               {showFullMap ? 'Hide Details' : 'View Details'}
@@ -86,24 +86,24 @@ const MapEmbed = () => {
         
         {/* Additional Location Details */}
         {showFullMap && (
-          <div className="p-4 bg-blue-50 border-t border-blue-200 animate-fadeIn">
-            <h3 className="font-semibold text-gray-900 mb-3">Location Details</h3>
+          <div className="p-4 bg-white/5 backdrop-blur-sm border-t border-white/20 animate-fadeIn">
+            <h3 className="font-semibold text-white mb-3">Location Details</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="font-medium text-gray-700">Parking:</span>
-                <p className="text-gray-600">Street parking available, nearby parking garage</p>
+                <span className="font-medium text-white/90">Parking:</span>
+                <p className="text-white/70">Street parking available, nearby parking garage</p>
               </div>
               <div>
-                <span className="font-medium text-gray-700">Public Transit:</span>
-                <p className="text-gray-600">Subway: 6 train to 33rd St station (2 min walk)</p>
+                <span className="font-medium text-white/90">Public Transit:</span>
+                <p className="text-white/70">Subway: 6 train to 33rd St station (2 min walk)</p>
               </div>
               <div>
-                <span className="font-medium text-gray-700">Accessibility:</span>
-                <p className="text-gray-600">Wheelchair accessible entrance and elevators</p>
+                <span className="font-medium text-white/90">Accessibility:</span>
+                <p className="text-white/70">Wheelchair accessible entrance and elevators</p>
               </div>
               <div>
-                <span className="font-medium text-gray-700">Nearby:</span>
-                <p className="text-gray-600">Empire State Building, Macy's Herald Square</p>
+                <span className="font-medium text-white/90">Nearby:</span>
+                <p className="text-white/70">Empire State Building, Macy's Herald Square</p>
               </div>
             </div>
           </div>
