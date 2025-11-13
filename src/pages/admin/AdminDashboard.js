@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit2, Trash2, Save, X, Upload, Package, Grid, Tag, List, Store as StoreIcon, Expand, Loader2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, Upload, Package, Grid, Tag, List, Store as StoreIcon, Expand, Loader2, Activity, Mail } from 'lucide-react';
 import ImageCropper from '../../components/ImageCropper';
 import OrderManagement from '../../components/OrderManagement';
 import AdvancedAnalytics from '../../components/AdvancedAnalytics';
+import AnalyticsDashboard from '../../components/analytics/AnalyticsDashboard';
 import useKeyboardShortcuts from '../../hooks/useKeyboardShortcuts';
 import DarkModeToggle from '../../components/DarkModeToggle';
 import NotificationProvider from '../../contexts/NotificationContext';
@@ -729,6 +730,7 @@ export default function AdminDashboard() {
               {[
                 { key: 'orders', icon: List, label: 'Orders' },
                 { key: 'analytics', icon: Grid, label: 'Analytics' },
+                { key: 'realtime-analytics', icon: Activity, label: '📊 Real-time Analytics' },
                 { key: 'inventory', icon: Package, label: 'Inventory' },
                 { key: 'emails', icon: Upload, label: 'Emails' },
                 { key: 'design', icon: Grid, label: 'Design' },
@@ -779,6 +781,18 @@ export default function AdminDashboard() {
               transition={{ duration: 0.3, ease: "easeInOut" }}
             >
               <AdvancedAnalytics />
+            </motion.div>
+          )}
+
+          {activeTab === 'realtime-analytics' && (
+            <motion.div
+              key="realtime-analytics"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <AnalyticsDashboard />
             </motion.div>
           )}
 
