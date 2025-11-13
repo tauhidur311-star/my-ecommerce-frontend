@@ -601,6 +601,14 @@ class APIService {
     return this.request(`/users/orders?page=${page}&limit=${limit}`);
   }
 
+  // Contact form API
+  async submitContactForm(contactData) {
+    return this.request('/contact', {
+      method: 'POST',
+      body: JSON.stringify(contactData),
+    });
+  }
+
   // Categories API
   async getCategories(flat = false) {
     return this.request(`/categories${flat ? '?flat=true' : ''}`);

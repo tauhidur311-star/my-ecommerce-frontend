@@ -1,0 +1,209 @@
+/* Contact Us Page - Additional CSS for animations and enhancements */
+
+/* Fade in animation for success/error messages */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Smooth transitions for interactive elements */
+.contact-form-input {
+  transition: all 0.2s ease-in-out;
+}
+
+.contact-form-input:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+}
+
+/* Enhanced button hover effects */
+.contact-submit-btn {
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.contact-submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+}
+
+.contact-submit-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.contact-submit-btn:hover::before {
+  left: 100%;
+}
+
+/* Card hover effects */
+.contact-card {
+  transition: all 0.3s ease-in-out;
+}
+
+.contact-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Icon animations */
+.contact-icon {
+  transition: all 0.2s ease-in-out;
+}
+
+.contact-icon:hover {
+  transform: scale(1.1) rotate(5deg);
+}
+
+/* Map interaction effects */
+.map-overlay {
+  transition: all 0.3s ease-in-out;
+}
+
+.map-overlay:hover {
+  backdrop-filter: blur(1px);
+}
+
+/* Loading spinner enhancement */
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Social media links pulse effect */
+.social-link {
+  transition: all 0.2s ease-in-out;
+}
+
+.social-link:hover {
+  animation: pulse 0.6s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Form validation states */
+.form-field-error {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+/* Enhanced focus rings for accessibility */
+.focus-enhanced:focus {
+  outline: none;
+  ring: 2px;
+  ring-color: rgb(99 102 241);
+  ring-offset: 2px;
+  border-color: rgb(99 102 241);
+}
+
+/* Responsive typography adjustments */
+@media (max-width: 640px) {
+  .contact-header {
+    font-size: 2rem;
+  }
+  
+  .contact-subheader {
+    font-size: 1rem;
+  }
+}
+
+/* Dark mode support (if needed) */
+@media (prefers-color-scheme: dark) {
+  .contact-card-dark {
+    background-color: #1f2937;
+    border-color: #374151;
+    color: #f9fafb;
+  }
+  
+  .contact-input-dark {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+  }
+  
+  .contact-input-dark:focus {
+    border-color: #6366f1;
+    background-color: #4b5563;
+  }
+}
+
+/* Print styles */
+@media print {
+  .contact-form,
+  .map-embed,
+  .social-links {
+    display: none;
+  }
+  
+  .contact-info {
+    break-inside: avoid;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .contact-submit-btn {
+    border: 2px solid;
+  }
+  
+  .contact-form-input {
+    border: 2px solid;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fadeIn,
+  .contact-submit-btn,
+  .contact-card,
+  .contact-icon,
+  .social-link {
+    animation: none;
+    transition: none;
+  }
+  
+  .contact-submit-btn:hover,
+  .contact-card:hover,
+  .contact-icon:hover {
+    transform: none;
+  }
+}
