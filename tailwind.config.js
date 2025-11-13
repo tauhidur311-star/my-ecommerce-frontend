@@ -46,6 +46,8 @@ module.exports = {
         'float-fast': 'floatFast 3s ease-in-out infinite',
         'fadeIn': 'fadeIn 0.3s ease-out',
         'slideUp': 'slideUp 0.3s ease-out',
+        'pulse-glow': 'pulseGlow 2s ease-in-out infinite',
+        'shimmer': 'shimmer 2s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -75,6 +77,14 @@ module.exports = {
         floatFast: {
           '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
           '50%': { transform: 'translateY(-10px) rotate(180deg)' },
+        },
+        pulseGlow: {
+          '0%, 100%': { boxShadow: '0 0 20px rgba(255, 255, 255, 0.1)' },
+          '50%': { boxShadow: '0 0 30px rgba(255, 255, 255, 0.2)' },
+        },
+        shimmer: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' },
         }
       },
       spacing: {

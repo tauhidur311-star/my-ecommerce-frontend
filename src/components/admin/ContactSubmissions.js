@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import apiService from '../../services/api';
+import GlassCard, { StatsCard } from '../ui/GlassCard';
+import FloatingWidget from '../ui/FloatingWidget';
+import { MessageSquare, FileText, TrendingUp } from 'lucide-react';
 
 const ContactSubmissions = () => {
   const [submissions, setSubmissions] = useState([]);
@@ -133,75 +136,51 @@ const ContactSubmissions = () => {
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Enhanced Header */}
-      <div className="bg-white/90 backdrop-blur-md rounded-xl shadow-lg p-6 border border-gray-200/50">
-        <h2 className="text-3xl font-bold text-gray-800 mb-2">Contact Submissions</h2>
-        <p className="text-gray-600">Manage and respond to customer inquiries with real-time updates</p>
-      </div>
+      <GlassCard delay={0.1}>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold text-white mb-2">Contact Submissions</h2>
+            <p className="text-white/80">Manage and respond to customer inquiries with real-time updates</p>
+          </div>
+          <div className="text-white/60">
+            <MessageSquare size={32} />
+          </div>
+        </div>
+      </GlassCard>
 
-      {/* Stats Cards */}
+      {/* Enhanced Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white/90 backdrop-blur-md rounded-xl shadow-lg p-6 border border-gray-200/50 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white text-lg font-bold">{stats.total}</span>
-              </div>
-            </div>
-            <div className="ml-5 w-0 flex-1">
-              <dl>
-                <dt className="text-sm font-medium text-gray-500 truncate">Total Submissions</dt>
-                <dd className="text-2xl font-bold text-gray-900">{stats.total}</dd>
-                <dd className="text-xs text-gray-400 mt-1">All time submissions</dd>
-              </dl>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white/90 backdrop-blur-md rounded-xl shadow-lg p-6 border border-gray-200/50 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" style={{ animationDelay: '0.1s' }}>
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white text-lg font-bold">{stats.today}</span>
-              </div>
-            </div>
-            <div className="ml-5 w-0 flex-1">
-              <dl>
-                <dt className="text-sm font-medium text-gray-500 truncate">Today's Submissions</dt>
-                <dd className="text-2xl font-bold text-gray-900">{stats.today}</dd>
-                <dd className="text-xs text-gray-400 mt-1">New submissions today</dd>
-              </dl>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white/90 backdrop-blur-md rounded-xl shadow-lg p-6 border border-gray-200/50 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" style={{ animationDelay: '0.2s' }}>
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white text-xl">📧</span>
-              </div>
-            </div>
-            <div className="ml-5 w-0 flex-1">
-              <dl>
-                <dt className="text-sm font-medium text-gray-500 truncate">Most Common</dt>
-                <dd className="text-2xl font-bold text-gray-900">
-                  {stats.bySubject[0] ? getSubjectLabel(stats.bySubject[0]._id) : 'N/A'}
-                </dd>
-                <dd className="text-xs text-gray-400 mt-1">Popular inquiry type</dd>
-              </dl>
-            </div>
-          </div>
-        </div>
+        <StatsCard
+          icon={<FileText className="w-6 h-6 text-white" />}
+          title="Total Submissions"
+          value={stats.total}
+          delay={0.2}
+        />
+        
+        <StatsCard
+          icon={<TrendingUp className="w-6 h-6 text-white" />}
+          title="Today's Submissions"
+          value={stats.today}
+          change={stats.today > 0 ? 12 : 0}
+          delay={0.3}
+        />
+        
+        <StatsCard
+          icon={<MessageSquare className="w-6 h-6 text-white" />}
+          title="Most Common"
+          value={stats.bySubject[0] ? getSubjectLabel(stats.bySubject[0]._id) : 'N/A'}
+          delay={0.4}
+        />
       </div>
 
       {/* Contact Submissions Table */}
-      <div className="bg-white/90 backdrop-blur-md rounded-xl shadow-lg p-6 border border-gray-200/50 hover:shadow-xl transition-all duration-300">
+      <GlassCard delay={0.5}>
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            <h2 className="text-2xl font-bold text-white mb-2">
               Contact Submissions
             </h2>
-            <p className="text-gray-600 text-sm">
+            <p className="text-white/70 text-sm">
               {filteredSubmissions.length} of {submissions.length} submissions shown
             </p>
           </div>
@@ -217,7 +196,7 @@ const ContactSubmissions = () => {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm bg-gray-50/50 backdrop-blur-sm transition-all duration-200"
+              className="block w-full pl-10 pr-10 py-3 border border-white/20 rounded-lg focus:ring-2 focus:ring-white/30 focus:border-white/40 sm:text-sm bg-white/10 backdrop-blur-sm transition-all duration-200 text-white placeholder-white/60"
               placeholder="Search by name or email..."
             />
             {searchTerm && (
@@ -307,7 +286,15 @@ const ContactSubmissions = () => {
             </div>
           )}
         </div>
-      </div>
+      </GlassCard>
+
+      {/* Floating Help Widget */}
+      <FloatingWidget
+        icon={<MessageSquare className="w-5 h-5 text-white" />}
+        label="Need Help?"
+        onClick={() => window.open('/help', '_blank')}
+        variant="primary"
+      />
 
       {/* Modal */}
       {showModal && selectedSubmission && (

@@ -15,6 +15,8 @@ import EmailNotificationSystem from '../../components/EmailNotificationSystem';
 import ThemeEditor from '../../components/design-editor/ThemeEditor';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import MotionWrapper, { MotionCard, MotionGrid } from '../../components/MotionWrapper';
+import GlassCard, { StatsCard } from '../../components/ui/GlassCard';
+import FloatingWidget, { QuickActionWidget } from '../../components/ui/FloatingWidget';
 import ContactSubmissions from '../../components/admin/ContactSubmissions';
 import ContactInfoSettings from '../../components/admin/ContactInfoSettings';
 import '../../styles/contactUs.css';
@@ -670,67 +672,39 @@ export default function AdminDashboard() {
         </div>
       </MotionWrapper>
 
-      {/* Enhanced Stats */}
+      {/* Enhanced Stats with Glass Cards */}
       <MotionWrapper delay={0.2}>
-        <MotionGrid columns={4} staggerDelay={0.1}>
-          <div className="bg-white/90 backdrop-blur-md rounded-xl shadow-lg p-6 border border-gray-200/50 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 text-sm font-medium">Total Products</p>
-                <p className="text-3xl font-bold text-gray-800 mt-2">{products.length}</p>
-                <p className="text-xs text-gray-400 mt-1">All inventory items</p>
-              </div>
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                <Package className="text-white" size={24} />
-              </div>
-            </div>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          <StatsCard
+            icon={<Package className="w-6 h-6 text-white" />}
+            title="Total Products"
+            value={products.length}
+            delay={0.1}
+          />
           
-          <div className="bg-white/90 backdrop-blur-md rounded-xl shadow-lg p-6 border border-gray-200/50 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 text-sm font-medium">In Stock</p>
-                <p className="text-3xl font-bold text-green-600 mt-2">
-                  {products.filter(p => p.inStock).length}
-                </p>
-                <p className="text-xs text-gray-400 mt-1">Available items</p>
-              </div>
-              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
-                <Tag className="text-white" size={24} />
-              </div>
-            </div>
-          </div>
+          <StatsCard
+            icon={<Tag className="w-6 h-6 text-white" />}
+            title="In Stock"
+            value={products.filter(p => p.inStock).length}
+            change={5}
+            delay={0.2}
+          />
           
-          <div className="bg-white/90 backdrop-blur-md rounded-xl shadow-lg p-6 border border-gray-200/50 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 text-sm font-medium">Out of Stock</p>
-                <p className="text-3xl font-bold text-red-600 mt-2">
-                  {products.filter(p => !p.inStock).length}
-                </p>
-                <p className="text-xs text-gray-400 mt-1">Need restocking</p>
-              </div>
-              <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-rose-600 rounded-xl flex items-center justify-center shadow-lg">
-                <List className="text-white" size={24} />
-              </div>
-            </div>
-          </div>
+          <StatsCard
+            icon={<List className="w-6 h-6 text-white" />}
+            title="Out of Stock"
+            value={products.filter(p => !p.inStock).length}
+            change={-2}
+            delay={0.3}
+          />
           
-          <div className="bg-white/90 backdrop-blur-md rounded-xl shadow-lg p-6 border border-gray-200/50 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 text-sm font-medium">Categories</p>
-                <p className="text-3xl font-bold text-purple-600 mt-2">
-                  {new Set(products.map(p => p.category)).size}
-                </p>
-                <p className="text-xs text-gray-400 mt-1">Product types</p>
-              </div>
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl flex items-center justify-center shadow-lg">
-                <Grid className="text-white" size={24} />
-              </div>
-            </div>
-          </div>
-        </MotionGrid>
+          <StatsCard
+            icon={<Grid className="w-6 h-6 text-white" />}
+            title="Categories"
+            value={new Set(products.map(p => p.category)).size}
+            delay={0.4}
+          />
+        </div>
       </MotionWrapper>
 
           {/* Enhanced Tab Navigation */}
@@ -1356,6 +1330,27 @@ export default function AdminDashboard() {
           </div>
         </div>
         )}
+        
+        {/* Quick Action Floating Widget */}
+        <QuickActionWidget
+          actions={[
+            {
+              icon: <Plus className="w-4 h-4" />,
+              label: "Add Product",
+              onClick: () => setShowForm(true)
+            },
+            {
+              icon: <Upload className="w-4 h-4" />,
+              label: "Import Data",
+              onClick: () => console.log("Import clicked")
+            },
+            {
+              icon: <Grid className="w-4 h-4" />,
+              label: "Analytics",
+              onClick: () => setActiveTab('analytics')
+            }
+          ]}
+        />
         
         </div>
       </DashboardLayout>
