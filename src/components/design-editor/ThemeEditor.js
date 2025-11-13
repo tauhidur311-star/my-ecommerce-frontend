@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { DndContext, DragEndEvent, DragOverlay, closestCorners } from '@dnd-kit/core';
 import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { Plus, Save, Eye, Upload, Download, RotateCcw, Settings, Layers } from 'lucide-react';
+import { Plus, Save, Eye, Upload, Download, RotateCcw, Settings, Layers, Monitor } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import Sidebar from './Sidebar';
@@ -9,6 +9,8 @@ import Canvas from './Canvas';
 import Inspector from './Inspector';
 import AssetPicker from './AssetPicker';
 import { themeAPI } from '../../services/themeAPI';
+import useThemeUpdates from '../../hooks/useThemeUpdates';
+import { useInvalidateTheme } from '../../hooks/useThemeData';
 
 const ThemeEditor = () => {
   const [currentTheme, setCurrentTheme] = useState(null);
@@ -21,11 +23,74 @@ const ThemeEditor = () => {
   const [previewMode, setPreviewMode] = useState('desktop'); // desktop, tablet, mobile
   const [isPublishing, setIsPublishing] = useState(false);
   const [draggedSection, setDraggedSection] = useState(null);
+  const [showLivePreview, setShowLivePreview] = useState(false);
+  const [lastSaveTime, setLastSaveTime] = useState(null);
+  
+  // Refs for real-time preview
+  const previewIframeRef = useRef(null);
+  const debounceTimerRef = useRef(null);
+  
+  // Hooks for theme invalidation and SSE updates
+  const { invalidateAllThemes } = useInvalidateTheme();
+
+  // SSE connection for theme updates
+  useThemeUpdates({
+    enabled: true,
+    onUpdate: (data) => {
+      console.log('Theme update received in editor:', data);
+      toast.success(`Template ${data.pageType} was published!`);
+      invalidateAllThemes();
+    },
+    onError: (error) => {
+      console.error('Theme updates SSE error in editor:', error);
+    }
+  });
 
   // Load initial theme and template
   useEffect(() => {
     loadActiveTheme();
   }, []);
+
+  // Real-time preview updates via postMessage
+  const sendPreviewUpdate = useCallback((layout) => {
+    if (previewIframeRef.current && showLivePreview) {
+      try {
+        previewIframeRef.current.contentWindow.postMessage({
+          type: 'preview-update',
+          layout: { sections: layout }
+        }, '*');
+        console.log('Sent preview update to iframe:', layout);
+      } catch (error) {
+        console.error('Error sending preview update:', error);
+      }
+    }
+  }, [showLivePreview]);
+
+  // Debounced preview updates
+  const debouncedPreviewUpdate = useCallback((sections) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    
+    debounceTimerRef.current = setTimeout(() => {
+      sendPreviewUpdate(sections);
+    }, 300);
+  }, [sendPreviewUpdate]);
+
+  // Auto-save draft changes
+  const debouncedSave = useCallback(async (sectionsToSave) => {
+    if (!currentTemplate || currentTemplate._id === 'fallback-home') return;
+    
+    try {
+      await themeAPI.updateTemplate(currentTemplate._id, {
+        json: { sections: sectionsToSave }
+      });
+      setLastSaveTime(new Date());
+      console.log('Auto-saved draft at:', new Date());
+    } catch (error) {
+      console.error('Auto-save failed:', error);
+    }
+  }, [currentTemplate]);
 
   const loadActiveTheme = async () => {
     try {
@@ -166,6 +231,17 @@ const ThemeEditor = () => {
         setSelectedSection(updatedSelectedSection);
       }
       
+      // Trigger real-time preview update
+      debouncedPreviewUpdate(newSections);
+      
+      // Auto-save after 2 seconds of no changes
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      setTimeout(() => {
+        debouncedSave(newSections);
+      }, 2000);
+      
       return newSections;
     });
     setIsDirty(true);
@@ -201,8 +277,22 @@ const ThemeEditor = () => {
     setIsPublishing(true);
     try {
       await saveDraft(); // Save first
-      await themeAPI.publishTemplate(currentTemplate._id);
-      toast.success('Template published successfully');
+      const publishedTemplate = await themeAPI.publishTemplate(currentTemplate._id);
+      
+      // Update local state
+      setCurrentTemplate(publishedTemplate);
+      setIsDirty(false);
+      
+      // Send update to live preview iframe if open
+      if (previewIframeRef.current && showLivePreview) {
+        previewIframeRef.current.contentWindow.postMessage({
+          type: 'template-published',
+          template: publishedTemplate
+        }, '*');
+      }
+      
+      toast.success('Template published successfully! 🚀');
+      console.log('Template published successfully:', publishedTemplate);
     } catch (error) {
       console.error('Error publishing template:', error);
       toast.error('Failed to publish template');
@@ -390,6 +480,19 @@ const ThemeEditor = () => {
             </div>
 
             <div className="flex items-center space-x-3">
+              {/* Live Preview Toggle */}
+              <button
+                onClick={() => setShowLivePreview(!showLivePreview)}
+                className={`inline-flex items-center px-3 py-2 border rounded-md shadow-sm text-sm font-medium transition-colors ${
+                  showLivePreview
+                    ? 'border-green-300 text-green-700 bg-green-50'
+                    : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
+                }`}
+              >
+                <Monitor className="w-4 h-4 mr-2" />
+                {showLivePreview ? 'Hide Preview' : 'Live Preview'}
+              </button>
+
               {/* Preview Mode Toggle */}
               <div className="flex items-center space-x-1 bg-gray-100 rounded-lg p-1">
                 {[
@@ -449,7 +552,8 @@ const ThemeEditor = () => {
 
           {/* Canvas Area */}
           <div className="flex-1 flex min-h-0">
-            <div className="flex-1 p-6 overflow-y-auto">
+            {/* Editor Canvas */}
+            <div className={`p-6 overflow-y-auto transition-all duration-300 ${showLivePreview ? 'w-1/2' : 'flex-1'}`}>
               <div 
                 className="mx-auto bg-white shadow-lg rounded-lg overflow-hidden transition-all duration-300"
                 style={{ width: getPreviewWidth(), maxWidth: '100%' }}
@@ -473,6 +577,44 @@ const ThemeEditor = () => {
                 </SortableContext>
               </div>
             </div>
+
+            {/* Live Preview Iframe */}
+            {showLivePreview && (
+              <div className="w-1/2 border-l border-gray-200 bg-gray-50 p-4">
+                <div className="h-full flex flex-col">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-medium text-gray-900">Live Preview</h3>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xs text-gray-500">
+                        {lastSaveTime ? `Saved ${lastSaveTime.toLocaleTimeString()}` : 'Not saved'}
+                      </span>
+                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex-1 bg-white rounded-lg shadow-sm overflow-hidden">
+                    <iframe
+                      ref={previewIframeRef}
+                      src={`${process.env.REACT_APP_PUBLIC_URL || window.location.origin}/preview/home`}
+                      className="w-full h-full border-0"
+                      title="Live Preview"
+                      onLoad={() => {
+                        console.log('Preview iframe loaded');
+                        // Send initial layout to iframe
+                        sendPreviewUpdate(sections);
+                      }}
+                      onError={(error) => {
+                        console.error('Preview iframe error:', error);
+                      }}
+                    />
+                  </div>
+                  
+                  <div className="mt-2 text-xs text-gray-400 text-center">
+                    Real-time preview • Updates automatically as you edit
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Inspector Panel */}
             {selectedSection && (

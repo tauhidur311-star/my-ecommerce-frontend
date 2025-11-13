@@ -9,6 +9,9 @@ import Navbar from '../../components/Navbar';
 // import { useWishlist } from '../../hooks/useWishlist';
 import useAuth from '../../hooks/useAuth';
 import { publicAPI } from '../../services/themeAPI';
+import useThemeUpdates from '../../hooks/useThemeUpdates';
+import { usePublishedTheme } from '../../hooks/useThemeData';
+import SafeSectionRenderer from '../../components/SafeSectionRenderer';
 
 const AuthModal = lazy(() => import('../../components/AuthModal'));
 
@@ -21,10 +24,47 @@ export default function Store() {
   const [cart, setCart] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Theme integration
-  const [publishedTheme, setPublishedTheme] = useState(null);
-  const [showThemeToggle, setShowThemeToggle] = useState(false);
+  // Theme integration with real-time updates
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [previewLayout, setPreviewLayout] = useState(null);
   
+  // Use theme data hook with cache invalidation
+  const { data: themeData, isLoading: themeLoading, error: themeError, refetch } = usePublishedTheme('home');
+  
+  // SSE connection for real-time theme updates
+  useThemeUpdates({
+    enabled: true,
+    onUpdate: (data) => {
+      console.log('Theme update received in storefront:', data);
+      if (data.pageType === 'home') {
+        toast.success('Page updated! 🚀');
+        refetch(); // Refetch theme data
+      }
+    },
+    onError: (error) => {
+      console.error('Theme updates SSE error in storefront:', error);
+    }
+  });
+
+  // Listen for preview updates from admin editor via postMessage
+  useEffect(() => {
+    const handleMessage = (event) => {
+      if (event.data.type === 'preview-update') {
+        console.log('Received preview update:', event.data.layout);
+        setIsPreviewMode(true);
+        setPreviewLayout(event.data.layout);
+      } else if (event.data.type === 'template-published') {
+        console.log('Template published, refetching...');
+        setIsPreviewMode(false);
+        setPreviewLayout(null);
+        refetch();
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [refetch]);
+
   // Auth hook
   const { user, logout, login, validateSession } = useAuth();
   const [sessionStatus, setSessionStatus] = useState('secure'); // secure, checking, warning, invalid
@@ -691,6 +731,90 @@ export default function Store() {
         onSearch={setSearchQuery}
         products={products}
       />
+
+      {/* Theme-based Content */}
+      <main className="relative z-10">
+        {/* Preview mode indicator */}
+        {isPreviewMode && (
+          <div className="bg-orange-100 border border-orange-300 px-4 py-2 text-center text-sm font-medium text-orange-800">
+            🔄 Preview Mode - Changes are not published yet
+          </div>
+        )}
+
+        {/* Theme Loading State */}
+        {themeLoading && (
+          <div className="min-h-screen flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading theme...</p>
+            </div>
+          </div>
+        )}
+
+        {/* Theme Error State */}
+        {themeError && !isPreviewMode && (
+          <div className="min-h-screen flex items-center justify-center">
+            <div className="text-center">
+              <p className="text-red-600 mb-4">Error loading theme: {themeError.message}</p>
+              <button 
+                onClick={() => refetch()}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Render Theme Sections */}
+        {!themeLoading && !themeError && (
+          <div className="theme-sections">
+            {/* Use preview layout if in preview mode, otherwise use published theme data */}
+            {(() => {
+              const currentLayout = isPreviewMode ? previewLayout : themeData?.layout;
+              const sections = currentLayout?.sections || [];
+
+              if (sections.length === 0) {
+                return (
+                  <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                    <div className="text-center">
+                      <h1 className="text-4xl font-bold text-gray-900 mb-4">Welcome to Your Store</h1>
+                      <p className="text-xl text-gray-600 mb-8">No theme sections configured yet</p>
+                      <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto px-6">
+                        {products.slice(0, 6).map(product => (
+                          <div key={product._id} className="bg-white rounded-lg shadow-md p-6">
+                            <div className="aspect-square bg-gray-200 rounded-md mb-4 overflow-hidden">
+                              <img 
+                                src={getImageUrl(product)} 
+                                alt={product.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.target.src = 'https://via.placeholder.com/300?text=No+Image';
+                                }}
+                              />
+                            </div>
+                            <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
+                            <p className="text-blue-600 font-bold">৳{product.price}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
+              return sections.map((section, index) => (
+                <SafeSectionRenderer
+                  key={`${section.id || section.type}-${index}`}
+                  section={section}
+                  products={products}
+                  onAddToCart={handleAddToCart}
+                />
+              ));
+            })()}
+          </div>
+        )}
+      </main>
 
       {/* Session Security Status */}
       {user && (

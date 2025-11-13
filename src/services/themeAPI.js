@@ -173,13 +173,63 @@ export const publicAPI = {
     const url = slug 
       ? `/api/public/theme/custom/${slug}`
       : `/api/public/theme/${pageType}`;
-    const response = await axios.get(`${API_URL}${url}`);
+    const response = await axios.get(`${API_URL}${url}?t=${Date.now()}`);
     return response.data.data;
   },
 
   getPublishedPages: async () => {
     const response = await axios.get(`${API_URL}/api/public/pages`);
     return response.data.data;
+  },
+
+  // Preview theme access (admin only)
+  getPreviewTheme: async (pageType, slug = null, token = null) => {
+    const url = slug 
+      ? `/api/public/theme/preview/custom/${slug}`
+      : `/api/public/theme/preview/${pageType}`;
+    
+    const headers = {};
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    
+    const response = await axios.get(`${API_URL}${url}?t=${Date.now()}`, { headers });
+    return response.data.data;
+  },
+
+  // SSE connection for theme updates
+  connectToThemeUpdates: (onUpdate, onError = null) => {
+    const eventSource = new EventSource(`${API_URL}/api/public/theme/updates`);
+    
+    eventSource.onopen = () => {
+      console.log('Connected to theme updates SSE');
+    };
+
+    eventSource.addEventListener('connected', (event) => {
+      console.log('SSE connected:', JSON.parse(event.data));
+    });
+
+    eventSource.addEventListener('theme-update', (event) => {
+      const data = JSON.parse(event.data);
+      console.log('Theme update received:', data);
+      if (onUpdate) onUpdate(data);
+    });
+
+    eventSource.addEventListener('ping', (event) => {
+      // Keep-alive ping, no action needed
+      console.log('SSE ping received');
+    });
+
+    eventSource.onerror = (error) => {
+      console.error('SSE connection error:', error);
+      if (onError) onError(error);
+    };
+
+    // Return cleanup function
+    return () => {
+      eventSource.close();
+      console.log('Disconnected from theme updates SSE');
+    };
   }
 };
 
