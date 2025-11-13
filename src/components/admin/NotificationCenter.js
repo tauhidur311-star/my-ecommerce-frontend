@@ -75,48 +75,6 @@ export default function NotificationCenter() {
     } finally {
       setLoading(false);
     }
-        read: true,
-        priority: 'low',
-        action: 'view_customer',
-        actionData: { customerId: 'cust-456' }
-      },
-      {
-        id: 4,
-        type: 'system',
-        title: 'Daily Sales Report',
-        message: 'Yesterday\'s sales: ৳15,450 (12 orders)',
-        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-        read: true,
-        priority: 'medium',
-        action: 'view_analytics',
-        actionData: {}
-      },
-      {
-        id: 5,
-        type: 'security',
-        title: 'Login Alert',
-        message: 'New admin login detected from Dhaka, Bangladesh',
-        timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-        read: false,
-        priority: 'high',
-        action: 'view_security',
-        actionData: {}
-      },
-      {
-        id: 6,
-        type: 'order',
-        title: 'Payment Confirmed',
-        message: 'Payment for order #1014 has been confirmed',
-        timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
-        read: true,
-        priority: 'medium',
-        action: 'view_order',
-        actionData: { orderId: '1014' }
-      }
-    ];
-
-    setNotifications(sampleNotifications);
-    setLoading(false);
   };
 
   const markAsRead = (id) => {

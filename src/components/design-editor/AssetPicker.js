@@ -35,6 +35,11 @@ const AssetPicker = ({ onSelect, onClose }) => {
         params.search = searchTerm;
       }
 
+      // Add error handling for API calls
+      if (!assetAPI || !assetAPI.getAssets) {
+        throw new Error('Asset API not available');
+      }
+
       const response = await assetAPI.getAssets(params);
       
       // Handle different response structures
@@ -258,6 +263,12 @@ const AssetPicker = ({ onSelect, onClose }) => {
       </div>
     );
   };
+
+  // Add error boundary to prevent crashes
+  if (!onSelect || !onClose) {
+    console.error('AssetPicker: Missing required props onSelect or onClose');
+    return null;
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

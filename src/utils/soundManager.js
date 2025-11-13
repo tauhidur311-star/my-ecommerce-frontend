@@ -30,7 +30,7 @@ class SoundManager {
         volume: this.volume,
         preload: true,
         onloaderror: () => {
-          console.warn('Failed to load click sound');
+          // Silently handle missing sound files in development
         }
       }),
       
@@ -39,7 +39,7 @@ class SoundManager {
         volume: this.volume * 0.5, // Quieter for hover
         preload: true,
         onloaderror: () => {
-          console.warn('Failed to load hover sound');
+          // Silently handle missing sound files in development
         }
       }),
       
@@ -48,7 +48,7 @@ class SoundManager {
         volume: this.volume,
         preload: true,
         onloaderror: () => {
-          console.warn('Failed to load success sound');
+          // Silently handle missing sound files in development
         }
       }),
       
@@ -57,7 +57,7 @@ class SoundManager {
         volume: this.volume,
         preload: true,
         onloaderror: () => {
-          console.warn('Failed to load notification sound');
+          // Silently handle missing sound files in development
         }
       }),
       
@@ -66,7 +66,7 @@ class SoundManager {
         volume: this.volume,
         preload: true,
         onloaderror: () => {
-          console.warn('Failed to load error sound');
+          // Silently handle missing sound files in development
         }
       }),
       
@@ -75,7 +75,7 @@ class SoundManager {
         volume: this.volume * 0.7,
         preload: true,
         onloaderror: () => {
-          console.warn('Failed to load swipe sound');
+          // Silently handle missing sound files in development
         }
       })
     };
