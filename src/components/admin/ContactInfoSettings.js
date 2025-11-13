@@ -3,9 +3,9 @@ import apiService from '../../services/api';
 
 const ContactInfoSettings = () => {
   const [contactInfo, setContactInfo] = useState({
-    address: '',
-    phoneNumber: '',
-    email: '',
+    address: { value: '', isVisible: true },
+    phoneNumber: { value: '', isVisible: true },
+    email: { value: '', isVisible: true },
     liveChatAvailability: '',
     socialLinks: {
       facebook: '',
@@ -179,10 +179,28 @@ const ContactInfoSettings = () => {
           <div className="p-6 pt-0 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Business Address</label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-gray-700">Business Address</label>
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={contactInfo.address?.isVisible !== false}
+                      onChange={(e) => updateField('address', { 
+                        ...contactInfo.address, 
+                        isVisible: e.target.checked 
+                      })}
+                      className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <span className="text-sm text-gray-600">Show on-site</span>
+                  </label>
+                </div>
                 <textarea
-                  value={contactInfo.address}
-                  onChange={(e) => updateField('address', e.target.value)}
+                  value={contactInfo.address?.value || contactInfo.address || ''}
+                  onChange={(e) => updateField('address', 
+                    typeof contactInfo.address === 'object' 
+                      ? { ...contactInfo.address, value: e.target.value }
+                      : { value: e.target.value, isVisible: true }
+                  )}
                   className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                   rows={4}
                   placeholder="123 Business Street&#10;Suite 456&#10;City, State 12345&#10;Country"
@@ -191,22 +209,58 @@ const ContactInfoSettings = () => {
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={contactInfo.phoneNumber?.isVisible !== false}
+                        onChange={(e) => updateField('phoneNumber', { 
+                          ...contactInfo.phoneNumber, 
+                          isVisible: e.target.checked 
+                        })}
+                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span className="text-sm text-gray-600">Show on-site</span>
+                    </label>
+                  </div>
                   <input
                     type="tel"
-                    value={contactInfo.phoneNumber}
-                    onChange={(e) => updateField('phoneNumber', e.target.value)}
+                    value={contactInfo.phoneNumber?.value || contactInfo.phoneNumber || ''}
+                    onChange={(e) => updateField('phoneNumber', 
+                      typeof contactInfo.phoneNumber === 'object' 
+                        ? { ...contactInfo.phoneNumber, value: e.target.value }
+                        : { value: e.target.value, isVisible: true }
+                    )}
                     className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                     placeholder="+1 (555) 123-4567"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium text-gray-700">Email Address</label>
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={contactInfo.email?.isVisible !== false}
+                        onChange={(e) => updateField('email', { 
+                          ...contactInfo.email, 
+                          isVisible: e.target.checked 
+                        })}
+                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span className="text-sm text-gray-600">Show on-site</span>
+                    </label>
+                  </div>
                   <input
                     type="email"
-                    value={contactInfo.email}
-                    onChange={(e) => updateField('email', e.target.value)}
+                    value={contactInfo.email?.value || contactInfo.email || ''}
+                    onChange={(e) => updateField('email', 
+                      typeof contactInfo.email === 'object' 
+                        ? { ...contactInfo.email, value: e.target.value }
+                        : { value: e.target.value, isVisible: true }
+                    )}
                     className="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                     placeholder="contact@yourstore.com"
                   />

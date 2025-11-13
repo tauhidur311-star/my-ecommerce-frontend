@@ -16,39 +16,65 @@ export default function NotificationCenter() {
     loadNotifications();
   }, []);
 
-  const loadNotifications = () => {
+  const loadNotifications = async () => {
     setLoading(true);
-    
-    // Generate sample notifications
-    const sampleNotifications = [
-      {
-        id: 1,
-        type: 'order',
-        title: 'New Order Received',
-        message: 'Order #1015 has been placed by Customer 5',
-        timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-        read: false,
-        priority: 'high',
-        action: 'view_order',
-        actionData: { orderId: '1015' }
-      },
-      {
-        id: 2,
-        type: 'inventory',
-        title: 'Low Stock Alert',
-        message: 'Premium Cotton Shirt is running low (only 3 left)',
-        timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-        read: false,
-        priority: 'medium',
-        action: 'update_inventory',
-        actionData: { productId: 'prod-123' }
-      },
-      {
-        id: 3,
-        type: 'customer',
-        title: 'New Customer Registration',
-        message: 'Welcome new customer: john.doe@example.com',
-        timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+    try {
+      // Load real notifications from API instead of hardcoded data
+      const apiService = await import('../../services/api');
+      
+      // Try to load real contact submissions and orders
+      const notifications = [];
+      
+      try {
+        const contactResponse = await apiService.default.request('/admin/analytics/recent-submissions?limit=5');
+        if (contactResponse.success && contactResponse.data) {
+          contactResponse.data.forEach(submission => {
+            notifications.push({
+              id: `contact_${submission._id}`,
+              type: 'customer',
+              title: 'New Contact Submission',
+              message: `${submission.name}: ${submission.subject}`,
+              timestamp: submission.createdAt,
+              read: submission.isRead || false,
+              priority: 'medium',
+              action: 'view_contact',
+              actionData: { contactId: submission._id }
+            });
+          });
+        }
+      } catch (error) {
+        console.log('No contact submissions available');
+      }
+
+      try {
+        const ordersResponse = await apiService.default.request('/admin/orders/recent?limit=5');
+        if (ordersResponse.success && ordersResponse.data) {
+          ordersResponse.data.forEach(order => {
+            notifications.push({
+              id: `order_${order._id}`,
+              type: 'order',
+              title: 'New Order',
+              message: `Order #${order.orderNumber} - ৳${order.totalAmount}`,
+              timestamp: order.createdAt,
+              read: false,
+              priority: 'high',
+              action: 'view_order',
+              actionData: { orderId: order._id }
+            });
+          });
+        }
+      } catch (error) {
+        console.log('No orders available');
+      }
+
+      // Only show real notifications
+      setNotifications(notifications.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)));
+    } catch (error) {
+      console.error('Failed to load real notifications:', error);
+      setNotifications([]); // No notifications if API fails
+    } finally {
+      setLoading(false);
+    }
         read: true,
         priority: 'low',
         action: 'view_customer',

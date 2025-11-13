@@ -28,6 +28,7 @@ import FloatingWidget, { QuickActionWidget } from '../../components/ui/FloatingW
 import ContactSubmissions from '../../components/admin/ContactSubmissions';
 import ContactInfoSettings from '../../components/admin/ContactInfoSettings';
 import EmailTemplateEditor from '../../components/admin/EmailTemplateEditor';
+import EmailDashboard from '../../components/admin/EmailDashboard';
 import NotificationBanner from '../../components/admin/NotificationBanner';
 import '../../styles/contactUs.css';
 // import '../../styles/mobile-responsive.css';
@@ -185,8 +186,8 @@ export default function AdminDashboard() {
         
         if (response.ok) {
           const data = await response.json();
-          const products = data.products || data.data || data;
-          setProducts(products);
+          const products = data?.products || data?.data || data || [];
+          setProducts(Array.isArray(products) ? products : []);
           
           // Also save to localStorage as backup
           await window.storage.set('admin-products', JSON.stringify(products));
@@ -803,7 +804,8 @@ export default function AdminDashboard() {
                 { key: 'settings', icon: StoreIcon, label: 'Store Settings' },
                 { key: 'contact-submissions', icon: null, label: '📧 Contact Submissions' },
                 { key: 'contact-settings', icon: null, label: '📞 Contact Settings' },
-                { key: 'email-templates', icon: Mail, label: '📄 Email Templates' }
+                { key: 'email-templates', icon: Mail, label: '📄 Email Templates' },
+                { key: 'email-dashboard', icon: Mail, label: '📧 Email Dashboard' }
               ].map(({ key, icon: Icon, label }) => (
                 <motion.button
                   key={key}
@@ -1108,6 +1110,19 @@ export default function AdminDashboard() {
               transition={{ duration: 0.3, ease: "easeInOut" }}
             >
               <EmailTemplateEditor />
+            </motion.div>
+          )}
+
+          {/* Email Dashboard Tab */}
+          {activeTab === 'email-dashboard' && (
+            <motion.div
+              key="email-dashboard"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <EmailDashboard />
             </motion.div>
           )}
         </AnimatePresence>
