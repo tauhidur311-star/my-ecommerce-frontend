@@ -6,6 +6,10 @@ import { Plus, Edit2, Trash2, Save, X, Upload, Package, Grid, Tag, List, Store a
 import EnhancedButton from '../../components/ui/EnhancedButton';
 import PageTransition from '../../components/animations/PageTransition';
 import { playSuccess } from '../../utils/soundManager';
+import GlassCard, { MetricGlassCard, DashboardGlassCard } from '../../components/ui/glass/GlassCard';
+import GlassModal, { ConfirmationModal } from '../../components/ui/glass/GlassModal';
+import GlassDropdown from '../../components/ui/glass/GlassDropdown';
+import GlassDragDropProvider, { GlassGridContainer } from '../../components/ui/glass/GlassDragDropProvider';
 import ImageCropper from '../../components/ImageCropper';
 import OrderManagement from '../../components/OrderManagement';
 import AdvancedAnalytics from '../../components/AdvancedAnalytics';
@@ -453,11 +457,23 @@ export default function AdminDashboard() {
   };
 
   const handleDelete = async (productId) => {
-    if (!window.confirm('Are you sure you want to delete this product?')) return;
+    const product = products.find(p => p._id === productId);
+    setDeleteModal({ show: true, product });
+  };
+
+  const confirmDelete = async () => {
+    const productId = deleteModal.product?._id;
+    if (!productId) return;
     
-    const updatedProducts = products.filter(p => p.id !== productId);
-    await saveProducts(updatedProducts);
-    alert('Product deleted!');
+    try {
+      const updatedProducts = products.filter(p => p.id !== productId && p._id !== productId);
+      await saveProducts(updatedProducts);
+      playSuccess();
+      toast.success('Product deleted successfully!');
+    } catch (error) {
+      toast.error('Failed to delete product');
+    }
+    setDeleteModal({ show: false, product: null });
   };
 
   const resetForm = () => {
@@ -732,6 +748,7 @@ export default function AdminDashboard() {
               {[
                 { key: 'orders', icon: List, label: 'Orders' },
                 { key: 'analytics', icon: Grid, label: 'Analytics' },
+                { key: 'dashboard', icon: Grid, label: '📊 Dashboard Overview' },
                 { key: 'realtime-analytics', icon: Activity, label: '📊 Real-time Analytics' },
                 { key: 'inventory', icon: Package, label: 'Inventory' },
                 { key: 'emails', icon: Upload, label: 'Emails' },
@@ -759,6 +776,43 @@ export default function AdminDashboard() {
               </div>
             </div>
           </MotionWrapper>
+
+        {/* Dashboard Overview */}
+        {activeTab === 'dashboard' && (
+          <PageTransition type="slideUp" key="dashboard">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard Overview</h2>
+                <GlassDropdown
+                  options={[
+                    { value: '7d', label: 'Last 7 days' },
+                    { value: '30d', label: 'Last 30 days' },
+                    { value: '90d', label: 'Last 90 days' }
+                  ]}
+                  value={{ value: '30d', label: 'Last 30 days' }}
+                  theme="analytics"
+                  size="small"
+                />
+              </div>
+              
+              <GlassDragDropProvider>
+                <GlassGridContainer items={dashboardLayout.map(item => item.id)} columns={4}>
+                  {dashboardLayout.map((item) => (
+                    <MetricGlassCard
+                      key={item.id}
+                      title={item.title}
+                      value={item.value}
+                      delta={Math.floor(Math.random() * 20 - 10)}
+                      theme={item.theme}
+                      draggable={true}
+                      dragId={item.id}
+                    />
+                  ))}
+                </GlassGridContainer>
+              </GlassDragDropProvider>
+            </div>
+          </PageTransition>
+        )}
 
         {/* Main Content Sections with AnimatePresence */}
         <AnimatePresence mode="wait">
@@ -900,18 +954,22 @@ export default function AdminDashboard() {
                           </span>
                         </td>
                         <td className="px-6 py-4 text-sm font-medium space-x-2">
-                          <button
+                          <motion.button
                             onClick={() => handleEdit(product)}
-                            className="text-blue-600 hover:text-blue-900"
+                            className="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.95 }}
                           >
                             <Edit2 size={18} />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(product.id)}
-                            className="text-red-600 hover:text-red-900"
+                          </motion.button>
+                          <motion.button
+                            onClick={() => handleDelete(product.id || product._id)}
+                            className="text-red-600 hover:text-red-900 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.95 }}
                           >
                             <Trash2 size={18} />
-                          </button>
+                          </motion.button>
                         </td>
                       </tr>
                     ))}
@@ -1005,6 +1063,18 @@ export default function AdminDashboard() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Glass UI Delete Confirmation Modal */}
+        <ConfirmationModal
+          isOpen={deleteModal.show}
+          onClose={() => setDeleteModal({ show: false, product: null })}
+          onConfirm={confirmDelete}
+          title="Delete Product"
+          message={`Are you sure you want to delete "${deleteModal.product?.name}"? This action cannot be undone.`}
+          confirmText="Delete"
+          cancelText="Cancel"
+          theme="danger"
+        />
 
         {/* Notification Banner */}
         <NotificationBanner />

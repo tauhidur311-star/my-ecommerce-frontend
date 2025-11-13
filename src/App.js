@@ -9,6 +9,7 @@ import UserDashboard from './pages/dashboard/UserDashboard';
 import AboutPage from './pages/store/AboutPage';
 import ContactPage from './pages/store/ContactPage';
 import WishlistPage from './pages/WishlistPage';
+import GlassUIShowcase from './components/examples/GlassUIShowcase';
 import ProtectedRoute from './components/ProtectedRoute';
 import Auth from './Auth';
 // Error logging simplified for better performance
@@ -104,6 +105,9 @@ function App() {
               <AdminDashboard />
             </ProtectedRoute>
           } />
+          
+          {/* Glass UI Demo Route */}
+          <Route path="/glass-demo" element={<GlassUIShowcase />} />
           
           {/* Catch-all route for SPA routing - redirects unknown routes to home */}
           <Route path="*" element={<Navigate to="/" replace />} />

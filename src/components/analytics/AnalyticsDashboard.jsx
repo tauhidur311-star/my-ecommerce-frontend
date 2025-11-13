@@ -32,6 +32,9 @@ import SummaryCard from './SummaryCard';
 import ChartWrapper from './ChartWrapper';
 import RecentSubmissionsList from './RecentSubmissionsList';
 import useSSE from '../../hooks/useSSE';
+import { MetricGlassCard, AnalyticsGlassCard } from '../ui/glass/GlassCard';
+import { LineGlassChart, AreaGlassChart, BarGlassChart, PieGlassChart } from '../ui/glass/GlassChartWrapper';
+import GlassDropdown from '../ui/glass/GlassDropdown';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -215,15 +218,17 @@ const AnalyticsDashboard = () => {
         </div>
         
         <div className="flex items-center gap-3">
-          <select
-            value={chartRange}
-            onChange={(e) => setChartRange(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-          >
-            <option value="7d">Last 7 Days</option>
-            <option value="30d">Last 30 Days</option>
-            <option value="90d">Last 90 Days</option>
-          </select>
+          <GlassDropdown
+            options={[
+              { value: '7d', label: 'Last 7 Days' },
+              { value: '30d', label: 'Last 30 Days' },
+              { value: '90d', label: 'Last 90 Days' }
+            ]}
+            value={{ value: chartRange, label: `Last ${chartRange === '7d' ? '7 Days' : chartRange === '30d' ? '30 Days' : '90 Days'}` }}
+            onChange={(option) => setChartRange(option.value)}
+            theme="analytics"
+            size="small"
+          />
           
           <button
             onClick={fetchAnalyticsData}
