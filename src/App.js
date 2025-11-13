@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { HelmetProvider } from 'react-helmet-async';
 import Store from './pages/store/Store';
 import DynamicStorefront from './components/DynamicStorefront';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -10,6 +11,9 @@ import ContactPage from './pages/store/ContactPage';
 import WishlistPage from './pages/WishlistPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import Auth from './Auth';
+import ErrorBoundary from './components/ErrorBoundary';
+import { ThemeProvider } from './components/theme/ThemeManager';
+import SEOHead from './components/SEO/SEOHead';
 // Error logging simplified for better performance
 import './App.css';
 
@@ -56,51 +60,100 @@ function App() {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <Router>
-        {showAuth && <Auth onClose={() => setShowAuth(false)} />}
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<Store />} />
-          <Route path="/theme-preview" element={<DynamicStorefront pageType="home" />} />
-          <Route path="/theme-home" element={<DynamicStorefront pageType="home" />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/cart" element={<Store />} /> {/* Cart is handled within Store component */}
-          
-          {/* Preview routes for theme editor */}
-          <Route path="/preview" element={<Store />} />
-          <Route path="/preview/:pageType" element={<Store />} />
-          
-          {/* Protected user routes */}
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <UserDashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/dashboard/:tab" element={
-            <ProtectedRoute>
-              <UserDashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/wishlist" element={
-            <ProtectedRoute>
-              <WishlistPage />
-            </ProtectedRoute>
-          } />
-          
-          {/* Protected admin routes */}
-          <Route path="/admin" element={
-            <ProtectedRoute requireAdmin={true}>
-              <AdminDashboard />
-            </ProtectedRoute>
-          } />
-          
-          {/* Catch-all route for SPA routing - redirects unknown routes to home */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Router>
-    </QueryClientProvider>
+    <ErrorBoundary level="page" onError={(error, errorInfo, errorId) => {
+      console.error('App Error:', error, errorInfo, errorId);
+    }}>
+      <HelmetProvider>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider>
+            <Router>
+              <SEOHead />
+              {showAuth && <Auth onClose={() => setShowAuth(false)} />}
+              <Routes>
+                {/* Public routes */}
+                <Route path="/" element={
+                  <ErrorBoundary level="page">
+                    <Store />
+                  </ErrorBoundary>
+                } />
+                <Route path="/theme-preview" element={
+                  <ErrorBoundary level="page">
+                    <DynamicStorefront pageType="home" />
+                  </ErrorBoundary>
+                } />
+                <Route path="/theme-home" element={
+                  <ErrorBoundary level="page">
+                    <DynamicStorefront pageType="home" />
+                  </ErrorBoundary>
+                } />
+                <Route path="/about" element={
+                  <ErrorBoundary level="page">
+                    <AboutPage />
+                  </ErrorBoundary>
+                } />
+                <Route path="/contact" element={
+                  <ErrorBoundary level="page">
+                    <ContactPage />
+                  </ErrorBoundary>
+                } />
+                <Route path="/cart" element={
+                  <ErrorBoundary level="page">
+                    <Store />
+                  </ErrorBoundary>
+                } /> {/* Cart is handled within Store component */}
+                
+                {/* Preview routes for theme editor */}
+                <Route path="/preview" element={
+                  <ErrorBoundary level="page">
+                    <Store />
+                  </ErrorBoundary>
+                } />
+                <Route path="/preview/:pageType" element={
+                  <ErrorBoundary level="page">
+                    <Store />
+                  </ErrorBoundary>
+                } />
+                
+                {/* Protected user routes */}
+                <Route path="/dashboard" element={
+                  <ErrorBoundary level="page">
+                    <ProtectedRoute>
+                      <UserDashboard />
+                    </ProtectedRoute>
+                  </ErrorBoundary>
+                } />
+                <Route path="/dashboard/:tab" element={
+                  <ErrorBoundary level="page">
+                    <ProtectedRoute>
+                      <UserDashboard />
+                    </ProtectedRoute>
+                  </ErrorBoundary>
+                } />
+                <Route path="/wishlist" element={
+                  <ErrorBoundary level="page">
+                    <ProtectedRoute>
+                      <WishlistPage />
+                    </ProtectedRoute>
+                  </ErrorBoundary>
+                } />
+                
+                {/* Protected admin routes */}
+                <Route path="/admin" element={
+                  <ErrorBoundary level="page">
+                    <ProtectedRoute requireAdmin={true}>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  </ErrorBoundary>
+                } />
+                
+                {/* Catch-all route for SPA routing - redirects unknown routes to home */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </Router>
+          </ThemeProvider>
+        </QueryClientProvider>
+      </HelmetProvider>
+    </ErrorBoundary>
   );
 }
 
