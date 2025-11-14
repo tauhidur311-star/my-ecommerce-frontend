@@ -21,20 +21,20 @@ import { motion } from 'framer-motion';
 // import useAdvancedPageBuilderStore from '../../stores/advancedPageBuilderStore';
 // import { useAnimationPreset } from '../../hooks/useAnimationPresets';
 // import { useCollaboration } from '../../hooks/useCollaboration';
-import AdvancedSettingsPanel from '../../components/design-editor/advanced/AdvancedSettingsPanel';
-import ResponsivePreviewPanel from '../../components/design-editor/advanced/ResponsivePreviewPanel';
+// import AdvancedSettingsPanel from '../../components/design-editor/advanced/AdvancedSettingsPanel';
+// import ResponsivePreviewPanel from '../../components/design-editor/advanced/ResponsivePreviewPanel';
 // import CollaborationCursors from '../../components/collaboration/CollaborationCursors';
 // import PresenceIndicator from '../../components/collaboration/PresenceIndicator';
 
-// Import advanced sections
-import VideoSection from '../../components/sections/advanced/VideoSection';
-import PricingSection from '../../components/sections/advanced/PricingSection';
-import FAQSection from '../../components/sections/advanced/FAQSection';
-import TeamSection from '../../components/sections/advanced/TeamSection';
-import StatsSection from '../../components/sections/advanced/StatsSection';
-import TimelineSection from '../../components/sections/advanced/TimelineSection';
-import LogoGridSection from '../../components/sections/advanced/LogoGridSection';
-import CTABlockSection from '../../components/sections/advanced/CTABlockSection';
+// Import advanced sections (temporarily disabled for build)
+// import VideoSection from '../../components/sections/advanced/VideoSection';
+// import PricingSection from '../../components/sections/advanced/PricingSection';
+// import FAQSection from '../../components/sections/advanced/FAQSection';
+// import TeamSection from '../../components/sections/advanced/TeamSection';
+// import StatsSection from '../../components/sections/advanced/StatsSection';
+// import TimelineSection from '../../components/sections/advanced/TimelineSection';
+// import LogoGridSection from '../../components/sections/advanced/LogoGridSection';
+// import CTABlockSection from '../../components/sections/advanced/CTABlockSection';
 
 // Import legacy sections for backward compatibility
 import HeroSection from '../../components/sections/HeroSection.js';
@@ -599,17 +599,39 @@ const EnhancedThemeEditor: React.FC<EnhancedThemeEditorProps> = ({
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {previewMode ? (
-            /* Responsive Preview Mode */
-            <ResponsivePreviewPanel
-              activeDevice={previewDevice}
-              onDeviceChange={setPreviewDevice}
-              performanceSettings={{ networkSpeed: '4g', cpuThrottling: 1, cacheDisabled: false }}
-              onPerformanceChange={() => {}}
-            >
-              <div className="min-h-screen bg-white">
-                {sections.map((section, index) => renderSectionWithAnimation(section, index))}
+            /* Responsive Preview Mode (simplified) */
+            <div className="flex-1 overflow-auto bg-gray-100 p-6">
+              <div className="text-center mb-4">
+                <div className="inline-flex rounded-lg border border-gray-200 bg-white p-1">
+                  <button
+                    onClick={() => setPreviewDevice('desktop')}
+                    className={`px-3 py-1 text-sm rounded-md ${previewDevice === 'desktop' ? 'bg-blue-500 text-white' : 'text-gray-600'}`}
+                  >
+                    <Monitor className="w-4 h-4 inline mr-1" />
+                    Desktop
+                  </button>
+                  <button
+                    onClick={() => setPreviewDevice('tablet')}
+                    className={`px-3 py-1 text-sm rounded-md ${previewDevice === 'tablet' ? 'bg-blue-500 text-white' : 'text-gray-600'}`}
+                  >
+                    <Tablet className="w-4 h-4 inline mr-1" />
+                    Tablet
+                  </button>
+                  <button
+                    onClick={() => setPreviewDevice('mobile')}
+                    className={`px-3 py-1 text-sm rounded-md ${previewDevice === 'mobile' ? 'bg-blue-500 text-white' : 'text-gray-600'}`}
+                  >
+                    <Smartphone className="w-4 h-4 inline mr-1" />
+                    Mobile
+                  </button>
+                </div>
               </div>
-            </ResponsivePreviewPanel>
+              <div className={`${getDeviceWidth()} mx-auto bg-white shadow-xl rounded-lg overflow-hidden`}>
+                <div className="min-h-screen bg-white">
+                  {sections.map((section, index) => renderSectionWithAnimation(section, index))}
+                </div>
+              </div>
+            </div>
           ) : (
             /* Edit Mode Canvas */
             <div className="flex-1 overflow-auto bg-gray-100 p-6">
@@ -732,7 +754,7 @@ const EnhancedThemeEditor: React.FC<EnhancedThemeEditorProps> = ({
         {/* Right Sidebar - Advanced Settings Panel */}
         {selectedSection && !previewMode && (
           <div className="w-80 bg-white border-l border-gray-200 overflow-hidden">
-            <AdvancedSettingsPanel
+            {/* <AdvancedSettingsPanel
               section={selectedSection}
               onUpdate={(updates) => updateSection(selectedSection.id, updates)}
               onCopyStyles={() => {
@@ -743,7 +765,39 @@ const EnhancedThemeEditor: React.FC<EnhancedThemeEditorProps> = ({
                 // Paste styles functionality
               }}
               canPasteStyles={false}
-            />
+            /> */}
+            <div className="p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">Section Settings</h3>
+                <button 
+                  onClick={() => selectSection(null)}
+                  className="p-1 hover:bg-gray-100 rounded"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Section ID</label>
+                  <input 
+                    type="text" 
+                    value={selectedSection?.id || ''} 
+                    disabled
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Section Type</label>
+                  <input 
+                    type="text" 
+                    value={selectedSection?.type || ''} 
+                    disabled
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm"
+                  />
+                </div>
+                <p className="text-sm text-gray-500 italic">Advanced settings panel temporarily disabled for build.</p>
+              </div>
+            </div>
           </div>
         )}
       </div>
