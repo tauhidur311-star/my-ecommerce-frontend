@@ -13,13 +13,13 @@ import {
   Monitor,
   Search,
   Copy,
-  Paste,
+  Clipboard,
   RotateCcw,
   Code,
   Eye,
   Settings,
   Zap,
-  TestTube,
+  Flask as TestTube,
   Layers
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -244,7 +244,7 @@ const AdvancedSettingsPanel: React.FC<AdvancedSettingsPanelProps> = ({
             disabled={!canPasteStyles}
             className="flex items-center px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-md disabled:opacity-50"
           >
-            <Paste className="w-4 h-4 mr-1" />
+            <Clipboard className="w-4 h-4 mr-1" />
             Paste
           </button>
           <button className="flex items-center px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-md">

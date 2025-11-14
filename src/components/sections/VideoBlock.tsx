@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Play, Pause, Volume2, VolumeX, Maximize, RotateCcw } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeOff as VolumeX, Maximize, RotateCcw } from 'lucide-react';
 
 interface VideoBlockProps {
   settings?: {

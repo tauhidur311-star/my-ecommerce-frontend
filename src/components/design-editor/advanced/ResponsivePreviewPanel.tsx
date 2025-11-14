@@ -8,7 +8,7 @@ import {
   Monitor, 
   Tablet, 
   Smartphone, 
-  Rotate3D, 
+  RotateCw as Rotate3D, 
   Wifi, 
   WifiOff, 
   Zap, 
@@ -20,7 +20,7 @@ import {
   Eye,
   EyeOff,
   Volume2,
-  VolumeX,
+  VolumeOff as VolumeX,
   Clock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
