@@ -416,19 +416,5 @@ export const useOptimizedAnimation = (config: AnimationConfig) => {
   return useCustomAnimation(optimizedConfig);
 };
 
-// ====================
-// EXPORT ALL HOOKS
-// ====================
-
-export {
-  useAnimationPreset,
-  useCustomAnimation,
-  useScrollAnimation,
-  useStaggerAnimation,
-  useIntersectionAnimation,
-  useMouseParallax,
-  useTypewriter,
-  useCounterAnimation,
-  useRevealOnScroll,
-  useOptimizedAnimation,
-};
+// All hooks are already individually exported above
+// No need for duplicate exports
