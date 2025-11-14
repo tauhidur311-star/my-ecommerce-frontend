@@ -19,7 +19,7 @@ import {
   Eye,
   Settings,
   Zap,
-  Flask as TestTube,
+  Beaker as TestTube,
   Layers
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';

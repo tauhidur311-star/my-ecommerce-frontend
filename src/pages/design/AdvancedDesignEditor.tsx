@@ -18,7 +18,7 @@ import {
   Settings,
   Layers,
   Palette,
-  Flask as TestTube,
+  Beaker as TestTube,
   Loader2,
   Play,
   Pause
