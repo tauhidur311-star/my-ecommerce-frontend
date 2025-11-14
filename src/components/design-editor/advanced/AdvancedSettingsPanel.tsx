@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import { 
   Palette, 
   Type, 
-  Spacing, 
+  Space as Spacing, 
   Smartphone, 
   Tablet, 
   Monitor,
