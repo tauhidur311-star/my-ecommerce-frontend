@@ -287,6 +287,57 @@ export const CTABlockSectionSchema = z.object({
 });
 
 // ====================
+// LOGO GRID SECTION SCHEMA (Updated)
+// ====================
+
+export const LogoGridSectionSchema = z.object({
+  type: z.literal('logo-grid'),
+  content: z.object({
+    title: z.string().min(1, 'Title is required'),
+    subtitle: z.string().optional(),
+    logos: z.array(
+      z.object({
+        id: z.string(),
+        name: z.string().min(1, 'Logo name is required'),
+        image: z.string().url('Valid image URL is required'),
+        url: z.string().url().optional(),
+      })
+    ).min(1, 'At least one logo is required'),
+    columns: ResponsiveSettingsSchema(z.number().min(2).max(6)),
+    grayscale: z.boolean().default(true),
+    hoverEffect: z.enum(['none', 'scale', 'brightness', 'color']).default('scale'),
+  }),
+  settings: BaseSectionSettingsSchema,
+});
+
+// ====================
+// CTA BLOCK SECTION SCHEMA (Updated)
+// ====================
+
+export const CTABlockSectionSchema = z.object({
+  type: z.literal('cta-block'),
+  content: z.object({
+    title: z.string().min(1, 'Title is required'),
+    subtitle: z.string().optional(),
+    description: z.string().min(1, 'Description is required'),
+    primaryCTA: z.object({
+      text: z.string().min(1, 'CTA text is required'),
+      url: z.string().url('Valid URL is required'),
+      style: z.enum(['primary', 'secondary', 'outline']).default('primary'),
+    }),
+    secondaryCTA: z.object({
+      text: z.string().min(1, 'CTA text is required'),
+      url: z.string().url('Valid URL is required'),
+      style: z.enum(['primary', 'secondary', 'outline']).default('secondary'),
+    }).optional(),
+    backgroundImage: z.string().url().optional(),
+    backgroundVideo: z.string().url().optional(),
+    layout: z.enum(['centered', 'split', 'banner']).default('centered'),
+  }),
+  settings: BaseSectionSettingsSchema,
+});
+
+// ====================
 // SECTION REGISTRY
 // ====================
 

@@ -561,28 +561,52 @@ export const timelinePresets = {
 };
 
 // ====================
-// LOGO GRID PRESETS
+// LOGO GRID PRESETS (Enhanced)
 // ====================
 
 export const logoGridPresets = {
   'partners': {
-    name: 'Partners',
-    description: 'Partner and client logos',
+    name: 'Trusted Partners',
+    description: 'Partner and client logos with hover effects',
     content: {
       title: 'Trusted by Industry Leaders',
       subtitle: 'Join thousands of companies already using our platform',
       logos: [
         {
           id: nanoid(),
-          name: 'Company A',
-          image: '/images/logos/company-a.svg',
-          url: 'https://company-a.com',
+          name: 'Microsoft',
+          image: 'https://img.icons8.com/fluency/96/000000/microsoft.png',
+          url: 'https://microsoft.com',
         },
         {
           id: nanoid(),
-          name: 'Company B',
-          image: '/images/logos/company-b.svg',
-          url: 'https://company-b.com',
+          name: 'Google',
+          image: 'https://img.icons8.com/color/96/000000/google-logo.png',
+          url: 'https://google.com',
+        },
+        {
+          id: nanoid(),
+          name: 'Apple',
+          image: 'https://img.icons8.com/ios-filled/96/000000/mac-os.png',
+          url: 'https://apple.com',
+        },
+        {
+          id: nanoid(),
+          name: 'Amazon',
+          image: 'https://img.icons8.com/color/96/000000/amazon.png',
+          url: 'https://amazon.com',
+        },
+        {
+          id: nanoid(),
+          name: 'Meta',
+          image: 'https://img.icons8.com/color/96/000000/meta.png',
+          url: 'https://meta.com',
+        },
+        {
+          id: nanoid(),
+          name: 'Netflix',
+          image: 'https://img.icons8.com/color/96/000000/netflix.png',
+          url: 'https://netflix.com',
         },
       ],
       columns: { desktop: 6, tablet: 4, mobile: 3 },
@@ -597,13 +621,38 @@ export const logoGridPresets = {
   },
 
   'integrations': {
-    name: 'Integrations',
-    description: 'Available integrations and tools',
+    name: 'Tool Integrations',
+    description: 'Available integrations and development tools',
     content: {
       title: 'Seamless Integrations',
-      subtitle: 'Connect with your favorite tools',
-      logos: [],
-      columns: { desktop: 8, tablet: 6, mobile: 4 },
+      subtitle: 'Connect with your favorite development tools',
+      logos: [
+        {
+          id: nanoid(),
+          name: 'GitHub',
+          image: 'https://img.icons8.com/fluency/96/000000/github.png',
+          url: 'https://github.com',
+        },
+        {
+          id: nanoid(),
+          name: 'Slack',
+          image: 'https://img.icons8.com/color/96/000000/slack-new.png',
+          url: 'https://slack.com',
+        },
+        {
+          id: nanoid(),
+          name: 'Figma',
+          image: 'https://img.icons8.com/color/96/000000/figma--v1.png',
+          url: 'https://figma.com',
+        },
+        {
+          id: nanoid(),
+          name: 'Notion',
+          image: 'https://img.icons8.com/color/96/000000/notion--v1.png',
+          url: 'https://notion.so',
+        },
+      ],
+      columns: { desktop: 4, tablet: 3, mobile: 2 },
       grayscale: false,
       hoverEffect: 'scale' as const,
     } as LogoGridSectionContent,
@@ -613,27 +662,45 @@ export const logoGridPresets = {
       padding: defaultResponsivePadding,
     },
   },
+
+  'clients': {
+    name: 'Client Showcase',
+    description: 'Clean client logo presentation',
+    content: {
+      title: 'Our Valued Clients',
+      subtitle: 'Proud to work with amazing companies worldwide',
+      logos: [],
+      columns: { desktop: 5, tablet: 3, mobile: 2 },
+      grayscale: true,
+      hoverEffect: 'brightness' as const,
+    } as LogoGridSectionContent,
+    settings: {
+      backgroundColor: 'transparent',
+      textColor: '#111827',
+      padding: defaultResponsivePadding,
+    },
+  },
 };
 
 // ====================
-// CTA BLOCK PRESETS
+// CTA BLOCK PRESETS (Enhanced)
 // ====================
 
 export const ctaBlockPresets = {
   'signup-cta': {
     name: 'Sign Up CTA',
-    description: 'Primary conversion call-to-action',
+    description: 'High-conversion signup call-to-action',
     content: {
-      title: 'Ready to Get Started?',
-      subtitle: 'Join thousands of satisfied customers',
-      description: 'Transform your business today with our powerful platform. Start your free trial and see the difference.',
+      title: 'Ready to Transform Your Business?',
+      subtitle: 'Join 50,000+ companies worldwide',
+      description: 'Start your free trial today and discover why industry leaders choose our platform. No credit card required.',
       primaryCTA: {
         text: 'Start Free Trial',
         url: '/signup',
         style: 'primary' as const,
       },
       secondaryCTA: {
-        text: 'Schedule Demo',
+        text: 'Watch Demo',
         url: '/demo',
         style: 'outline' as const,
       },
@@ -648,16 +715,21 @@ export const ctaBlockPresets = {
 
   'contact-cta': {
     name: 'Contact CTA',
-    description: 'Contact and consultation call-to-action',
+    description: 'Professional contact call-to-action with split layout',
     content: {
-      title: 'Have Questions?',
-      description: 'Our experts are here to help you find the perfect solution for your business needs.',
+      title: 'Ready to Take the Next Step?',
+      subtitle: 'Let\'s discuss your project',
+      description: 'Our team of experts is ready to help you achieve your goals. Get in touch for a personalized consultation.',
       primaryCTA: {
-        text: 'Contact Us',
+        text: 'Get In Touch',
         url: '/contact',
         style: 'primary' as const,
       },
-      backgroundImage: '/images/cta-background.jpg',
+      secondaryCTA: {
+        text: 'View Portfolio',
+        url: '/portfolio',
+        style: 'outline' as const,
+      },
       layout: 'split' as const,
     } as CTABlockSectionContent,
     settings: {
@@ -669,26 +741,99 @@ export const ctaBlockPresets = {
 
   'newsletter-cta': {
     name: 'Newsletter CTA',
-    description: 'Newsletter subscription call-to-action',
+    description: 'Newsletter subscription with banner layout',
     content: {
-      title: 'Stay in the Loop',
-      subtitle: 'Get the latest updates',
-      description: 'Subscribe to our newsletter for product updates, industry insights, and exclusive offers.',
+      title: 'Stay Ahead of the Curve',
+      subtitle: 'Weekly insights delivered to your inbox',
+      description: 'Get exclusive content, industry trends, and expert tips. Join 25,000+ subscribers.',
       primaryCTA: {
-        text: 'Subscribe Now',
+        text: 'Subscribe Free',
         url: '/newsletter',
         style: 'primary' as const,
       },
       layout: 'banner' as const,
     } as CTABlockSectionContent,
     settings: {
-      backgroundColor: '#f3f4f6',
-      textColor: '#374151',
+      backgroundColor: '#f8fafc',
+      textColor: '#1e293b',
       padding: { 
         desktop: { top: 60, bottom: 60, left: 20, right: 20 },
         tablet: { top: 50, bottom: 50, left: 16, right: 16 },
         mobile: { top: 40, bottom: 40, left: 16, right: 16 },
       },
+    },
+  },
+
+  'product-launch': {
+    name: 'Product Launch',
+    description: 'Exciting product announcement CTA',
+    content: {
+      title: 'The Future is Here',
+      subtitle: 'Introducing our revolutionary new platform',
+      description: 'Experience next-generation features that will transform how you work. Be among the first to try it.',
+      primaryCTA: {
+        text: 'Get Early Access',
+        url: '/early-access',
+        style: 'primary' as const,
+      },
+      secondaryCTA: {
+        text: 'Learn More',
+        url: '/features',
+        style: 'outline' as const,
+      },
+      layout: 'centered' as const,
+    } as CTABlockSectionContent,
+    settings: {
+      backgroundColor: '#7c3aed',
+      textColor: '#ffffff',
+      padding: defaultResponsivePadding,
+    },
+  },
+
+  'special-offer': {
+    name: 'Special Offer',
+    description: 'Limited time promotion CTA',
+    content: {
+      title: 'Limited Time: 50% Off All Plans',
+      subtitle: 'Exclusive offer ends soon',
+      description: 'Don\'t miss out on our biggest sale of the year. Upgrade now and save hundreds on your subscription.',
+      primaryCTA: {
+        text: 'Claim Offer',
+        url: '/special-offer',
+        style: 'primary' as const,
+      },
+      secondaryCTA: {
+        text: 'View Plans',
+        url: '/pricing',
+        style: 'secondary' as const,
+      },
+      layout: 'banner' as const,
+    } as CTABlockSectionContent,
+    settings: {
+      backgroundColor: '#dc2626',
+      textColor: '#ffffff',
+      padding: defaultResponsivePadding,
+    },
+  },
+
+  'consultation': {
+    name: 'Free Consultation',
+    description: 'Professional services consultation CTA',
+    content: {
+      title: 'Get Expert Guidance',
+      subtitle: 'Free 30-minute consultation',
+      description: 'Schedule a call with our experts to discuss your specific needs and discover the best solution for your business.',
+      primaryCTA: {
+        text: 'Book Consultation',
+        url: '/consultation',
+        style: 'primary' as const,
+      },
+      layout: 'split' as const,
+    } as CTABlockSectionContent,
+    settings: {
+      backgroundColor: '#059669',
+      textColor: '#ffffff',
+      padding: defaultResponsivePadding,
     },
   },
 };
