@@ -8,6 +8,13 @@ import toast from 'react-hot-toast';
 
 const EnhancedAssetPicker = ({ onSelect, onClose, allowMultiple = false }) => {
   const [assets, setAssets] = useState([]);
+  const [optimizationSettings, setOptimizationSettings] = useState({
+    format: 'auto', // auto, webp, jpeg, png
+    quality: 85,
+    resize: true,
+    maxWidth: 1920,
+    maxHeight: 1080
+  });
   const [folders, setFolders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -122,6 +129,7 @@ const EnhancedAssetPicker = ({ onSelect, onClose, allowMultiple = false }) => {
     uploadFiles(files);
   };
 
+  // Enhanced upload with Cloudflare R2 optimization
   const uploadFiles = async (files) => {
     try {
       setUploading(true);

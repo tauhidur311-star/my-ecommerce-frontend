@@ -17,14 +17,14 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-// Import our advanced components (temporarily disabled for build)
+// Import our advanced components - ACTIVATED for collaboration
 // import useAdvancedPageBuilderStore from '../../stores/advancedPageBuilderStore';
 // import { useAnimationPreset } from '../../hooks/useAnimationPresets';
-// import { useCollaboration } from '../../hooks/useCollaboration';
+import { useCollaboration } from '../../hooks/useCollaboration';
 // import AdvancedSettingsPanel from '../../components/design-editor/advanced/AdvancedSettingsPanel';
 // import ResponsivePreviewPanel from '../../components/design-editor/advanced/ResponsivePreviewPanel';
-// import CollaborationCursors from '../../components/collaboration/CollaborationCursors';
-// import PresenceIndicator from '../../components/collaboration/PresenceIndicator';
+import CollaborationCursors from '../../components/collaboration/CollaborationCursors';
+import PresenceIndicator from '../../components/collaboration/PresenceIndicator';
 
 // Import advanced sections (temporarily disabled for build)
 // import VideoSection from '../../components/sections/advanced/VideoSection';
@@ -125,9 +125,8 @@ const EnhancedThemeEditor: React.FC<EnhancedThemeEditorProps> = ({
   const saveToHistory = () => console.log('Save to history');
   const updateGlobalSettings = (updates) => setGlobalSettings(prev => ({ ...prev, ...updates }));
 
-  // Collaboration integration (temporarily disabled)
-  // const collaboration = useCollaboration(designId);
-  const collaboration = { actions: { broadcastSectionUpdate: () => {} } }; // Mock for now
+  // Collaboration integration - ACTIVATED
+  const collaboration = useCollaboration(designId || 'default');
 
   // Local state for UI
   const [activeView, setActiveView] = useState('editor');
@@ -336,8 +335,8 @@ const EnhancedThemeEditor: React.FC<EnhancedThemeEditorProps> = ({
 
   return (
     <div className="h-screen flex flex-col bg-gray-100 relative">
-      {/* Collaboration Features (temporarily disabled) */}
-      {/* <CollaborationCursors designId={designId} /> */}
+      {/* Collaboration Features - ACTIVATED */}
+      <CollaborationCursors designId={designId || 'default'} />
       
       {/* Enhanced Top Navigation */}
       <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between relative z-20">
@@ -352,7 +351,7 @@ const EnhancedThemeEditor: React.FC<EnhancedThemeEditorProps> = ({
           <span className="text-gray-600">Theme Editor</span>
           
           {/* Collaboration indicator */}
-          {/* <PresenceIndicator designId={designId} /> */}
+          <PresenceIndicator designId={designId || 'default'} />
         </div>
         
         <div className="flex items-center gap-4">
