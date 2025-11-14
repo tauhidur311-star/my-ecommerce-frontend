@@ -96,7 +96,7 @@ export const useRealTimeNotifications = () => {
     // Connect to WebSocket for real-time notifications (with error handling)
     let ws;
     try {
-      const wsUrl = `${process.env.REACT_APP_WS_URL || 'wss://my-ecommerce-api-b9t4.onrender.com'}/notifications`;
+      const wsUrl = `${process.env.REACT_APP_WS_URL || 'wss://my-ecommerce-backend-s0rt.onrender.com'}/notifications`;
       ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {

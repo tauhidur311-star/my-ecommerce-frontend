@@ -1,7 +1,7 @@
 // Disable error logger import for production  
 // Error logger removed for performance
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://my-ecommerce-api-b9t4.onrender.com';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://my-ecommerce-backend-s0rt.onrender.com';
 
 // Enhanced API Service with Comprehensive Token Management
 class EnhancedAPIService {
