@@ -18,23 +18,23 @@ import {
 import { motion } from 'framer-motion';
 
 // Import our advanced components
-import useAdvancedPageBuilderStore from '../../stores/advancedPageBuilderStore.ts';
-import { useAnimationPreset } from '../../hooks/useAnimationPresets.ts';
-import { useCollaboration } from '../../hooks/useCollaboration.ts';
-import AdvancedSettingsPanel from '../../components/design-editor/advanced/AdvancedSettingsPanel.tsx';
-import ResponsivePreviewPanel from '../../components/design-editor/advanced/ResponsivePreviewPanel.tsx';
-import CollaborationCursors from '../../components/collaboration/CollaborationCursors.tsx';
-import PresenceIndicator from '../../components/collaboration/PresenceIndicator.tsx';
+import useAdvancedPageBuilderStore from '../../stores/advancedPageBuilderStore';
+import { useAnimationPreset } from '../../hooks/useAnimationPresets';
+// import { useCollaboration } from '../../hooks/useCollaboration';
+import AdvancedSettingsPanel from '../../components/design-editor/advanced/AdvancedSettingsPanel';
+import ResponsivePreviewPanel from '../../components/design-editor/advanced/ResponsivePreviewPanel';
+// import CollaborationCursors from '../../components/collaboration/CollaborationCursors';
+// import PresenceIndicator from '../../components/collaboration/PresenceIndicator';
 
 // Import advanced sections
-import VideoSection from '../../components/sections/advanced/VideoSection.tsx';
-import PricingSection from '../../components/sections/advanced/PricingSection.tsx';
-import FAQSection from '../../components/sections/advanced/FAQSection.tsx';
-import TeamSection from '../../components/sections/advanced/TeamSection.tsx';
-import StatsSection from '../../components/sections/advanced/StatsSection.tsx';
-import TimelineSection from '../../components/sections/advanced/TimelineSection.tsx';
-import LogoGridSection from '../../components/sections/advanced/LogoGridSection.tsx';
-import CTABlockSection from '../../components/sections/advanced/CTABlockSection.tsx';
+import VideoSection from '../../components/sections/advanced/VideoSection';
+import PricingSection from '../../components/sections/advanced/PricingSection';
+import FAQSection from '../../components/sections/advanced/FAQSection';
+import TeamSection from '../../components/sections/advanced/TeamSection';
+import StatsSection from '../../components/sections/advanced/StatsSection';
+import TimelineSection from '../../components/sections/advanced/TimelineSection';
+import LogoGridSection from '../../components/sections/advanced/LogoGridSection';
+import CTABlockSection from '../../components/sections/advanced/CTABlockSection';
 
 // Import legacy sections for backward compatibility
 import HeroSection from '../../components/sections/HeroSection.js';
@@ -76,8 +76,9 @@ const EnhancedThemeEditor: React.FC<EnhancedThemeEditorProps> = ({
     updateGlobalSettings
   } = useAdvancedPageBuilderStore();
 
-  // Collaboration integration
-  const collaboration = useCollaboration(designId);
+  // Collaboration integration (temporarily disabled)
+  // const collaboration = useCollaboration(designId);
+  const collaboration = { actions: { broadcastSectionUpdate: () => {} } }; // Mock for now
 
   // Local state for UI
   const [activeView, setActiveView] = useState('editor');
@@ -285,8 +286,8 @@ const EnhancedThemeEditor: React.FC<EnhancedThemeEditorProps> = ({
 
   return (
     <div className="h-screen flex flex-col bg-gray-100 relative">
-      {/* Collaboration Features */}
-      <CollaborationCursors designId={designId} />
+      {/* Collaboration Features (temporarily disabled) */}
+      {/* <CollaborationCursors designId={designId} /> */}
       
       {/* Enhanced Top Navigation */}
       <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between relative z-20">
@@ -301,7 +302,7 @@ const EnhancedThemeEditor: React.FC<EnhancedThemeEditorProps> = ({
           <span className="text-gray-600">Theme Editor</span>
           
           {/* Collaboration indicator */}
-          <PresenceIndicator designId={designId} />
+          {/* <PresenceIndicator designId={designId} /> */}
         </div>
         
         <div className="flex items-center gap-4">
