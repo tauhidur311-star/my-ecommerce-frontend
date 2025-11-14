@@ -14,7 +14,7 @@ import type {
   LogoGridSectionContent,
   CTABlockSectionContent,
   ResponsiveSettings 
-} from '../types/pageBuilder.ts';
+} from '../types/pageBuilder';
 
 // ====================
 // RESPONSIVE DEFAULTS

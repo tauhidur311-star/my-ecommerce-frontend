@@ -3,7 +3,7 @@
  * Pre-built templates for different industries, styles, and page types
  */
 
-import type { TemplateRegistry, PageTemplate } from '../types/pageBuilder.ts';
+import type { TemplateRegistry, PageTemplate } from '../types/pageBuilder';
 
 // ====================
 // TEMPLATE CATEGORIES

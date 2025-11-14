@@ -21,10 +21,10 @@ import type {
   ExportOptions,
   ImportResult,
   PerformanceSettings
-} from '../types/pageBuilder.ts';
-import { validateSection } from '../schemas/sectionSchemas.ts';
-import { allPresets } from '../data/sectionPresets.ts';
-import { templateRegistry } from '../data/templateRegistry.ts';
+} from '../types/pageBuilder';
+import { validateSection } from '../schemas/sectionSchemas';
+import { allPresets } from '../data/sectionPresets';
+import { templateRegistry } from '../data/templateRegistry';
 
 // ====================
 // DEFAULT CONFIGURATIONS

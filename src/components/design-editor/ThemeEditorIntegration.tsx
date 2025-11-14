@@ -6,7 +6,7 @@
 import React from 'react';
 import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Sparkles } from 'lucide-react';
-import EnhancedThemeEditor from '../../pages/design/EnhancedThemeEditor.tsx';
+import EnhancedThemeEditor from '../../pages/design/EnhancedThemeEditor';
 
 interface ThemeEditorIntegrationProps {
   // Props for backward compatibility with your existing editor
