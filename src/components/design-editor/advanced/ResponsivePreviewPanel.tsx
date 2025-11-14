@@ -20,7 +20,7 @@ import {
   Eye,
   EyeOff,
   Volume2,
-  VolumeOff as VolumeX,
+  VolumeX,
   Clock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';

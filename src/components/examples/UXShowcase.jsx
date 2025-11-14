@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Star, Heart, ShoppingBag, Users, Sparkles, Volume2, VolumeOff as VolumeX } from 'lucide-react';
+import { Star, Heart, ShoppingBag, Users, Sparkles, Volume2, VolumeX } from 'lucide-react';
 
 // Import our enhanced components
 import EnhancedButton from '../ui/EnhancedButton';

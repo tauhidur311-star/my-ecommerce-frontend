@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Pause, Volume2, VolumeOff as VolumeX, Maximize, Settings } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Maximize, Settings } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { VideoSectionContent } from '../../../types/pageBuilder.ts';
 
