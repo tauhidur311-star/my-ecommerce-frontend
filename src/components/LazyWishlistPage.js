@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import { Heart } from 'lucide-react';
 
-const WishlistPage = React.lazy(() => import('../pages/WishlistPage'));
+const WishlistPage = React.lazy(() => import('../pages/WishlistPage.js'));
 
 function WishlistPageSkeleton() {
   return (

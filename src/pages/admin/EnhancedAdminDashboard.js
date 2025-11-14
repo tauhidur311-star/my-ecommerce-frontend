@@ -16,8 +16,8 @@ import NotificationToast from '../../components/notifications/NotificationToast'
 import LoadingSkeleton from '../../components/ui/LoadingSkeleton';
 
 // Lazy load components for better performance
-const EnhancedAnalyticsDashboard = lazy(() => import('../../components/analytics/EnhancedAnalyticsDashboard'));
-const InventoryTable = lazy(() => import('../../components/inventory/InventoryTable'));
+const EnhancedAnalyticsDashboard = lazy(() => import('../../components/analytics/EnhancedAnalyticsDashboard.jsx'));
+const InventoryTable = lazy(() => import('../../components/inventory/InventoryTable.jsx'));
 const ProductsManagement = lazy(() => import('../../components/admin/ProductsManagement.jsx'));
 const UserManagement = lazy(() => import('../../components/admin/UserManagement.jsx'));
 const SegmentationPanel = lazy(() => import('../../components/customers/SegmentationPanel.jsx'));

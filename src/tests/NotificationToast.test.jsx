@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import NotificationToast from '../components/notifications/NotificationToast';
-import socketService from '../services/socketService';
+import NotificationToast from '../components/notifications/NotificationToast.jsx';
+import socketService from '../services/socketService.js';
 
 // Mock socket service
 jest.mock('../services/socketService', () => ({

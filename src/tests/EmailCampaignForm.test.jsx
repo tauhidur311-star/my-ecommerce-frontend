@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import EmailCampaignForm from '../components/emailCampaigns/EmailCampaignForm';
-import enhancedApiService from '../services/enhancedApi';
+import EmailCampaignForm from '../components/emailCampaigns/EmailCampaignForm.jsx';
+import enhancedApiService from '../services/enhancedApi.js';
 import { toast } from 'react-hot-toast';
 
 // Mock enhanced API service

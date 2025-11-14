@@ -13,7 +13,7 @@ import useThemeUpdates from '../../hooks/useThemeUpdates.js';
 import { usePublishedTheme } from '../../hooks/useThemeData.js';
 import SafeSectionRenderer from '../../components/SafeSectionRenderer';
 
-const AuthModal = lazy(() => import('../../components/AuthModal'));
+const AuthModal = lazy(() => import('../../components/AuthModal.js'));
 
 export default function Store() {
   const navigate = useNavigate();
