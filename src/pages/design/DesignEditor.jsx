@@ -1,4 +1,4 @@
-// Redirect to enhanced design editor
-import EnhancedDesignEditor from './EnhancedDesignEditor';
+// Redirect to new enhanced theme editor
+import EnhancedThemeEditor from './EnhancedThemeEditor';
 
-export default EnhancedDesignEditor;
+export default EnhancedThemeEditor;
