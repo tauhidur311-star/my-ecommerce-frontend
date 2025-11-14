@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 // Error logger removed for performance
 
-export default function useAuth() {
+const useAuth = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -175,4 +175,8 @@ export default function useAuth() {
   }, [logout]);
 
   return { user, loading, login, logout, getTokenTimeRemaining, validateSession, terminateAllSessions };
-}
+};
+
+// Support both named and default imports
+export { useAuth };
+export default useAuth;

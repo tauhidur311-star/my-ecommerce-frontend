@@ -38,3 +38,6 @@ export const useSocket = () => {
     markNotificationAsRead: (notificationId) => socketService.markNotificationAsRead(notificationId),
   };
 };
+
+// Support default import pattern
+export default useSocket;

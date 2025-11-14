@@ -459,4 +459,6 @@ export const usePresenceIndicator = (designId?: string) => {
   };
 };
 
+// Support both named and default imports
+export { useCollaboration, usePresenceIndicator };
 export default useCollaboration;
