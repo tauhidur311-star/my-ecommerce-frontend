@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import SectionRenderer from './sections/SectionRenderer';
 import SafeSectionRenderer from './SafeSectionRenderer';
-import { publicAPI } from '../services/themeAPI';
+import { publicAPI } from '../services/themeAPI.js';
 import Navbar from './Navbar';
 
 const DynamicStorefront = ({ pageType = 'home', slug = null }) => {

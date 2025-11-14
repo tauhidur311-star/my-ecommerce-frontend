@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, CreditCard, Smartphone, DollarSign, Loader } from 'lucide-react';
-import { APIService } from '../services/api';
+import { APIService } from '../services/api.js';
 import { toast } from 'react-hot-toast';
 
 const PaymentModal = ({ isOpen, onClose, orderAmount, orderId, onPaymentSuccess }) => {

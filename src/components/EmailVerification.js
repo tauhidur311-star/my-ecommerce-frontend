@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
-import api from '../services/api';
+import api from '../services/api.js';
 
 const EmailVerification = ({ user, onVerificationComplete }) => {
   const [loading, setLoading] = useState(false);

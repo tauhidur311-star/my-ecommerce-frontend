@@ -9,8 +9,8 @@ import Navbar from '../../components/Navbar';
 import NotificationBell from '../../components/NotificationBell';
 import EnhancedTwoFactorAuth from '../../components/EnhancedTwoFactorAuth';
 import EnhancedWishlist from '../../components/EnhancedWishlist';
-import { useSocket } from '../../hooks/useSocket';
-import useAuth from '../../hooks/useAuth';
+import { useSocket } from '../../hooks/useSocket.js';
+import useAuth from '../../hooks/useAuth.js';
 import enhancedApiService from '../../services/enhancedApi';
 
 const bangladeshDivisions = [

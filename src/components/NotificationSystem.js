@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Bell, CheckCircle, AlertCircle, Info, X, Eye, Trash2, Settings } from 'lucide-react';
 import toast from 'react-hot-toast';
-import api from '../services/api';
+import api from '../services/api.js';
 
 const NotificationSystem = ({ user }) => {
   const [notifications, setNotifications] = useState([]);

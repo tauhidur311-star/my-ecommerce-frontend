@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, ArrowLeft, ShoppingCart, Trash2, Star, Filter, Grid, List, Search, X } from 'lucide-react';
-import { useWishlist } from '../hooks/useWishlist';
+import { useWishlist } from '../hooks/useWishlist.js';
 import Navbar from '../components/Navbar';
 import toast, { Toaster } from 'react-hot-toast';
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Shield, Lock, Smartphone, CheckCircle, AlertCircle, X, Mail, Key } from 'lucide-react';
 import toast from 'react-hot-toast';
-import api from '../services/api';
+import api from '../services/api.js';
 
 const EnhancedTwoFactorAuth = ({ user }) => {
   const [twoFactorStatus, setTwoFactorStatus] = useState(null);

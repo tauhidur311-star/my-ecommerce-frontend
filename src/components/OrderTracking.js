@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Package, Truck, MapPin, CheckCircle, Clock, AlertCircle, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
-import api from '../services/api';
+import api from '../services/api.js';
 
 const OrderTracking = ({ orderId, onClose }) => {
   const [order, setOrder] = useState(null);

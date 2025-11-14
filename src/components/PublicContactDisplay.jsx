@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Phone, MapPin, Clock, ExternalLink } from 'lucide-react';
-import apiService from '../services/api';
+import apiService from '../services/api.js';
 
 const PublicContactDisplay = ({ className = '' }) => {
   const [contactInfo, setContactInfo] = useState(null);

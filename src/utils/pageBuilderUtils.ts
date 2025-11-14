@@ -12,7 +12,7 @@ import type {
   ExportOptions,
   ImportResult
 } from '../types/pageBuilder';
-import { SectionSchemas, validateSection } from '../schemas/sectionSchemas';
+import { SectionSchemas, validateSection } from '../schemas/sectionSchemas.ts';
 
 // ====================
 // SECTION UTILITIES

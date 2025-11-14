@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { publicAPI } from '../services/themeAPI';
+import { publicAPI } from '../services/themeAPI.js';
 
 /**
  * Hook to manage real-time theme updates via SSE

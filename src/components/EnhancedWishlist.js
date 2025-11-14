@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Heart, ShoppingCart, Trash2, Star, Package, TrendingUp } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
-import api from '../services/api';
+import api from '../services/api.js';
 
 const EnhancedWishlist = ({ user }) => {
   const [wishlistItems, setWishlistItems] = useState([]);

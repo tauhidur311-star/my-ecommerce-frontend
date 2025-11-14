@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Star, ThumbsUp, ThumbsDown, Flag, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';
 import toast from 'react-hot-toast';
-import api from '../services/api';
+import api from '../services/api.js';
 
 const ProductReviews = ({ productId, user }) => {
   const [reviews, setReviews] = useState([]);

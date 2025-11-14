@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Bell, X, Check } from 'lucide-react';
-import enhancedApiService from '../services/enhancedApi';
-import socketService from '../services/socketService';
+import enhancedApiService from '../services/enhancedApi.js';
+import socketService from '../services/socketService.js';
 import { toast } from 'react-hot-toast';
 
 const NotificationBell = () => {

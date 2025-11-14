@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { publicAPI } from '../services/themeAPI';
+import { publicAPI } from '../services/themeAPI.js';
 
 /**
  * Hook to fetch theme data with automatic cache invalidation

@@ -7,9 +7,9 @@ import {
   ShoppingBag, DollarSign, Star, FileText
 } from 'lucide-react';
 import ConnectionStatus from '../../components/ui/ConnectionStatus';
-import { useAnalyticsData } from '../../hooks/useAnalyticsData';
-import { useNotifications, useRealTimeNotifications } from '../../hooks/useNotifications';
-import { useOfflineCache, useServiceWorker } from '../../hooks/useOfflineCache';
+import { useAnalyticsData } from '../../hooks/useAnalyticsData.js';
+import { useNotifications, useRealTimeNotifications } from '../../hooks/useNotifications.js';
+import { useOfflineCache, useServiceWorker } from '../../hooks/useOfflineCache.js';
 import GlassCard from '../../components/ui/glass/GlassCard';
 import EnhancedButton from '../../components/ui/EnhancedButton';
 import NotificationToast from '../../components/notifications/NotificationToast';

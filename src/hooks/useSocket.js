@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import socketService from '../services/socketService';
+import socketService from '../services/socketService.js';
 
 export const useSocket = () => {
   const isInitialized = useRef(false);
