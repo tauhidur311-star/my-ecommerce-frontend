@@ -6,7 +6,7 @@ import Store from './pages/store/Store';
 import DynamicStorefront from './components/DynamicStorefront';
 import EnhancedAdminDashboard from './pages/admin/EnhancedAdminDashboard';
 import DesignEditor from './pages/design/DesignEditor';
-import EnhancedThemeEditor from './pages/design/EnhancedThemeEditor';
+import EnhancedThemeEditor from './pages/design/EnhancedThemeEditor.tsx';
 import UserDashboard from './pages/dashboard/UserDashboard';
 import AboutPage from './pages/store/AboutPage';
 import ContactPage from './pages/store/ContactPage';
