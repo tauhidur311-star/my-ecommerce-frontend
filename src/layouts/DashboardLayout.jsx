@@ -1,9 +1,9 @@
 import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import AnimatedBackground from "../components/admin/AnimatedBackground";
-import DarkModeToggle from "../components/DarkModeToggle";
-import RealNotificationSystem from '../components/admin/RealNotificationSystem';
+import AnimatedBackground from "../components/admin/AnimatedBackground.js";
+import DarkModeToggle from "../components/DarkModeToggle.js";
+import RealNotificationSystem from '../components/admin/RealNotificationSystem.jsx';
 
 export default function DashboardLayout({ children, section = "dashboard", title = "Admin Dashboard" }) {
   const navigate = useNavigate();

@@ -5,13 +5,13 @@ import {
   ShoppingCart, Settings, Bell, Shield, CreditCard, MapPin as AddressIcon, ExternalLink 
 } from 'lucide-react';
 import { toast, Toaster } from 'react-hot-toast';
-import Navbar from '../../components/Navbar';
-import NotificationBell from '../../components/NotificationBell';
-import EnhancedTwoFactorAuth from '../../components/EnhancedTwoFactorAuth';
-import EnhancedWishlist from '../../components/EnhancedWishlist';
+import Navbar from '../../components/Navbar.js';
+import NotificationBell from '../../components/NotificationBell.js';
+import EnhancedTwoFactorAuth from '../../components/EnhancedTwoFactorAuth.js';
+import EnhancedWishlist from '../../components/EnhancedWishlist.js';
 import { useSocket } from '../../hooks/useSocket.js';
 import useAuth from '../../hooks/useAuth.js';
-import enhancedApiService from '../../services/enhancedApi';
+import enhancedApiService from '../../services/enhancedApi.js';
 
 const bangladeshDivisions = [
   'Barisal',
