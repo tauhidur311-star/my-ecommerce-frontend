@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { DevicePreview, PerformanceSettings } from '../../../types/pageBuilder.ts';
-import { devicePresets } from '../../../stores/advancedPageBuilderStore';
+import { devicePresets } from '../../../stores/advancedPageBuilderStore.ts';
 
 interface ResponsivePreviewPanelProps {
   activeDevice: DevicePreview;
