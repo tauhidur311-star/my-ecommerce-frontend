@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
+import { Routes, Route, useNavigate, useParams, Navigate } from 'react-router-dom';
 import { ArrowLeft, Sparkles } from 'lucide-react';
 import EnhancedThemeEditor from '../../pages/design/EnhancedThemeEditor';
 
@@ -132,19 +132,15 @@ export const ThemeEditorUpgradeDemo: React.FC = () => {
   );
 };
 
-// Route configuration for integration
+// Route configuration for integration (DEPRECATED - use main App.js routes)
 export const ThemeEditorRoutes: React.FC = () => {
   return (
     <Routes>
-      {/* Enhanced editor route */}
-      <Route path="/design/enhanced/:designId?" element={<ThemeEditorIntegration />} />
-      
-      {/* Upgrade demo route */}
-      <Route path="/design/upgrade" element={<ThemeEditorUpgradeDemo />} />
-      
-      {/* Backward compatibility - redirect old routes */}
-      <Route path="/design/editor" element={<ThemeEditorIntegration />} />
-      <Route path="/theme-editor" element={<ThemeEditorIntegration />} />
+      {/* All routes now redirect to main /design route */}
+      <Route path="/design/enhanced/:designId?" element={<Navigate to="/design" replace />} />
+      <Route path="/design/upgrade" element={<Navigate to="/design" replace />} />
+      <Route path="/design/editor" element={<Navigate to="/design" replace />} />
+      <Route path="/theme-editor" element={<Navigate to="/design" replace />} />
     </Routes>
   );
 };

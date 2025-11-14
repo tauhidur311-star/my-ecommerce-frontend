@@ -62,8 +62,46 @@ const EnhancedThemeEditor: React.FC<EnhancedThemeEditorProps> = ({
   const [previewDevice, setPreviewDeviceState] = useState('desktop');
   const [isDirty, setIsDirty] = useState(false);
   
-  // Mock store functions
-  const addSection = (section) => setSections(prev => [...prev, { ...section, id: Date.now().toString() }]);
+  // Mock store functions with error handling
+  const addSection = (section) => {
+    try {
+      // Create a safe section object with default values
+      const safeSection = {
+        id: Date.now().toString(),
+        type: section.type || 'hero',
+        content: {
+          title: section.content?.title || 'New Section',
+          subtitle: section.content?.subtitle || '',
+          primaryCTA: {
+            text: section.content?.primaryCTA?.text || 'Learn More',
+            url: section.content?.primaryCTA?.url || '#'
+          },
+          secondaryCTA: {
+            text: section.content?.secondaryCTA?.text || 'Get Started',
+            url: section.content?.secondaryCTA?.url || '#'
+          },
+          ...section.content
+        },
+        settings: section.settings || {},
+        ...section
+      };
+      setSections(prev => [...prev, safeSection]);
+    } catch (error) {
+      console.error('Failed to add section:', error);
+      // Add a basic fallback section
+      setSections(prev => [...prev, {
+        id: Date.now().toString(),
+        type: 'hero',
+        content: {
+          title: 'New Section',
+          subtitle: 'Edit this section to customize your content',
+          primaryCTA: { text: 'Learn More', url: '#' },
+          secondaryCTA: { text: 'Get Started', url: '#' }
+        },
+        settings: {}
+      }]);
+    }
+  };
   const removeSection = (id) => setSections(prev => prev.filter(s => s.id !== id));
   const updateSection = (id, updates) => setSections(prev => prev.map(s => s.id === id ? {...s, ...updates} : s));
   const duplicateSection = (id) => {
