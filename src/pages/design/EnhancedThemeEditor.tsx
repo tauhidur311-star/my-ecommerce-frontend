@@ -19,7 +19,7 @@ import { motion } from 'framer-motion';
 
 // Import our advanced components
 import useAdvancedPageBuilderStore from '../../stores/advancedPageBuilderStore';
-import { useAnimationPreset } from '../../hooks/useAnimationPresets';
+import { useAnimationPreset } from '../../hooks/useAnimationPresets.ts';
 import { useCollaboration } from '../../hooks/useCollaboration';
 import AdvancedSettingsPanel from '../../components/design-editor/advanced/AdvancedSettingsPanel';
 import ResponsivePreviewPanel from '../../components/design-editor/advanced/ResponsivePreviewPanel';
