@@ -4,7 +4,7 @@
  */
 
 import { nanoid } from 'nanoid';
-import type { PageTemplate } from '../types/pageBuilder';
+import type { PageTemplate } from '../types/pageBuilder.ts';
 
 // ====================
 // FASHION STORE TEMPLATES

@@ -6,7 +6,7 @@
 import React from 'react';
 import { Calendar, MapPin, ExternalLink, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
-import type { TimelineSectionContent } from '../../../types/pageBuilder';
+import type { TimelineSectionContent } from '../../../types/pageBuilder.ts';
 
 interface TimelineSectionProps {
   content: TimelineSectionContent;

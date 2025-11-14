@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import { Linkedin, Twitter, Mail, ExternalLink, Users, Grid, Carousel } from 'lucide-react';
 import { motion } from 'framer-motion';
-import type { TeamSectionContent } from '../../../types/pageBuilder';
+import type { TeamSectionContent } from '../../../types/pageBuilder.ts';
 
 interface TeamSectionProps {
   content: TeamSectionContent;

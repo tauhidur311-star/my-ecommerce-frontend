@@ -6,7 +6,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ArrowRight, Play, Star, Zap, Heart, Target, ChevronRight, ExternalLink, Upload, Palette } from 'lucide-react';
 import { motion, useInView, useMotionValue, useSpring } from 'framer-motion';
-import type { CTABlockSectionContent } from '../../../types/pageBuilder';
+import type { CTABlockSectionContent } from '../../../types/pageBuilder.ts';
 
 interface CTABlockSectionProps {
   content: CTABlockSectionContent;

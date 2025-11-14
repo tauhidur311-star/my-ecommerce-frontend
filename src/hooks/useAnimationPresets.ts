@@ -5,7 +5,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useInView, useAnimation, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { AnimationConfig, AnimationEngine, presetAnimations, PresetAnimationKey } from '../utils/animationEngine';
+import { AnimationConfig, AnimationEngine, presetAnimations, PresetAnimationKey } from '../utils/animationEngine.ts';
 
 // ====================
 // ANIMATION PRESET HOOK

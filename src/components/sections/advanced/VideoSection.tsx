@@ -6,7 +6,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Play, Pause, Volume2, VolumeX, Maximize, Settings } from 'lucide-react';
 import { motion } from 'framer-motion';
-import type { VideoSectionContent } from '../../../types/pageBuilder';
+import type { VideoSectionContent } from '../../../types/pageBuilder.ts';
 
 interface VideoSectionProps {
   content: VideoSectionContent;

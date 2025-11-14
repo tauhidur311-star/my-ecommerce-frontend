@@ -6,7 +6,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { TrendingUp, Users, Star, Zap, Target, Award, Activity, Globe } from 'lucide-react';
 import { motion, useInView, useMotionValue, useSpring } from 'framer-motion';
-import type { StatsSectionContent } from '../../../types/pageBuilder';
+import type { StatsSectionContent } from '../../../types/pageBuilder.ts';
 
 interface StatsSectionProps {
   content: StatsSectionContent;

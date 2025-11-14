@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
-import { api } from '../services/api';
+import { api } from '../services/api.js';
 
 // Main application store
 export const useAppStore = create()(

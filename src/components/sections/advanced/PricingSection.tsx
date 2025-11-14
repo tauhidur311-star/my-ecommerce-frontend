@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import { Check, X, Star, Zap, Crown, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
-import type { PricingSectionContent } from '../../../types/pageBuilder';
+import type { PricingSectionContent } from '../../../types/pageBuilder.ts';
 
 interface PricingSectionProps {
   content: PricingSectionContent;

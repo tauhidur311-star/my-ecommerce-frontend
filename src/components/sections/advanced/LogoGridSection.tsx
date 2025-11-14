@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import { Upload, Link2, Grid3x3, Eye, EyeOff, Sparkles, Image as ImageIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { LogoGridSectionContent } from '../../../types/pageBuilder';
+import type { LogoGridSectionContent } from '../../../types/pageBuilder.ts';
 
 interface LogoGridSectionProps {
   content: LogoGridSectionContent;

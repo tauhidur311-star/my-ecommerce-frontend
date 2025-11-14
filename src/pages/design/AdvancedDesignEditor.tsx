@@ -32,10 +32,10 @@ import useAdvancedPageBuilderStore from '../../stores/advancedPageBuilderStore.t
 import type { SectionBase, DevicePreview, ExportOptions } from '../../types/pageBuilder.ts';
 
 // Advanced components
-// import AdvancedSectionLibrary from '../../components/design-editor/advanced/AdvancedSectionLibrary.tsx'; // TODO: Create this component
+import AdvancedSectionLibrary from '../../components/design-editor/advanced/AdvancedSectionLibrary.tsx';
 import AdvancedSettingsPanel from '../../components/design-editor/advanced/AdvancedSettingsPanel.tsx';
 import ResponsivePreviewPanel from '../../components/design-editor/advanced/ResponsivePreviewPanel.tsx';
-// import TemplateGallery from '../../components/design-editor/advanced/TemplateGallery.tsx'; // TODO: Create this component
+import TemplateGallery from '../../components/design-editor/advanced/TemplateGallery.tsx';
 
 // Section renderers
 import VideoSection from '../../components/sections/advanced/VideoSection.tsx';

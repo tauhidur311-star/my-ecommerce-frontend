@@ -6,7 +6,7 @@
 import React, { useState, useMemo } from 'react';
 import { ChevronDown, ChevronUp, Search, X, Tag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { FAQSectionContent } from '../../../types/pageBuilder';
+import type { FAQSectionContent } from '../../../types/pageBuilder.ts';
 
 interface FAQSectionProps {
   content: FAQSectionContent;

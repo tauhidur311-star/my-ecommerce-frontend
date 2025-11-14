@@ -24,7 +24,7 @@ import {
   Clock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { DevicePreview, PerformanceSettings } from '../../../types/pageBuilder';
+import type { DevicePreview, PerformanceSettings } from '../../../types/pageBuilder.ts';
 import { devicePresets } from '../../../stores/advancedPageBuilderStore';
 
 interface ResponsivePreviewPanelProps {

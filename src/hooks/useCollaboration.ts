@@ -6,7 +6,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from './useAuth';
-import useAdvancedPageBuilderStore from '../stores/advancedPageBuilderStore';
+import useAdvancedPageBuilderStore from '../stores/advancedPageBuilderStore.ts';
 
 interface CollaboratorCursor {
   userId: string;

@@ -23,7 +23,7 @@ import {
   Layers
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { SectionBase, ResponsiveSettings, AnimationSettings } from '../../../types/pageBuilder';
+import type { SectionBase, ResponsiveSettings, AnimationSettings } from '../../../types/pageBuilder.ts';
 
 interface AdvancedSettingsPanelProps {
   section: SectionBase;
