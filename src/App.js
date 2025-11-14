@@ -5,7 +5,7 @@ import soundManager from './utils/soundManager';
 import Store from './pages/store/Store';
 import DynamicStorefront from './components/DynamicStorefront';
 import EnhancedAdminDashboard from './pages/admin/EnhancedAdminDashboard';
-import EnhancedThemeEditor from './pages/design/EnhancedThemeEditor';
+import EnhancedThemeEditor from './pages/design/EnhancedThemeEditor.tsx';
 import UserDashboard from './pages/dashboard/UserDashboard';
 import AboutPage from './pages/store/AboutPage';
 import ContactPage from './pages/store/ContactPage';
@@ -117,6 +117,9 @@ function App() {
               <EnhancedThemeEditor />
             </ProtectedRoute>
           } />
+          
+          {/* Redirect old upgrade route to new design route */}
+          <Route path="/design/upgrade" element={<Navigate to="/design" replace />} />
           
           {/* Glass UI Demo Route */}
           <Route path="/glass-demo" element={<GlassUIShowcase />} />
