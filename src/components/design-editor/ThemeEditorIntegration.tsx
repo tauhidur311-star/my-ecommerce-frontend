@@ -101,7 +101,7 @@ export const ThemeEditorUpgradeDemo: React.FC = () => {
           
           <div className="flex justify-center">
             <button
-              onClick={() => window.location.href = '/design/enhanced'}
+              onClick={() => window.location.href = '/design'}
               className="inline-flex items-center px-8 py-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors text-lg"
             >
               <Sparkles className="w-6 h-6 mr-3" />

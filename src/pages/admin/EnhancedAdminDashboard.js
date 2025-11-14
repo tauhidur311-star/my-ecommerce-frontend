@@ -450,7 +450,7 @@ const EnhancedAdminDashboard = () => {
                 <EnhancedButton
                   variant="primary"
                   size="sm"
-                  onClick={() => window.location.href = '/design/enhanced'}
+                  onClick={() => window.location.href = '/design'}
                 >
                   <Settings size={16} />
                   Design
