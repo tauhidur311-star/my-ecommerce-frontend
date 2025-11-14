@@ -256,16 +256,15 @@ const EnhancedThemeEditor: React.FC<EnhancedThemeEditorProps> = ({
     );
   }, [sectionRenderers, previewMode, updateSection, collaboration]);
 
+  // Animation preset for sections (moved to top level to comply with React hooks rules)
+  const sectionFadeUpAnimation = useAnimationPreset('sectionFadeUp');
+
   // Section renderer with animation wrapper
   const renderSectionWithAnimation = useCallback((section: any, index: number) => {
     const animationConfig = section.settings?.animation;
     
     if (animationConfig && animationConfig.type !== 'none') {
-      const animationProps = useAnimationPreset(
-        animationConfig.type === 'slide' && animationConfig.direction === 'up' 
-          ? 'sectionFadeUp' 
-          : 'sectionFadeUp' // Default fallback
-      );
+      const animationProps = sectionFadeUpAnimation;
       
       return (
         <motion.div
@@ -282,7 +281,7 @@ const EnhancedThemeEditor: React.FC<EnhancedThemeEditorProps> = ({
     }
 
     return renderSection(section, index);
-  }, [renderSection]);
+  }, [renderSection, sectionFadeUpAnimation]);
 
   return (
     <div className="h-screen flex flex-col bg-gray-100 relative">
