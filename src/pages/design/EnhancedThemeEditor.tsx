@@ -23,26 +23,26 @@ import { useAnimationPreset } from '../../hooks/useAnimationPresets.ts';
 import { useCollaboration } from '../../hooks/useCollaboration.ts';
 import AdvancedSettingsPanel from '../../components/design-editor/advanced/AdvancedSettingsPanel';
 import ResponsivePreviewPanel from '../../components/design-editor/advanced/ResponsivePreviewPanel';
-import CollaborationCursors from '../../components/collaboration/CollaborationCursors';
-import PresenceIndicator from '../../components/collaboration/PresenceIndicator';
+import CollaborationCursors from '../../components/collaboration/CollaborationCursors.tsx';
+import PresenceIndicator from '../../components/collaboration/PresenceIndicator.tsx';
 
 // Import advanced sections
-import VideoSection from '../../components/sections/advanced/VideoSection';
-import PricingSection from '../../components/sections/advanced/PricingSection';
-import FAQSection from '../../components/sections/advanced/FAQSection';
-import TeamSection from '../../components/sections/advanced/TeamSection';
-import StatsSection from '../../components/sections/advanced/StatsSection';
-import TimelineSection from '../../components/sections/advanced/TimelineSection';
-import LogoGridSection from '../../components/sections/advanced/LogoGridSection';
-import CTABlockSection from '../../components/sections/advanced/CTABlockSection';
+import VideoSection from '../../components/sections/advanced/VideoSection.tsx';
+import PricingSection from '../../components/sections/advanced/PricingSection.tsx';
+import FAQSection from '../../components/sections/advanced/FAQSection.tsx';
+import TeamSection from '../../components/sections/advanced/TeamSection.tsx';
+import StatsSection from '../../components/sections/advanced/StatsSection.tsx';
+import TimelineSection from '../../components/sections/advanced/TimelineSection.tsx';
+import LogoGridSection from '../../components/sections/advanced/LogoGridSection.tsx';
+import CTABlockSection from '../../components/sections/advanced/CTABlockSection.tsx';
 
 // Import legacy sections for backward compatibility
-import HeroSection from '../../components/sections/HeroSection';
-import FeaturesSection from '../../components/sections/FeaturesSection';
-import GallerySection from '../../components/sections/GallerySection';
-import TestimonialsSection from '../../components/sections/TestimonialsSection';
-import ContactFormSection from '../../components/sections/ContactFormSection';
-import NewsletterSection from '../../components/sections/NewsletterSection';
+import HeroSection from '../../components/sections/HeroSection.js';
+import FeaturesSection from '../../components/sections/FeaturesSection.jsx';
+import GallerySection from '../../components/sections/GallerySection.js';
+import TestimonialsSection from '../../components/sections/TestimonialsSection.jsx';
+import ContactFormSection from '../../components/sections/ContactFormSection.js';
+import NewsletterSection from '../../components/sections/NewsletterSection.js';
 
 interface EnhancedThemeEditorProps {
   designId?: string;
