@@ -28,29 +28,29 @@ import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautif
 import toast from 'react-hot-toast';
 
 // Store and types
-import useAdvancedPageBuilderStore from '../../stores/advancedPageBuilderStore';
-import type { SectionBase, DevicePreview, ExportOptions } from '../../types/pageBuilder';
+import useAdvancedPageBuilderStore from '../../stores/advancedPageBuilderStore.ts';
+import type { SectionBase, DevicePreview, ExportOptions } from '../../types/pageBuilder.ts';
 
 // Advanced components
-import AdvancedSectionLibrary from '../../components/design-editor/advanced/AdvancedSectionLibrary';
-import AdvancedSettingsPanel from '../../components/design-editor/advanced/AdvancedSettingsPanel';
-import ResponsivePreviewPanel from '../../components/design-editor/advanced/ResponsivePreviewPanel';
-import TemplateGallery from '../../components/design-editor/advanced/TemplateGallery';
+// import AdvancedSectionLibrary from '../../components/design-editor/advanced/AdvancedSectionLibrary.tsx'; // TODO: Create this component
+import AdvancedSettingsPanel from '../../components/design-editor/advanced/AdvancedSettingsPanel.tsx';
+import ResponsivePreviewPanel from '../../components/design-editor/advanced/ResponsivePreviewPanel.tsx';
+// import TemplateGallery from '../../components/design-editor/advanced/TemplateGallery.tsx'; // TODO: Create this component
 
 // Section renderers
-import VideoSection from '../../components/sections/advanced/VideoSection';
-import PricingSection from '../../components/sections/advanced/PricingSection';
-import FAQSection from '../../components/sections/advanced/FAQSection';
-import TeamSection from '../../components/sections/advanced/TeamSection';
-import StatsSection from '../../components/sections/advanced/StatsSection';
+import VideoSection from '../../components/sections/advanced/VideoSection.tsx';
+import PricingSection from '../../components/sections/advanced/PricingSection.tsx';
+import FAQSection from '../../components/sections/advanced/FAQSection.tsx';
+import TeamSection from '../../components/sections/advanced/TeamSection.tsx';
+import StatsSection from '../../components/sections/advanced/StatsSection.tsx';
 
 // Legacy section components (for backward compatibility)
-import HeroSection from '../../components/sections/HeroSection';
-import FeaturesSection from '../../components/sections/FeaturesSection';
-import GallerySection from '../../components/sections/GallerySection';
-import TestimonialsSection from '../../components/sections/TestimonialsSection';
-import ContactFormSection from '../../components/sections/ContactFormSection';
-import NewsletterSection from '../../components/sections/NewsletterSection';
+import HeroSection from '../../components/sections/HeroSection.js';
+import FeaturesSection from '../../components/sections/FeaturesSection.jsx';
+import GallerySection from '../../components/sections/GallerySection.js';
+import TestimonialsSection from '../../components/sections/TestimonialsSection.jsx';
+import ContactFormSection from '../../components/sections/ContactFormSection.js';
+import NewsletterSection from '../../components/sections/NewsletterSection.js';
 
 interface AdvancedDesignEditorProps {
   projectId?: string;

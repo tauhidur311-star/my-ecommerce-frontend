@@ -21,8 +21,8 @@ import { motion } from 'framer-motion';
 import useAdvancedPageBuilderStore from '../../stores/advancedPageBuilderStore.ts';
 import { useAnimationPreset } from '../../hooks/useAnimationPresets.ts';
 import { useCollaboration } from '../../hooks/useCollaboration.ts';
-import AdvancedSettingsPanel from '../../components/design-editor/advanced/AdvancedSettingsPanel';
-import ResponsivePreviewPanel from '../../components/design-editor/advanced/ResponsivePreviewPanel';
+import AdvancedSettingsPanel from '../../components/design-editor/advanced/AdvancedSettingsPanel.tsx';
+import ResponsivePreviewPanel from '../../components/design-editor/advanced/ResponsivePreviewPanel.tsx';
 import CollaborationCursors from '../../components/collaboration/CollaborationCursors.tsx';
 import PresenceIndicator from '../../components/collaboration/PresenceIndicator.tsx';
 
