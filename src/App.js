@@ -123,11 +123,6 @@ function App() {
               <EnhancedThemeEditor />
             </ProtectedRoute>
           } />
-          <Route path="/design/legacy" element={
-            <ProtectedRoute requireAdmin={true}>
-              <DesignEditor />
-            </ProtectedRoute>
-          } />
           <Route path="/design/upgrade" element={
             <ProtectedRoute requireAdmin={true}>
               <Navigate to="/design/enhanced" replace />

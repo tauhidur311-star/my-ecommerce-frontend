@@ -54,47 +54,41 @@ export const ThemeEditorUpgradeDemo: React.FC = () => {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
             <Sparkles className="w-8 h-8 text-blue-500 mr-2" />
-            <h1 className="text-3xl font-bold text-gray-900">Enhanced Theme Editor</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Professional Theme Editor</h1>
           </div>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Your existing theme editor has been upgraded with advanced features, 
-            real-time collaboration, and professional section types.
+            Create stunning, professional themes with advanced features, 
+            real-time collaboration, and enterprise-grade section types.
           </p>
         </div>
 
-        {/* Feature Comparison */}
-        <div className="grid md:grid-cols-2 gap-8 mb-12">
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">Previous Editor</h3>
-            <ul className="space-y-2 text-gray-600">
-              <li>✓ Basic sections (header, hero, products)</li>
-              <li>✓ Simple drag & drop</li>
-              <li>✓ Device preview</li>
-              <li>✓ Basic styling options</li>
-              <li>✗ Limited section types</li>
-              <li>✗ No collaboration</li>
-              <li>✗ No animations</li>
-              <li>✗ No templates</li>
-            </ul>
-          </div>
-
-          <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl shadow-lg p-6 border-2 border-blue-200">
-            <h3 className="text-xl font-semibold text-blue-900 mb-4 flex items-center">
-              <Sparkles className="w-5 h-5 mr-2" />
-              Enhanced Editor
+        {/* Features Overview */}
+        <div className="mb-12">
+          <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl shadow-lg p-8 border-2 border-blue-200 max-w-4xl mx-auto">
+            <h3 className="text-2xl font-semibold text-blue-900 mb-6 flex items-center justify-center">
+              <Sparkles className="w-6 h-6 mr-3" />
+              Design Editor Features
             </h3>
-            <ul className="space-y-2 text-blue-800">
-              <li>✓ All previous features</li>
-              <li>✓ 8 advanced section types</li>
-              <li>✓ Real-time collaboration</li>
-              <li>✓ Professional animations</li>
-              <li>✓ Industry templates</li>
-              <li>✓ Advanced responsive controls</li>
-              <li>✓ Export/import system</li>
-              <li>✓ Live cursor tracking</li>
-              <li>✓ A/B testing ready</li>
-              <li>✓ Custom CSS injection</li>
-            </ul>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <ul className="space-y-3 text-blue-800">
+                  <li className="flex items-center"><span className="text-green-600 mr-2">✓</span> Advanced section library</li>
+                  <li className="flex items-center"><span className="text-green-600 mr-2">✓</span> Real-time collaboration</li>
+                  <li className="flex items-center"><span className="text-green-600 mr-2">✓</span> Professional animations</li>
+                  <li className="flex items-center"><span className="text-green-600 mr-2">✓</span> Industry templates</li>
+                  <li className="flex items-center"><span className="text-green-600 mr-2">✓</span> Responsive design controls</li>
+                </ul>
+              </div>
+              <div>
+                <ul className="space-y-3 text-blue-800">
+                  <li className="flex items-center"><span className="text-green-600 mr-2">✓</span> Export/import system</li>
+                  <li className="flex items-center"><span className="text-green-600 mr-2">✓</span> Live cursor tracking</li>
+                  <li className="flex items-center"><span className="text-green-600 mr-2">✓</span> A/B testing ready</li>
+                  <li className="flex items-center"><span className="text-green-600 mr-2">✓</span> Custom CSS injection</li>
+                  <li className="flex items-center"><span className="text-green-600 mr-2">✓</span> Advanced styling options</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -105,20 +99,13 @@ export const ThemeEditorUpgradeDemo: React.FC = () => {
             Jump into the enhanced editor and experience the difference with advanced features and smooth collaboration.
           </p>
           
-          <div className="flex justify-center space-x-4">
+          <div className="flex justify-center">
             <button
               onClick={() => window.location.href = '/design/enhanced'}
-              className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center px-8 py-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors text-lg"
             >
-              <Sparkles className="w-5 h-5 mr-2" />
-              Try Enhanced Editor
-            </button>
-            
-            <button
-              onClick={() => window.location.href = '/design/legacy'}
-              className="inline-flex items-center px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Use Legacy Editor
+              <Sparkles className="w-6 h-6 mr-3" />
+              Open Design Editor
             </button>
           </div>
         </div>
