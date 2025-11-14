@@ -322,7 +322,7 @@ const useCollaboration = (designId?: string) => {
 // CURSOR TRACKING HOOK
 // ====================
 
-export const useCursorTracking = (designId?: string) => {
+const useCursorTracking = (designId?: string) => {
   const { sendCursorPosition } = useCollaboration(designId).actions;
   const lastPosition = useRef({ x: 0, y: 0 });
   const throttleTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -369,7 +369,7 @@ export const useCursorTracking = (designId?: string) => {
 // SECTION EDITING HOOK
 // ====================
 
-export const useSectionEditing = (sectionId: string, designId?: string) => {
+const useSectionEditing = (sectionId: string, designId?: string) => {
   const { 
     editingLocks, 
     actions: { startSectionEdit, endSectionEdit, startTyping, endTyping }
@@ -431,7 +431,7 @@ export const useSectionEditing = (sectionId: string, designId?: string) => {
 // TYPING INDICATOR HOOK
 // ====================
 
-export const useTypingIndicator = (sectionId: string, designId?: string) => {
+const useTypingIndicator = (sectionId: string, designId?: string) => {
   const { typingIndicators, collaborators } = useCollaboration(designId);
   
   const typingUsers = typingIndicators.get(sectionId);
@@ -449,7 +449,7 @@ export const useTypingIndicator = (sectionId: string, designId?: string) => {
 // PRESENCE INDICATOR HOOK
 // ====================
 
-export const usePresenceIndicator = (designId?: string) => {
+const usePresenceIndicator = (designId?: string) => {
   const { isConnected, collaborators } = useCollaboration(designId);
   
   return {
@@ -460,5 +460,11 @@ export const usePresenceIndicator = (designId?: string) => {
 };
 
 // Support both named and default imports
-export { useCollaboration, usePresenceIndicator };
+export { 
+  useCollaboration, 
+  usePresenceIndicator, 
+  useCursorTracking, 
+  useSectionEditing, 
+  useTypingIndicator 
+};
 export default useCollaboration;
