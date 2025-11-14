@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Wifi, WifiOff, ChevronDown, Crown, Eye } from 'lucide-react';
-import { usePresenceIndicator } from '../../hooks/useCollaboration';
+import { usePresenceIndicator } from '../../hooks/useCollaboration.ts';
 
 interface PresenceIndicatorProps {
   designId?: string;

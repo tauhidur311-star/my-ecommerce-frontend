@@ -14,8 +14,8 @@ import Inspector from './Inspector';
 import EnhancedAssetPicker from './EnhancedAssetPicker';
 import ShortcutsPanel from './ShortcutsPanel';
 import MultiSelectManager from './MultiSelectManager';
-import useUndoRedo from '../../hooks/useUndoRedo';
-import useKeyboardShortcuts from '../../hooks/useKeyboardShortcuts';
+import useUndoRedo from '../../hooks/useUndoRedo.js';
+import useKeyboardShortcuts from '../../hooks/useKeyboardShortcuts.js';
 import { themeAPI } from '../../services/themeAPI';
 
 const EnhancedThemeEditor = () => {

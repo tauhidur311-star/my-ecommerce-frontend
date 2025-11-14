@@ -7,10 +7,10 @@ import { User, ShoppingCart, LogOut, Star, Package, TrendingUp } from 'lucide-re
 // import Silk from '../../components/Silk';
 import Navbar from '../../components/Navbar';
 // import { useWishlist } from '../../hooks/useWishlist';
-import useAuth from '../../hooks/useAuth';
+import useAuth from '../../hooks/useAuth.js';
 import { publicAPI } from '../../services/themeAPI';
-import useThemeUpdates from '../../hooks/useThemeUpdates';
-import { usePublishedTheme } from '../../hooks/useThemeData';
+import useThemeUpdates from '../../hooks/useThemeUpdates.js';
+import { usePublishedTheme } from '../../hooks/useThemeData.js';
 import SafeSectionRenderer from '../../components/SafeSectionRenderer';
 
 const AuthModal = lazy(() => import('../../components/AuthModal'));

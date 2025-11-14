@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Wifi, WifiOff, Activity, Settings } from 'lucide-react';
-import useRealTimeConnection from '../../hooks/useRealTimeConnection';
+import useRealTimeConnection from '../../hooks/useRealTimeConnection.js';
 import { getServiceWorkerStatus } from '../../utils/serviceWorkerRegistration';
 
 const ConnectionStatus = ({ className = '' }) => {

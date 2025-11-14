@@ -4,7 +4,7 @@ import {
   Package, AlertTriangle, Edit3, Trash2, Plus, Search,
   Filter, Download, Upload, BarChart3, TrendingDown
 } from 'lucide-react';
-import { useInventory, useInventoryAlerts } from '../../hooks/useInventory';
+import { useInventory, useInventoryAlerts } from '../../hooks/useInventory.js';
 import EnhancedButton from '../ui/EnhancedButton';
 import GlassModal from '../ui/glass/GlassModal';
 import toast from 'react-hot-toast';

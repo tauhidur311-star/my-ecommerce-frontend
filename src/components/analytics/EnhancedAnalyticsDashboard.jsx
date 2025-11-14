@@ -8,7 +8,7 @@ import {
   TrendingUp, TrendingDown, Users, ShoppingCart, Package,
   DollarSign, Eye, Calendar, Filter, Download, RefreshCw
 } from 'lucide-react';
-import { useAnalyticsData } from '../../hooks/useAnalyticsData';
+import { useAnalyticsData } from '../../hooks/useAnalyticsData.js';
 import ChartWrapper from './ChartWrapper';
 import SummaryCard from './SummaryCard';
 import RecentSubmissionsList from './RecentSubmissionsList';

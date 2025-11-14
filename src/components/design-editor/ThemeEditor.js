@@ -10,8 +10,8 @@ import Inspector from './Inspector';
 import AssetPicker from './AssetPicker';
 import SidebarToggle from './SidebarToggle';
 import { themeAPI } from '../../services/themeAPI';
-import useThemeUpdates from '../../hooks/useThemeUpdates';
-import { useInvalidateTheme } from '../../hooks/useThemeData';
+import useThemeUpdates from '../../hooks/useThemeUpdates.js';
+import { useInvalidateTheme } from '../../hooks/useThemeData.js';
 
 const ThemeEditor = () => {
   const [currentTheme, setCurrentTheme] = useState(null);

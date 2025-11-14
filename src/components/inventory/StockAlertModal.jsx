@@ -4,7 +4,7 @@ import {
   AlertTriangle, Mail, MessageCircle, Settings, 
   Bell, Clock, Users, CheckCircle, XCircle
 } from 'lucide-react';
-import { useInventoryAlerts } from '../../hooks/useInventory';
+import { useInventoryAlerts } from '../../hooks/useInventory.js';
 import GlassModal from '../ui/glass/GlassModal';
 import EnhancedButton from '../ui/EnhancedButton';
 import toast from 'react-hot-toast';

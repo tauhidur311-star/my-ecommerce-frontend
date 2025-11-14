@@ -6,7 +6,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MousePointer2 } from 'lucide-react';
-import { useCollaboration } from '../../hooks/useCollaboration';
+import { useCollaboration } from '../../hooks/useCollaboration.ts';
 
 interface CollaborationCursorsProps {
   designId?: string;
