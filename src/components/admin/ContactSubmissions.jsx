@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   MessageCircle, Mail, Phone, Calendar, User, MapPin,
@@ -27,94 +27,47 @@ const ContactSubmissions = () => {
 
   const { user } = useAuth();
 
-  // Mock data for demonstration - replace with real API call
-  const mockSubmissions = [
-    {
-      _id: '1',
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-      phone: '+1-234-567-8900',
-      subject: 'Product Inquiry',
-      message: 'Hi, I am interested in your latest iPhone models. Could you please provide more details about pricing and availability?',
-      status: 'new',
-      priority: 'medium',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-    {
-      _id: '2',
-      name: 'Jane Smith',
-      email: 'jane.smith@example.com',
-      phone: '+1-234-567-8901',
-      subject: 'Order Support',
-      message: 'I need help with my recent order #12345. The delivery was delayed and I haven\'t received any updates.',
-      status: 'in-progress',
-      priority: 'high',
-      createdAt: new Date(Date.now() - 86400000).toISOString(),
-      updatedAt: new Date(Date.now() - 43200000).toISOString(),
-    },
-    {
-      _id: '3',
-      name: 'Mike Johnson',
-      email: 'mike.johnson@example.com',
-      phone: '',
-      subject: 'Technical Issue',
-      message: 'I am experiencing issues with the checkout process. The payment gateway keeps failing when I try to complete my purchase.',
-      status: 'resolved',
-      priority: 'high',
-      createdAt: new Date(Date.now() - 172800000).toISOString(),
-      updatedAt: new Date(Date.now() - 86400000).toISOString(),
-    },
-    {
-      _id: '4',
-      name: 'Sarah Wilson',
-      email: 'sarah.wilson@example.com',
-      phone: '+1-234-567-8902',
-      subject: 'Return Request',
-      message: 'I would like to return my recent purchase. The product doesn\'t match the description on your website.',
-      status: 'new',
-      priority: 'low',
-      createdAt: new Date(Date.now() - 259200000).toISOString(),
-      updatedAt: new Date(Date.now() - 259200000).toISOString(),
-    }
-  ];
-
-  useEffect(() => {
-    loadSubmissions();
-  }, []);
-
-  useEffect(() => {
-    filterSubmissions();
-  }, [submissions, searchQuery, statusFilter]);
-
-  const loadSubmissions = async () => {
+  const loadSubmissions = useCallback(async () => {
     try {
       setLoading(true);
-      // Replace with real API call
-      // const response = await api.get('/admin/contacts');
-      // setSubmissions(response.data);
       
-      // Using mock data for demonstration
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setSubmissions(mockSubmissions);
+      // Fetch real contact submissions from API
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/contact-submissions', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch contact submissions');
+      }
+
+      const data = await response.json();
+      const submissions = data.submissions || [];
+      setSubmissions(submissions);
       
-      // Calculate stats
+      // Calculate stats from real data
       const newStats = {
-        total: mockSubmissions.length,
-        new: mockSubmissions.filter(s => s.status === 'new').length,
-        inProgress: mockSubmissions.filter(s => s.status === 'in-progress').length,
-        resolved: mockSubmissions.filter(s => s.status === 'resolved').length,
+        total: submissions.length,
+        new: submissions.filter(s => s.status === 'new').length,
+        inProgress: submissions.filter(s => s.status === 'in-progress').length,
+        resolved: submissions.filter(s => s.status === 'resolved').length,
       };
       setStats(newStats);
       
     } catch (error) {
       console.error('Error loading contact submissions:', error);
+      // Set empty data on error
+      setSubmissions([]);
+      setStats({ total: 0, new: 0, inProgress: 0, resolved: 0 });
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const filterSubmissions = () => {
+  const filterSubmissions = useCallback(() => {
     let filtered = submissions;
 
     // Filter by search query
@@ -133,13 +86,34 @@ const ContactSubmissions = () => {
     }
 
     setFilteredSubmissions(filtered);
-  };
+  }, [submissions, searchQuery, statusFilter]);
+
+  useEffect(() => {
+    loadSubmissions();
+  }, [loadSubmissions]);
+
+  useEffect(() => {
+    filterSubmissions();
+  }, [filterSubmissions]);
 
   const updateSubmissionStatus = async (id, newStatus) => {
     try {
-      // Replace with real API call
-      // await api.patch(`/admin/contacts/${id}/status`, { status: newStatus });
-      
+      // Update status on server
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/admin/contact-submissions/${id}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update submission status');
+      }
+
+      // Update local state
       setSubmissions(prev => 
         prev.map(submission => 
           submission._id === id 
@@ -165,6 +139,7 @@ const ContactSubmissions = () => {
 
     } catch (error) {
       console.error('Error updating submission status:', error);
+      alert('Failed to update submission status. Please try again.');
     }
   };
 

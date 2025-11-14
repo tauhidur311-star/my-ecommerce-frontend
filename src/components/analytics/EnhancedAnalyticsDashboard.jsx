@@ -20,53 +20,14 @@ const EnhancedAnalyticsDashboard = () => {
   
   const { summary, realTimeMetrics, isLoading, refreshAll } = useAnalyticsData(timeRange);
 
-  // Mock data for charts - replace with real data from your API
-  const mockRevenueData = [
-    { date: '2024-01-01', revenue: 12000, orders: 45, visitors: 890 },
-    { date: '2024-01-02', revenue: 15000, orders: 52, visitors: 920 },
-    { date: '2024-01-03', revenue: 18000, orders: 63, visitors: 1100 },
-    { date: '2024-01-04', revenue: 14000, orders: 48, visitors: 850 },
-    { date: '2024-01-05', revenue: 20000, orders: 71, visitors: 1200 },
-    { date: '2024-01-06', revenue: 16000, orders: 56, visitors: 980 },
-    { date: '2024-01-07', revenue: 22000, orders: 78, visitors: 1350 },
-  ];
-
-  const mockCategoryData = [
-    { name: 'Electronics', value: 35, color: '#3B82F6' },
-    { name: 'Clothing', value: 28, color: '#10B981' },
-    { name: 'Home & Garden', value: 20, color: '#F59E0B' },
-    { name: 'Books', value: 12, color: '#EF4444' },
-    { name: 'Sports', value: 5, color: '#8B5CF6' },
-  ];
-
-  const mockTrafficData = [
-    { source: 'Direct', visitors: 1250, percentage: 42 },
-    { source: 'Google', visitors: 980, percentage: 33 },
-    { source: 'Social Media', visitors: 450, percentage: 15 },
-    { source: 'Email', visitors: 200, percentage: 7 },
-    { source: 'Referrals', visitors: 90, percentage: 3 },
-  ];
-
-  const mockRecentSubmissions = [
-    {
-      _id: '1',
-      name: 'John Doe',
-      email: 'john@example.com',
-      subject: 'Product Inquiry',
-      message: 'I would like to know more about your latest electronics products...',
-      status: 'new',
-      createdAt: new Date().toISOString(),
-    },
-    {
-      _id: '2',
-      name: 'Jane Smith',
-      email: 'jane@example.com',
-      subject: 'Order Support',
-      message: 'I need help with my recent order #12345...',
-      status: 'in-progress',
-      createdAt: new Date(Date.now() - 3600000).toISOString(),
-    },
-  ];
+  // Real data from API hooks
+  const { 
+    chartData, 
+    categoryData, 
+    trafficData, 
+    recentSubmissions,
+    refreshChartData 
+  } = useAnalyticsData(timeRange);
 
   const timeRangeOptions = [
     { value: '24h', label: 'Last 24 Hours' },
@@ -89,15 +50,15 @@ const EnhancedAnalyticsDashboard = () => {
   const summaryStats = [
     {
       title: 'Total Revenue',
-      value: `৳${realTimeMetrics?.totalRevenue?.toLocaleString() || '45,230'}`,
-      delta: summary?.revenueGrowth || 12.5,
+      value: realTimeMetrics?.totalRevenue ? `৳${realTimeMetrics.totalRevenue.toLocaleString()}` : '৳0',
+      delta: summary?.revenueGrowth || 0,
       icon: DollarSign,
       color: 'blue'
     },
     {
       title: 'Total Orders',
-      value: realTimeMetrics?.totalOrders || '1,234',
-      delta: summary?.ordersGrowth || 8.2,
+      value: realTimeMetrics?.totalOrders || 0,
+      delta: summary?.ordersGrowth || 0,
       icon: ShoppingCart,
       color: 'green'
     },
@@ -181,7 +142,7 @@ const EnhancedAnalyticsDashboard = () => {
           error={null}
         >
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={mockRevenueData}>
+            <AreaChart data={chartData || []}>
               <defs>
                 <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
@@ -224,7 +185,7 @@ const EnhancedAnalyticsDashboard = () => {
           error={null}
         >
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={mockRevenueData}>
+            <LineChart data={chartData || []}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
               <XAxis 
                 dataKey="date" 
@@ -274,7 +235,7 @@ const EnhancedAnalyticsDashboard = () => {
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={mockCategoryData}
+                data={categoryData || []}
                 cx="50%"
                 cy="50%"
                 outerRadius={80}
@@ -282,7 +243,7 @@ const EnhancedAnalyticsDashboard = () => {
                 label={({ name, value }) => `${name}: ${value}%`}
                 labelLine={false}
               >
-                {mockCategoryData.map((entry, index) => (
+                {(categoryData || []).map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
@@ -297,10 +258,10 @@ const EnhancedAnalyticsDashboard = () => {
             Traffic Sources
           </h3>
           <div className="space-y-4">
-            {mockTrafficData.map((source, index) => (
+            {(trafficData || []).map((source, index) => (
               <div key={source.source} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className={`w-3 h-3 rounded-full`} style={{ backgroundColor: mockCategoryData[index]?.color || '#6B7280' }}></div>
+                  <div className={`w-3 h-3 rounded-full`} style={{ backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'][index] || '#6B7280' }}></div>
                   <span className="text-sm font-medium text-gray-900 dark:text-white">
                     {source.source}
                   </span>
@@ -319,7 +280,7 @@ const EnhancedAnalyticsDashboard = () => {
         </div>
 
         {/* Recent Activity */}
-        <RecentSubmissionsList items={mockRecentSubmissions} />
+        <RecentSubmissionsList items={recentSubmissions || []} />
       </div>
 
       {/* Performance Metrics Table */}

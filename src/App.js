@@ -5,15 +5,17 @@ import soundManager from './utils/soundManager';
 import Store from './pages/store/Store';
 import DynamicStorefront from './components/DynamicStorefront';
 import EnhancedAdminDashboard from './pages/admin/EnhancedAdminDashboard';
-import EnhancedThemeEditor from './pages/design/EnhancedThemeEditor.tsx';
+import ThemeEditor from './pages/design/ThemeEditor.tsx';
 import UserDashboard from './pages/dashboard/UserDashboard';
-import AboutPage from './pages/store/AboutPage';
-import ContactPage from './pages/store/ContactPage';
 import WishlistPage from './pages/WishlistPage';
 import GlassUIShowcase from './components/examples/GlassUIShowcase';
 import ProtectedRoute from './components/ProtectedRoute';
+import ContentPageRoute from './components/ContentPageRoute';
+import NotFoundPage from './components/NotFoundPage';
 import Auth from './Auth';
 import NotificationToast from './components/notifications/NotificationToast';
+import CookieConsentBanner from './components/CookieConsentBanner';
+import cookieManager from './utils/cookieManager';
 // Error logging simplified for better performance
 import './App.css';
 
@@ -31,6 +33,17 @@ const queryClient = new QueryClient({
 
 function App() {
   const [showAuth, setShowAuth] = useState(false);
+  const [theme, setTheme] = useState('light');
+
+  // Initialize theme from cookies
+  useEffect(() => {
+    const savedTheme = cookieManager.getTheme();
+    setTheme(savedTheme);
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    
+    // Apply theme class to body for global styling
+    document.body.className = savedTheme === 'dark' ? 'dark-theme' : 'light-theme';
+  }, []);
 
   // Initialize sound manager and error handling
   useEffect(() => {
@@ -76,8 +89,6 @@ function App() {
           <Route path="/" element={<Store />} />
           <Route path="/theme-preview" element={<DynamicStorefront pageType="home" />} />
           <Route path="/theme-home" element={<DynamicStorefront pageType="home" />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/contact" element={<ContactPage />} />
           <Route path="/cart" element={<Store />} /> {/* Cart is handled within Store component */}
           
           {/* Preview routes for theme editor */}
@@ -109,25 +120,32 @@ function App() {
           } />
           <Route path="/design" element={
             <ProtectedRoute requireAdmin={true}>
-              <EnhancedThemeEditor />
+              <ThemeEditor />
             </ProtectedRoute>
           } />
-          <Route path="/design/:designId" element={
-            <ProtectedRoute requireAdmin={true}>
-              <EnhancedThemeEditor />
-            </ProtectedRoute>
-          } />
-          
-          {/* Redirect old upgrade route to new design route */}
-          <Route path="/design/upgrade" element={<Navigate to="/design" replace />} />
           
           {/* Glass UI Demo Route */}
           <Route path="/glass-demo" element={<GlassUIShowcase />} />
           
-          {/* Catch-all route for SPA routing - redirects unknown routes to home */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          {/* 404 Page */}
+          <Route path="/404" element={<NotFoundPage />} />
+          
+          {/* Dynamic Content Pages Route - handles all content pages with access control */}
+          <Route path="/:slug" element={<ContentPageRoute />} />
+          
+          {/* Debug: Log when this route is hit */}
+          <Route path="/debug-route/:slug" element={
+            <div>
+              <h1>Debug Route Hit: {window.location.pathname}</h1>
+              <ContentPageRoute />
+            </div>
+          } />
+          
+          {/* Catch-all route for truly unknown routes */}
+          <Route path="*" element={<Navigate to="/404" replace />} />
         </Routes>
         <NotificationToast position="top-right" />
+        <CookieConsentBanner />
       </Router>
     </QueryClientProvider>
   );

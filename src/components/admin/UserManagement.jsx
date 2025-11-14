@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import GlassCard from '../ui/glass/GlassCard';
 import EnhancedButton from '../ui/EnhancedButton';
+import userService from '../../services/userService';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -28,34 +29,78 @@ const UserManagement = () => {
     newThisMonth: 0
   });
 
-  // API functions
-  const fetchUsers = async () => {
+  // Enhanced API functions using userService
+  const fetchUsers = async (forceRefresh = false) => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/users?limit=100', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+      
+      if (forceRefresh) {
+        // Clear any cached user data and force fresh fetch
+        console.log('Force refreshing user data...');
+        
+        // Try to fetch fresh user profile from API
+        const token = localStorage.getItem('token');
+        try {
+          const response = await fetch('/api/users/profile', {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            const updatedUser = data.user || data.data || data;
+            
+            if (updatedUser) {
+              console.log('Fresh user data from API:', updatedUser);
+              // Update localStorage with fresh data
+              localStorage.setItem('user', JSON.stringify(updatedUser));
+            }
+          }
+        } catch (apiError) {
+          console.log('Could not fetch fresh user data from API:', apiError.message);
         }
+      }
+      
+      // Debug: Check what's actually in localStorage
+      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+      console.log('=== USER DATA DEBUG ===');
+      console.log('Current localStorage user data:', storedUser);
+      console.log('Phone fields:', {
+        phone: storedUser.phone,
+        mobile: storedUser.mobile,
+        phoneNumber: storedUser.phoneNumber,
+        addressPhone: storedUser.address?.phone
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch users');
-      }
-
-      const data = await response.json();
-      if (data.success) {
-        const usersData = data.data || [];
-        setUsers(usersData);
-        calculateStats(usersData);
-      }
+      console.log('Address fields:', {
+        addressObject: storedUser.address,
+        street: storedUser.street,
+        city: storedUser.city,
+        country: storedUser.country,
+        zipCode: storedUser.zipCode
+      });
+      console.log('=== END DEBUG ===');
+      
+      // Use the enhanced userService to get real user data
+      const usersData = await userService.getCombinedUserData();
+      
+      console.log(`Loaded ${usersData.length} real users from all sources`);
+      console.log('First user data:', usersData[0]);
+      
+      setUsers(usersData);
+      calculateStats(usersData);
+      
     } catch (error) {
       console.error('Error fetching users:', error);
       setUsers([]);
     } finally {
       setLoading(false);
     }
+  };
+
+  const forceRefreshUsers = () => {
+    fetchUsers(true);
   };
 
   const calculateStats = (usersData) => {
@@ -75,6 +120,11 @@ const UserManagement = () => {
 
   const updateUserStatus = async (userId, isActive) => {
     try {
+      // Update in local state immediately for better UX
+      setUsers(prev => prev.map(user => 
+        user._id === userId ? { ...user, isActive, lastLogin: new Date().toISOString() } : user
+      ));
+      
       const token = localStorage.getItem('token');
       const response = await fetch(`/api/users/${userId}/status`, {
         method: 'PATCH',
@@ -186,7 +236,7 @@ const UserManagement = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [fetchUsers]);
 
   const StatsCard = ({ title, value, icon: Icon, color, subtitle }) => (
     <motion.div
@@ -508,9 +558,14 @@ const UserManagement = () => {
           <p className="text-gray-600">Manage customer accounts and user permissions</p>
         </div>
         <div className="flex gap-3">
-          <EnhancedButton variant="outline" onClick={fetchUsers} disabled={loading}>
+          <EnhancedButton variant="outline" onClick={() => fetchUsers(false)} disabled={loading}>
             <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
             Refresh
+          </EnhancedButton>
+          
+          <EnhancedButton variant="primary" onClick={forceRefreshUsers} disabled={loading}>
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            Force Refresh Profile
           </EnhancedButton>
           <EnhancedButton variant="outline">
             <Download size={16} />

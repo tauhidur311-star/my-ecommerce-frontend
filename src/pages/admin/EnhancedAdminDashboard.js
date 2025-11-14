@@ -24,13 +24,54 @@ const SegmentationPanel = lazy(() => import('../../components/customers/Segmenta
 const ContactSubmissions = lazy(() => import('../../components/admin/ContactSubmissions.jsx'));
 const OrdersManagement = lazy(() => import('../../components/admin/OrdersManagement.jsx'));
 const CampaignManager = lazy(() => import('../../components/marketing/CampaignManager.jsx'));
-const PerformanceMonitor = lazy(() => import('../../components/admin/PerformanceMonitor.jsx'));
-const FinancialReports = lazy(() => import('../../components/admin/FinancialReports.jsx'));
-const ReviewsManagement = lazy(() => import('../../components/admin/ReviewsManagement.jsx'));
-const ContentManagement = lazy(() => import('../../components/admin/ContentManagement.jsx'));
+const PerformanceMonitor = lazy(() => import('../../components/admin/SimplePerformanceMonitor.jsx'));
+const ContentManagement = lazy(() => import('../../components/admin/SimpleContentManagement.jsx'));
 
 const EnhancedAdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
+  
+  const navigationItems = [
+    { id: 'overview', label: 'Overview', icon: Home },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    { id: 'orders', label: 'Orders', icon: ShoppingBag },
+    { id: 'products', label: 'Products', icon: Package },
+    { id: 'inventory', label: 'Inventory', icon: Package },
+    { id: 'users', label: 'Users', icon: Users },
+    { id: 'customers', label: 'Customers', icon: Users },
+    { id: 'contacts', label: 'Contact Us', icon: MessageCircle },
+    { id: 'marketing', label: 'Marketing', icon: Mail },
+    { id: 'content', label: 'Content', icon: FileText },
+    { id: 'performance', label: 'Performance', icon: Activity },
+    { id: 'settings', label: 'Settings', icon: Settings },
+  ];
+  
+  // Load admin preferences from cookies
+  React.useEffect(() => {
+    const cookieManager = require('../../utils/cookieManager').default;
+    const savedTab = cookieManager.getCookie('adminActiveTab');
+    const savedLayout = cookieManager.getAdminLayout();
+    
+    if (savedTab && navigationItems.find(item => item.id === savedTab)) {
+      setActiveTab(savedTab);
+    }
+    
+    // Apply admin layout preferences
+    document.body.setAttribute('data-admin-layout', savedLayout);
+  }, [navigationItems]);
+  
+  // Save active tab to cookies when it changes
+  React.useEffect(() => {
+    const cookieManager = require('../../utils/cookieManager').default;
+    cookieManager.setCookie('adminActiveTab', activeTab, { maxAge: 31536000 });
+  }, [activeTab]);
+
+  // Force clear any cached tabs that no longer exist
+  useEffect(() => {
+    const validTabs = ['overview', 'analytics', 'orders', 'products', 'inventory', 'users', 'customers', 'contacts', 'marketing', 'content', 'performance', 'settings'];
+    if (!validTabs.includes(activeTab)) {
+      setActiveTab('overview');
+    }
+  }, [activeTab]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
@@ -52,23 +93,6 @@ const EnhancedAdminDashboard = () => {
 
     return () => clearInterval(interval);
   }, [isOnline, refreshAll]);
-
-  const navigationItems = [
-    { id: 'overview', label: 'Overview', icon: Home },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-    { id: 'orders', label: 'Orders', icon: ShoppingBag },
-    { id: 'products', label: 'Products', icon: Package },
-    { id: 'inventory', label: 'Inventory', icon: Package },
-    { id: 'users', label: 'Users', icon: Users },
-    { id: 'customers', label: 'Customers', icon: Users },
-    { id: 'contacts', label: 'Contact Us', icon: MessageCircle },
-    { id: 'marketing', label: 'Marketing', icon: Mail },
-    { id: 'reports', label: 'Financial Reports', icon: DollarSign },
-    { id: 'reviews', label: 'Reviews', icon: Star },
-    { id: 'content', label: 'Content', icon: FileText },
-    { id: 'performance', label: 'Performance', icon: Activity },
-    { id: 'settings', label: 'Settings', icon: Settings },
-  ];
 
   const quickStats = [
     {
@@ -207,11 +231,39 @@ const EnhancedAdminDashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <GlassCard title="Recent Orders" className="h-96">
                 <div className="space-y-3">
-                  {/* Recent orders list would go here */}
-                  <div className="text-center text-gray-500 mt-8">
-                    <Package className="mx-auto w-12 h-12 mb-2 opacity-50" />
-                    <p>Recent orders will appear here</p>
-                  </div>
+                  {realTimeMetrics?.recentOrders?.length > 0 ? (
+                    realTimeMetrics.recentOrders.slice(0, 5).map((order, index) => (
+                      <motion.div
+                        key={order._id}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="p-3 bg-gray-50 rounded-lg border border-gray-200"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium">Order #{order.orderNumber}</p>
+                            <p className="text-xs text-gray-600">{order.customer}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-medium">৳{order.total.toLocaleString()}</p>
+                            <span className={`text-xs px-2 py-1 rounded-full ${
+                              order.status === 'completed' ? 'bg-green-100 text-green-700' :
+                              order.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                              'bg-gray-100 text-gray-700'
+                            }`}>
+                              {order.status}
+                            </span>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))
+                  ) : (
+                    <div className="text-center text-gray-500 mt-8">
+                      <Package className="mx-auto w-12 h-12 mb-2 opacity-50" />
+                      <p>No recent orders</p>
+                    </div>
+                  )}
                 </div>
               </GlassCard>
 
@@ -301,19 +353,6 @@ const EnhancedAdminDashboard = () => {
           </Suspense>
         );
 
-      case 'reports':
-        return (
-          <Suspense fallback={<LoadingSkeleton />}>
-            <FinancialReports />
-          </Suspense>
-        );
-
-      case 'reviews':
-        return (
-          <Suspense fallback={<LoadingSkeleton />}>
-            <ReviewsManagement />
-          </Suspense>
-        );
 
       case 'content':
         return (

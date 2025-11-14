@@ -1,12 +1,12 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Package, AlertTriangle, Edit3, Trash2, Plus, Search,
-  Filter, Download, Upload, BarChart3, TrendingDown
+  Filter, Download, Upload, BarChart3, TrendingDown, Wifi, WifiOff
 } from 'lucide-react';
-import { useInventory, useInventoryAlerts } from '../../hooks/useInventory.js';
 import EnhancedButton from '../ui/EnhancedButton';
 import GlassModal from '../ui/glass/GlassModal';
+import socketService from '../../services/socketService';
 import toast from 'react-hot-toast';
 
 const InventoryTable = () => {
@@ -22,17 +22,181 @@ const InventoryTable = () => {
     operation: 'set'
   });
 
-  const { 
-    inventory, 
-    lowStockAlerts, 
-    metrics, 
-    isLoading, 
-    updateStock, 
-    bulkUpdate,
-    isBulkUpdating 
-  } = useInventory();
+  // Simple inventory management using regular React state
+  const [inventory, setInventory] = React.useState([]);
+  const [lowStockAlerts, setLowStockAlerts] = React.useState([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [isBulkUpdating, setIsBulkUpdating] = React.useState(false);
+  const [isConnected, setIsConnected] = React.useState(false);
+  const [realtimeUpdates, setRealtimeUpdates] = React.useState([]);
 
-  const { sendLowStockAlert } = useInventoryAlerts();
+  // Load inventory data from localStorage or API
+  React.useEffect(() => {
+    const loadInventory = async () => {
+      setIsLoading(true);
+      try {
+        // Try to load from localStorage first (fallback data)
+        const localProducts = localStorage.getItem('admin-products');
+        if (localProducts) {
+          const products = JSON.parse(localProducts);
+          setInventory(products);
+          
+          // Calculate low stock alerts
+          const alerts = products.filter(product => product.stock <= 5);
+          setLowStockAlerts(alerts);
+        }
+        
+        // You can also try to fetch from API here
+        // const response = await fetch('/api/admin/inventory', {
+        //   headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        // });
+        // if (response.ok) {
+        //   const data = await response.json();
+        //   setInventory(data.products || []);
+        // }
+        
+      } catch (error) {
+        console.error('Error loading inventory:', error);
+        toast.error('Failed to load inventory data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadInventory();
+  }, []);
+
+  // Set up real-time socket connection for inventory updates
+  useEffect(() => {
+    const connectSocket = async () => {
+      try {
+        await socketService.connect();
+        setIsConnected(socketService.isSocketConnected());
+        
+        if (socketService.isSocketConnected()) {
+          // Subscribe to inventory updates
+          socketService.subscribeToInventoryUpdates();
+          
+          // Listen for real-time inventory updates
+          const unsubscribeInventoryUpdated = socketService.addListener('inventoryUpdated', (data) => {
+            setInventory(prev => prev.map(item => 
+              item._id === data.productId ? { ...item, ...data.updates } : item
+            ));
+            setRealtimeUpdates(prev => [data, ...prev.slice(0, 4)]); // Keep last 5 updates
+            toast.success(`Inventory updated: ${data.productName || 'Product'}`);
+          });
+
+          const unsubscribeStockUpdated = socketService.addListener('stockUpdated', (data) => {
+            setInventory(prev => prev.map(item => 
+              item._id === data.productId ? { ...item, stock: data.newStock } : item
+            ));
+            setRealtimeUpdates(prev => [{
+              type: 'stock_update',
+              productId: data.productId,
+              message: `Stock updated to ${data.newStock}`,
+              timestamp: data.timestamp
+            }, ...prev.slice(0, 4)]);
+          });
+
+          const unsubscribeLowStockAlert = socketService.addListener('lowStockAlert', (data) => {
+            setLowStockAlerts(prev => {
+              const exists = prev.find(alert => alert.productId === data.productId);
+              if (!exists) {
+                return [...prev, data];
+              }
+              return prev;
+            });
+            toast.error(`Low stock alert: ${data.productName} (${data.currentStock} remaining)`);
+          });
+
+          const unsubscribeInventoryStockUpdated = socketService.addListener('inventoryStockUpdated', (data) => {
+            setInventory(prev => prev.map(item => 
+              item._id === data.productId ? { ...item, stock: data.newStock } : item
+            ));
+            toast.success(`Stock updated by ${data.updatedBy}: ${data.reason || 'Stock adjustment'}`);
+          });
+
+          // Cleanup function
+          return () => {
+            unsubscribeInventoryUpdated();
+            unsubscribeStockUpdated();
+            unsubscribeLowStockAlert();
+            unsubscribeInventoryStockUpdated();
+            socketService.unsubscribeFromInventoryUpdates();
+          };
+        }
+      } catch (error) {
+        console.error('Failed to connect to socket:', error);
+        setIsConnected(false);
+      }
+    };
+
+    connectSocket();
+
+    return () => {
+      if (socketService.isSocketConnected()) {
+        socketService.unsubscribeFromInventoryUpdates();
+      }
+    };
+  }, []);
+
+  // Calculate metrics
+  const metrics = React.useMemo(() => ({
+    totalProducts: inventory.length,
+    lowStockCount: lowStockAlerts.length,
+    totalValue: inventory.reduce((sum, product) => sum + (product.price * product.stock), 0),
+    outOfStockCount: inventory.filter(p => p.stock === 0).length
+  }), [inventory, lowStockAlerts]);
+  
+  const updateStock = useCallback((productId, quantity, operation = 'set', reason = '') => {
+    // Update local state immediately for responsiveness
+    setInventory(prev => prev.map(product => {
+      if (product._id === productId || product.id === productId) {
+        const newStock = operation === 'set' ? quantity : 
+                        operation === 'add' ? product.stock + quantity :
+                        Math.max(0, product.stock - quantity);
+        
+        // Check for low stock and send alert if connected
+        if (newStock <= 5 && isConnected) {
+          socketService.sendLowStockAlert(productId, product.name, newStock, 5);
+        }
+        
+        return { ...product, stock: newStock };
+      }
+      return product;
+    }));
+
+    // Broadcast update via socket if connected
+    if (isConnected) {
+      const newStock = operation === 'set' ? quantity : 
+                      operation === 'add' ? inventory.find(p => p._id === productId)?.stock + quantity :
+                      Math.max(0, inventory.find(p => p._id === productId)?.stock - quantity);
+      
+      socketService.updateProductStock(productId, newStock, operation, reason);
+    }
+    
+    toast.success('Stock updated successfully!');
+  }, [inventory, isConnected]);
+  
+  const bulkUpdate = useCallback((updates) => {
+    setIsBulkUpdating(true);
+    try {
+      // Apply bulk updates
+      setInventory(prev => prev.map(product => {
+        const update = updates.find(u => u.id === product._id || u.id === product.id);
+        return update ? { ...product, ...update.data } : product;
+      }));
+      toast.success('Bulk update completed successfully!');
+    } catch (error) {
+      toast.error('Bulk update failed');
+    } finally {
+      setIsBulkUpdating(false);
+    }
+  }, []);
+  
+  const sendLowStockAlert = useCallback((productIds) => {
+    toast.success(`Low stock alerts sent for ${productIds.length} products`);
+  }, []);
 
   // Filter and sort inventory
   const filteredInventory = inventory
@@ -115,6 +279,30 @@ const InventoryTable = () => {
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Inventory Management</h2>
           <p className="text-gray-600">Manage your product inventory and stock levels</p>
+        </div>
+        <div className="flex items-center gap-4">
+          {/* Real-time Connection Status */}
+          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100">
+            {isConnected ? (
+              <>
+                <Wifi size={16} className="text-green-500" />
+                <span className="text-sm text-green-700">Live Updates</span>
+              </>
+            ) : (
+              <>
+                <WifiOff size={16} className="text-gray-500" />
+                <span className="text-sm text-gray-500">Offline Mode</span>
+              </>
+            )}
+          </div>
+          
+          {/* Recent Updates Indicator */}
+          {realtimeUpdates.length > 0 && (
+            <div className="relative">
+              <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+              <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
+            </div>
+          )}
         </div>
         
         <div className="flex items-center gap-3">

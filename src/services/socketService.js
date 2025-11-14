@@ -91,6 +91,31 @@ class SocketService {
     this.socket.on('admin_announcement', (data) => {
       this.triggerListener('adminAnnouncement', data);
     });
+
+    // Inventory events
+    this.socket.on('inventory_updated', (data) => {
+      this.triggerListener('inventoryUpdated', data);
+    });
+
+    this.socket.on('stock_updated', (data) => {
+      this.triggerListener('stockUpdated', data);
+    });
+
+    this.socket.on('inventory_stock_updated', (data) => {
+      this.triggerListener('inventoryStockUpdated', data);
+    });
+
+    this.socket.on('low_stock_alert', (data) => {
+      this.triggerListener('lowStockAlert', data);
+    });
+
+    this.socket.on('inventory_change', (data) => {
+      this.triggerListener('inventoryChange', data);
+    });
+
+    this.socket.on('inventory_error', (data) => {
+      this.triggerListener('inventoryError', data);
+    });
   }
 
   disconnect() {
@@ -118,6 +143,33 @@ class SocketService {
 
   subscribeToAdminUpdates() {
     this.emit('subscribe_admin_updates');
+  }
+
+  // Inventory-specific methods
+  subscribeToInventoryUpdates() {
+    this.emit('subscribe_inventory_updates');
+  }
+
+  unsubscribeFromInventoryUpdates() {
+    this.emit('unsubscribe_inventory_updates');
+  }
+
+  updateProductStock(productId, newStock, operation = 'set', reason = '') {
+    this.emit('update_product_stock', {
+      productId,
+      newStock,
+      operation,
+      reason
+    });
+  }
+
+  sendLowStockAlert(productId, productName, currentStock, threshold) {
+    this.emit('inventory_low_stock_alert', {
+      productId,
+      productName,
+      currentStock,
+      threshold
+    });
   }
 
   markNotificationAsRead(notificationId) {

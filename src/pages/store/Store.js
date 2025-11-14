@@ -12,6 +12,7 @@ import { publicAPI } from '../../services/themeAPI';
 import useThemeUpdates from '../../hooks/useThemeUpdates.js';
 import { usePublishedTheme } from '../../hooks/useThemeData.js';
 import SafeSectionRenderer from '../../components/SafeSectionRenderer';
+// Removed theme system imports
 
 const AuthModal = lazy(() => import('../../components/AuthModal.js'));
 
@@ -24,7 +25,9 @@ export default function Store() {
   const [cart, setCart] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Theme integration with real-time updates
+  // Removed theme system state
+
+  // Theme integration state and hooks (moved before useEffect)
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [previewLayout, setPreviewLayout] = useState(null);
   
@@ -310,10 +313,8 @@ export default function Store() {
   // Quick view modal state
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showQuickView, setShowQuickView] = useState(false);
-  const [selectedSize, setSelectedSize] = useState('');
-  
-  // Cart sidebar state
   const [showCartSidebar, setShowCartSidebar] = useState(false);
+  const [selectedSize, setSelectedSize] = useState('');
   
   // Wishlist hook (currently unused but may be needed later)
   // const { toggleWishlist, isInWishlist } = useWishlist();
@@ -433,6 +434,30 @@ export default function Store() {
       localStorage.removeItem('cart');
     }
   }, [cart]);
+
+  // Listen for preview updates from design editor
+  useEffect(() => {
+    const handleMessage = (event) => {
+      if (event.data.type === 'preview-update') {
+        console.log('Received preview update:', event.data.layout);
+        setIsPreviewMode(true);
+        setPreviewLayout(event.data.layout);
+      } else if (event.data.type === 'template-published') {
+        console.log('Template published, refetching...');
+        setIsPreviewMode(false);
+        setPreviewLayout(null);
+        refetch();
+      } else if (event.data.type === 'template-deleted') {
+        console.log('Template deleted, clearing preview...');
+        setIsPreviewMode(false);
+        setPreviewLayout(null);
+        refetch();
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [refetch]);
 
 
   const handleCheckout = async () => {
