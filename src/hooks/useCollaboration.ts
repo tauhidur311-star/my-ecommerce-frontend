@@ -44,7 +44,7 @@ interface CollaborationState {
 // MAIN COLLABORATION HOOK
 // ====================
 
-export const useCollaboration = (designId?: string) => {
+const useCollaboration = (designId?: string) => {
   const { user, token } = useAuth();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [collaborationState, setCollaborationState] = useState<CollaborationState>({
