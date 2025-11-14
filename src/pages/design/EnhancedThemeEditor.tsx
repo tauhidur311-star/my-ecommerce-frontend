@@ -19,7 +19,7 @@ import { motion } from 'framer-motion';
 
 // Import our advanced components
 import useAdvancedPageBuilderStore from '../../stores/advancedPageBuilderStore';
-import { useAnimationPreset } from '../../hooks/useAnimationPresets';
+// import { useAnimationPreset } from '../../hooks/useAnimationPresets';
 // import { useCollaboration } from '../../hooks/useCollaboration';
 import AdvancedSettingsPanel from '../../components/design-editor/advanced/AdvancedSettingsPanel';
 import ResponsivePreviewPanel from '../../components/design-editor/advanced/ResponsivePreviewPanel';
@@ -257,8 +257,9 @@ const EnhancedThemeEditor: React.FC<EnhancedThemeEditorProps> = ({
     );
   }, [sectionRenderers, previewMode, updateSection, collaboration]);
 
-  // Animation preset for sections (moved to top level to comply with React hooks rules)
-  const sectionFadeUpAnimation = useAnimationPreset('sectionFadeUp');
+  // Animation preset for sections (temporarily disabled)
+  // const sectionFadeUpAnimation = useAnimationPreset('sectionFadeUp');
+  const sectionFadeUpAnimation = { ref: null, variants: {}, initial: 'hidden', animate: 'visible', transition: {} };
 
   // Section renderer with animation wrapper
   const renderSectionWithAnimation = useCallback((section: any, index: number) => {
