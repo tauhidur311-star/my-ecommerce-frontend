@@ -6,6 +6,7 @@ import Store from './pages/store/Store';
 import DynamicStorefront from './components/DynamicStorefront';
 import EnhancedAdminDashboard from './pages/admin/EnhancedAdminDashboard';
 import DesignEditor from './pages/design/DesignEditor';
+import EnhancedThemeEditor from './pages/design/EnhancedThemeEditor';
 import UserDashboard from './pages/dashboard/UserDashboard';
 import AboutPage from './pages/store/AboutPage';
 import ContactPage from './pages/store/ContactPage';
@@ -110,6 +111,16 @@ function App() {
           <Route path="/design" element={
             <ProtectedRoute requireAdmin={true}>
               <DesignEditor />
+            </ProtectedRoute>
+          } />
+          <Route path="/design/enhanced" element={
+            <ProtectedRoute requireAdmin={true}>
+              <EnhancedThemeEditor />
+            </ProtectedRoute>
+          } />
+          <Route path="/design/enhanced/:designId" element={
+            <ProtectedRoute requireAdmin={true}>
+              <EnhancedThemeEditor />
             </ProtectedRoute>
           } />
           
