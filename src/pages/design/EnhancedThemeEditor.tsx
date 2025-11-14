@@ -18,9 +18,9 @@ import {
 import { motion } from 'framer-motion';
 
 // Import our advanced components
-import useAdvancedPageBuilderStore from '../../stores/advancedPageBuilderStore';
+import useAdvancedPageBuilderStore from '../../stores/advancedPageBuilderStore.ts';
 import { useAnimationPreset } from '../../hooks/useAnimationPresets.ts';
-import { useCollaboration } from '../../hooks/useCollaboration';
+import { useCollaboration } from '../../hooks/useCollaboration.ts';
 import AdvancedSettingsPanel from '../../components/design-editor/advanced/AdvancedSettingsPanel';
 import ResponsivePreviewPanel from '../../components/design-editor/advanced/ResponsivePreviewPanel';
 import CollaborationCursors from '../../components/collaboration/CollaborationCursors';
