@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://my-ecommerce-backend-s0rt.onrender.com';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 // API Service Layer to replace localStorage
 class APIService {
@@ -230,11 +230,6 @@ class APIService {
     });
   }
 
-  async cancelOrder(id) {
-    return this.makeRequest(`/orders/${id}/cancel`, {
-      method: 'POST',
-    });
-  }
 
   // Analytics endpoints
   async getAnalytics(endpoint) {
@@ -525,18 +520,6 @@ class APIService {
   }
 
   // Advanced Search API
-  async searchProducts(params) {
-    const searchParams = new URLSearchParams(params);
-    return this.request(`/search/products?${searchParams}`);
-  }
-
-  async getSearchSuggestions(query, limit = 10) {
-    return this.request(`/search/suggestions?q=${encodeURIComponent(query)}&limit=${limit}`);
-  }
-
-  async getPopularSearches() {
-    return this.request('/search/popular');
-  }
 
   async getSearchFilters(category = '') {
     return this.request(`/search/filters${category ? `?category=${category}` : ''}`);
@@ -638,6 +621,39 @@ class APIService {
       method: 'PATCH',
       body: JSON.stringify({ status }),
     });
+  }
+
+  // HTTP method shortcuts for convenience
+  get(endpoint, options = {}) {
+    return this.makeRequest(endpoint, { method: 'GET', ...options });
+  }
+
+  post(endpoint, data, options = {}) {
+    return this.makeRequest(endpoint, { 
+      method: 'POST', 
+      body: JSON.stringify(data), 
+      ...options 
+    });
+  }
+
+  put(endpoint, data, options = {}) {
+    return this.makeRequest(endpoint, { 
+      method: 'PUT', 
+      body: JSON.stringify(data), 
+      ...options 
+    });
+  }
+
+  patch(endpoint, data, options = {}) {
+    return this.makeRequest(endpoint, { 
+      method: 'PATCH', 
+      body: JSON.stringify(data), 
+      ...options 
+    });
+  }
+
+  delete(endpoint, options = {}) {
+    return this.makeRequest(endpoint, { method: 'DELETE', ...options });
   }
 }
 

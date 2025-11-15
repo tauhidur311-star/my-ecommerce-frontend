@@ -1,16 +1,38 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { 
-  Search, Plus, Eye, Settings, ChevronDown, X, Menu, Home, ShoppingBag, 
-  LayoutGrid, Users, BarChart3, Package, Tag, MessageSquare, Palette, Image, 
-  Type, Layout, Columns, Square, ChevronLeft, ChevronRight, Save, Undo, Redo, 
-  Monitor, Smartphone, Tablet, AlignLeft, AlignCenter, AlignRight, Bold, Italic, 
-  Underline, Link2, Video, Grid3x3, Maximize2, Copy, Trash2, ArrowUp, ArrowDown, 
-  Code, Zap, MoreVertical, Star, Heart, EyeOff, Download, Upload, RefreshCw, 
-  Layers, MousePointer, PanelLeft, PanelRight, Move, GripVertical, FolderOpen,
-  FileImage, CheckCircle, AlertCircle, Edit3, Sparkles, List, Grid, ShoppingCart,
-  Phone, Mail, MapPin, Facebook, Twitter, Instagram, Youtube, Clock, TrendingUp, Share2,
-  Globe, Filter, SidebarOpen, SidebarClose
-} from 'lucide-react';
+// Optimized Lucide Icons - Individual imports for better tree-shaking
+import Search from 'lucide-react/dist/esm/icons/search';
+import Plus from 'lucide-react/dist/esm/icons/plus';
+import Eye from 'lucide-react/dist/esm/icons/eye';
+import Settings from 'lucide-react/dist/esm/icons/settings';
+import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
+import X from 'lucide-react/dist/esm/icons/x';
+import ChevronLeft from 'lucide-react/dist/esm/icons/chevron-left';
+import Save from 'lucide-react/dist/esm/icons/save';
+import Undo from 'lucide-react/dist/esm/icons/undo';
+import Redo from 'lucide-react/dist/esm/icons/redo';
+import Monitor from 'lucide-react/dist/esm/icons/monitor';
+import Smartphone from 'lucide-react/dist/esm/icons/smartphone';
+import Tablet from 'lucide-react/dist/esm/icons/tablet';
+import Copy from 'lucide-react/dist/esm/icons/copy';
+import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
+import Palette from 'lucide-react/dist/esm/icons/palette';
+import Globe from 'lucide-react/dist/esm/icons/globe';
+import Download from 'lucide-react/dist/esm/icons/download';
+import FileImage from 'lucide-react/dist/esm/icons/file-image';
+import Filter from 'lucide-react/dist/esm/icons/filter';
+import PanelRight from 'lucide-react/dist/esm/icons/panel-right';
+
+// Additional missing icons
+import ShoppingCart from 'lucide-react/dist/esm/icons/shopping-cart';
+import Star from 'lucide-react/dist/esm/icons/star';
+import Facebook from 'lucide-react/dist/esm/icons/facebook';
+import Instagram from 'lucide-react/dist/esm/icons/instagram';
+import Twitter from 'lucide-react/dist/esm/icons/twitter';
+import Video from 'lucide-react/dist/esm/icons/video';
+import Image from 'lucide-react/dist/esm/icons/image';
+import SidebarClose from 'lucide-react/dist/esm/icons/sidebar-close';
+import SidebarOpen from 'lucide-react/dist/esm/icons/sidebar-open';
+import Home from 'lucide-react/dist/esm/icons/home';
 
 // Enhanced imports from Fix File 13 - Add Imports.tsx
 import EnhancedRightSidebar from '../../components/EnhancedRightSidebar';
@@ -22,6 +44,8 @@ import AddBlockModal from '../../components/AddBlockModal';
 import MediaLibraryModal from '../../components/MediaLibraryModal';
 
 const ThemeEditor = () => {
+  // Cache-busting: Force browser to recognize this as new component
+  console.log('🎨 Enhanced ThemeEditor loaded with 35 fixes - v2.0', new Date().toISOString());
   // Enhanced State Management
   const [pages, setPages] = useState([
     { id: 'home', name: 'Home', icon: Home, sections: [], template: 'default' },

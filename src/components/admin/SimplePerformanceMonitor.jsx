@@ -34,8 +34,8 @@ const SimplePerformanceMonitor = () => {
       
       console.log('🔄 Fetching real performance data...');
       
-      // Try multiple endpoints to get performance data
-      const endpoints = ['/api/admin/performance', '/health', '/api/health'];
+      // Use health endpoints that return proper JSON
+      const endpoints = ['/api/health', '/api/health/analytics'];
       let response = null;
       let endpointUsed = '';
       
@@ -323,7 +323,7 @@ const SimplePerformanceMonitor = () => {
   const testSystemHealth = async () => {
     try {
       const token = localStorage.getItem('token');
-      const endpoints = ['/health', '/api/admin/performance'];
+      const endpoints = ['/api/health', '/api/health/analytics'];
       let results = [];
       
       for (const endpoint of endpoints) {

@@ -16,8 +16,8 @@ const useRealTimeConnection = () => {
       // Determine WebSocket URL based on environment
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const host = process.env.NODE_ENV === 'production' 
-        ? 'my-ecommerce-backend-s0rt.onrender.com'
-        : window.location.hostname + ':5000';
+        ? 'localhost:5000'
+        : 'localhost:5000';
       
       const wsUrl = `${protocol}//${host}/notifications`;
       
@@ -168,7 +168,7 @@ const useRealTimeConnection = () => {
       try {
         const protocol = window.location.protocol;
         const host = process.env.NODE_ENV === 'production' 
-          ? 'my-ecommerce-backend-s0rt.onrender.com'
+          ? 'localhost:5000'
           : window.location.hostname + ':5000';
         
         const sseUrl = `${protocol}//${host}/api/sse/notifications?token=${token}`;

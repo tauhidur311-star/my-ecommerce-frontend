@@ -5,7 +5,6 @@ import soundManager from './utils/soundManager';
 import Store from './pages/store/Store';
 import DynamicStorefront from './components/DynamicStorefront';
 import EnhancedAdminDashboard from './pages/admin/EnhancedAdminDashboard';
-import ThemeEditor from './pages/design/ThemeEditor.tsx';
 import UserDashboard from './pages/dashboard/UserDashboard';
 import WishlistPage from './pages/WishlistPage';
 import GlassUIShowcase from './components/examples/GlassUIShowcase';
@@ -16,8 +15,10 @@ import Auth from './Auth';
 import NotificationToast from './components/notifications/NotificationToast';
 import CookieConsentBanner from './components/CookieConsentBanner';
 import cookieManager from './utils/cookieManager';
-// Error logging simplified for better performance
 import './App.css';
+
+// Lazy load ThemeEditor for better code splitting
+const ThemeEditor = React.lazy(() => import('./pages/design/ThemeEditor.tsx'));
 
 // Create a QueryClient instance
 const queryClient = new QueryClient({
@@ -120,7 +121,16 @@ function App() {
           } />
           <Route path="/design" element={
             <ProtectedRoute requireAdmin={true}>
-              <ThemeEditor />
+              <React.Suspense fallback={
+                <div className="flex items-center justify-center min-h-screen">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading Theme Editor...</p>
+                  </div>
+                </div>
+              }>
+                <ThemeEditor />
+              </React.Suspense>
             </ProtectedRoute>
           } />
           

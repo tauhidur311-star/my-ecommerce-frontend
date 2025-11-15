@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "description": "Frontend React application for My E-commerce",
   "private": true,
+  "sideEffects": false,
+  "proxy": "http://localhost:5000",
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/modifiers": "^7.0.0",
@@ -30,17 +32,17 @@
     "nanoid": "^5.0.0",
     "postcss": "^8.4.24",
     "react": "^18.2.0",
+    "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.66.0",
     "react-hot-toast": "^2.4.1",
     "react-icons": "^5.5.0",
     "react-image-crop": "^11.0.10",
-    "react-router-dom": "^7.9.5",
+    "react-router-dom": "^6.26.0",
     "react-scripts": "5.0.1",
     "react-swipeable": "^7.0.2",
     "react-toastify": "^11.0.5",
     "react-zoom-pan-pinch": "^3.3.0",
-    "react-beautiful-dnd": "^13.1.1",
     "recharts": "^2.8.0",
     "socket.io-client": "^4.8.1",
     "tailwindcss": "^3.3.0",
@@ -82,5 +84,8 @@
   },
   "overrides": {
     "react-virtual": "@tanstack/react-virtual"
+  },
+  "devDependencies": {
+    "webpack-bundle-analyzer": "^4.10.2"
   }
 }

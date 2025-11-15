@@ -1,5 +1,6 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
   BarChart3, Users, Package, Mail, Settings, Shield,
   Bell, Search, Menu, X, Home, TrendingUp, AlertTriangle,
@@ -26,8 +27,10 @@ const OrdersManagement = lazy(() => import('../../components/admin/OrdersManagem
 const CampaignManager = lazy(() => import('../../components/marketing/CampaignManager.jsx'));
 const PerformanceMonitor = lazy(() => import('../../components/admin/SimplePerformanceMonitor.jsx'));
 const ContentManagement = lazy(() => import('../../components/admin/SimpleContentManagement.jsx'));
+const ConnectionDiagnostics = lazy(() => import('../../components/admin/ConnectionDiagnostics.jsx'));
 
 const EnhancedAdminDashboard = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   
   const navigationItems = [
@@ -43,6 +46,7 @@ const EnhancedAdminDashboard = () => {
     { id: 'content', label: 'Content', icon: FileText },
     { id: 'theme-editor', label: 'Theme Editor', icon: Palette },
     { id: 'performance', label: 'Performance', icon: Activity },
+    { id: 'diagnostics', label: 'Diagnostics', icon: Shield },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
   
@@ -58,7 +62,7 @@ const EnhancedAdminDashboard = () => {
     
     // Apply admin layout preferences
     document.body.setAttribute('data-admin-layout', savedLayout);
-  }, [navigationItems]);
+  }, []); // Empty dependency array - only run once on mount
   
   // Save active tab to cookies when it changes
   React.useEffect(() => {
@@ -66,13 +70,14 @@ const EnhancedAdminDashboard = () => {
     cookieManager.setCookie('adminActiveTab', activeTab, { maxAge: 31536000 });
   }, [activeTab]);
 
-  // Force clear any cached tabs that no longer exist
+  // Force clear any cached tabs that no longer exist (only check once on mount)
   useEffect(() => {
-    const validTabs = ['overview', 'analytics', 'orders', 'products', 'inventory', 'users', 'customers', 'contacts', 'marketing', 'content', 'theme-editor', 'performance', 'settings'];
+    const validTabs = ['overview', 'analytics', 'orders', 'products', 'inventory', 'users', 'customers', 'contacts', 'marketing', 'content', 'theme-editor', 'performance', 'diagnostics', 'settings'];
     if (!validTabs.includes(activeTab)) {
+      console.log('Invalid tab detected, resetting to overview:', activeTab);
       setActiveTab('overview');
     }
-  }, [activeTab]);
+  }, []); // Empty dependency - only run once on mount
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
@@ -87,13 +92,13 @@ const EnhancedAdminDashboard = () => {
   // Auto-refresh data every 5 minutes
   useEffect(() => {
     const interval = setInterval(() => {
-      if (isOnline) {
+      if (isOnline && refreshAll) {
         refreshAll();
       }
     }, 5 * 60 * 1000);
 
     return () => clearInterval(interval);
-  }, [isOnline, refreshAll]);
+  }, [isOnline]); // Removed refreshAll from dependencies to prevent infinite loop
 
   const quickStats = [
     {
@@ -363,13 +368,13 @@ const EnhancedAdminDashboard = () => {
         );
 
       case 'theme-editor':
-        // Redirect to the dedicated theme editor page
-        window.location.href = '/design';
+        // Properly navigate to the dedicated theme editor page
+        navigate('/design');
         return (
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
               <Palette className="mx-auto w-12 h-12 mb-4 text-blue-500" />
-              <p className="text-gray-600">Redirecting to Theme Editor...</p>
+              <p className="text-gray-600">Navigating to Theme Editor...</p>
             </div>
           </div>
         );
@@ -378,6 +383,13 @@ const EnhancedAdminDashboard = () => {
         return (
           <Suspense fallback={<LoadingSkeleton />}>
             <PerformanceMonitor />
+          </Suspense>
+        );
+
+      case 'diagnostics':
+        return (
+          <Suspense fallback={<LoadingSkeleton />}>
+            <ConnectionDiagnostics />
           </Suspense>
         );
 

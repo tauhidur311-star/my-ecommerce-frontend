@@ -1,5 +1,5 @@
 // User Service for fetching real user dashboard data
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://my-ecommerce-backend-s0rt.onrender.com';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 export const userService = {
   // Fetch all users with their complete profiles
@@ -51,7 +51,7 @@ export const userService = {
     try {
       // Try different endpoints that might contain user data
       const endpoints = [
-        '/api/auth/users',
+        '/api/users',
         '/api/admin/users', 
         '/api/users/profiles',
         '/api/customers'

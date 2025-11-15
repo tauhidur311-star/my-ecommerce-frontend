@@ -30,7 +30,11 @@ class SocketService {
       return null;
     }
 
-    const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://my-ecommerce-backend-s0rt.onrender.com';
+    // Use WebSocket URL if available, otherwise fall back to API URL
+    const WS_URL = process.env.REACT_APP_WS_URL || process.env.REACT_APP_API_URL || 'http://localhost:5000';
+    const API_BASE_URL = WS_URL.replace('wss://', 'https://').replace('ws://', 'http://');
+
+    console.log('🔌 Connecting to WebSocket:', WS_URL);
 
     this.socket = io(API_BASE_URL, {
       auth: {
@@ -41,6 +45,10 @@ class SocketService {
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
+      // Add CORS headers for cross-origin requests
+      extraHeaders: {
+        'Access-Control-Allow-Credentials': 'true'
+      }
     });
 
     this.setupEventListeners();

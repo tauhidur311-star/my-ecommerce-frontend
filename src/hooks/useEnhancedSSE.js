@@ -84,7 +84,8 @@ export const useEnhancedSSE = (endpoint, options = {}) => {
     const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
     const url = `${apiUrl}/api/sse${endpoint}`;
     
-    log('Connecting to SSE endpoint:', url);
+    log('🔗 Connecting to SSE endpoint:', url);
+    console.log('🔗 Connecting to theme updates SSE…');
 
     try {
       const eventSource = new EventSource(url);
@@ -119,7 +120,8 @@ export const useEnhancedSSE = (endpoint, options = {}) => {
       };
 
       eventSource.onerror = (event) => {
-        log('SSE connection error:', event);
+        log('❌ SSE connection error:', event);
+        console.log('🔌 Disconnected from theme updates SSE');
         
         const errorObj = new Error('SSE connection error');
         setError(errorObj);

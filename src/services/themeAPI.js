@@ -233,9 +233,11 @@ export const publicAPI = {
   }
 };
 
-export default {
+const themeService = {
   theme: themeAPI,
   asset: assetAPI,
   reusableBlock: reusableBlockAPI,
   public: publicAPI
 };
+
+export default themeService;
