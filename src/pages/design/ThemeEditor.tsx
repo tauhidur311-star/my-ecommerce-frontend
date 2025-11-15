@@ -8,8 +8,18 @@ import {
   Code, Zap, MoreVertical, Star, Heart, EyeOff, Download, Upload, RefreshCw, 
   Layers, MousePointer, PanelLeft, PanelRight, Move, GripVertical, FolderOpen,
   FileImage, CheckCircle, AlertCircle, Edit3, Sparkles, List, Grid, ShoppingCart,
-  Phone, Mail, MapPin, Facebook, Twitter, Instagram, Youtube, Clock, TrendingUp, Share2
+  Phone, Mail, MapPin, Facebook, Twitter, Instagram, Youtube, Clock, TrendingUp, Share2,
+  Globe, Filter, SidebarOpen, SidebarClose
 } from 'lucide-react';
+
+// Enhanced imports from Fix File 13 - Add Imports.tsx
+import EnhancedRightSidebar from '../../components/EnhancedRightSidebar';
+import AddSectionModal from '../../components/AddSectionModal';
+import ThemeEditorModal from '../../components/ThemeEditorModal';
+import PageManagementModal from '../../components/PageManagementModal';
+import ExportImportModal from '../../components/ExportImportModal';
+import AddBlockModal from '../../components/AddBlockModal';
+import MediaLibraryModal from '../../components/MediaLibraryModal';
 
 const ThemeEditor = () => {
   // Enhanced State Management
@@ -197,7 +207,7 @@ const ThemeEditor = () => {
   const [selectedBlock, setSelectedBlock] = useState(null);
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(true);
   const [rightSidebarOpen, setRightSidebarOpen] = useState(true);
-  const [deviceMode, setDeviceMode] = useState('desktop');
+  // Removed duplicate deviceMode - using devicePreview for consistency
   const [showAddSection, setShowAddSection] = useState(false);
   const [showAddBlock, setShowAddBlock] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
@@ -219,6 +229,15 @@ const ThemeEditor = () => {
   const [selectedTab, setSelectedTab] = useState('sections');
   const [sectionFilter, setSectionFilter] = useState('all');
   
+  // Enhanced state from Fix File 14 - Enhance Existing State.tsx
+  const [showMediaLibrary, setShowMediaLibrary] = useState(false);
+  const [mediaFiles, setMediaFiles] = useState([]);
+  const [showTopbar, setShowTopbar] = useState(true); // For topbar fix
+  const [devicePreview, setDevicePreview] = useState('desktop'); // For responsive preview
+  const [dragOverSection, setDragOverSection] = useState(null); // For drag/drop visual indicators
+  
+  // Enhanced refs from Fix File 14
+  const editorScrollRef = useRef<HTMLDivElement>(null); // For scroll fix
   const fileInputRef = useRef(null);
   const dragItemRef = useRef(null);
   const dragNodeRef = useRef(null);
@@ -358,6 +377,300 @@ const ThemeEditor = () => {
     }
   ];
 
+  // Backend Integration from Fix Files 16-18 - Backend Integration Functions.tsx
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  console.log('🌐 API Base URL:', API_BASE_URL);
+
+  // Fixed saveToHistory function - MOVED UP to prevent initialization error
+  const saveToHistory = useCallback((state) => {
+    console.log('Saving to history:', state);
+    setHistory(prev => {
+      const newHistory = prev.slice(0, historyIndex + 1);
+      newHistory.push(JSON.parse(JSON.stringify(state)));
+      if (newHistory.length > 50) { // Limit history to 50 entries
+        newHistory.shift();
+        return newHistory;
+      }
+      return newHistory;
+    });
+    setHistoryIndex(prev => prev + 1);
+    setSaveStatus('unsaved');
+  }, [historyIndex]);
+
+  // Backend API Functions - FIXED to handle page creation and updates
+  const handleSaveToBackend = useCallback(async () => {
+    setSaveStatus('saving');
+    
+    try {
+      const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+      console.log('🔑 Using token:', token ? 'Found' : 'Missing');
+      
+      const pageData = {
+        sections: sections.map((section, index) => ({
+          section_id: section.id.toString(),
+          type: section.type,
+          order: index,
+          visible: section.visible !== false,
+          settings: section.settings || {},
+          blocks: (section.blocks || []).map((block, blockIndex) => ({
+            block_id: block.id.toString(),
+            type: block.type,
+            content: block.content,
+            settings: block.settings || {},
+            order: blockIndex
+          }))
+        })),
+        theme_settings: theme,
+        page_name: pages.find(p => p.id === activePage)?.name || 'Home',
+        template_type: activePage, // ✅ FIXED: Use template_type instead of page_type
+        slug: activePage.toLowerCase(),
+        published: true // Auto-publish for storefront visibility
+      };
+      
+      // First try to get existing pages to find if this page exists
+      const existingPagesResponse = await fetch(`${API_BASE_URL}/api/pages`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      let targetPageId = null;
+      if (existingPagesResponse.ok) {
+        const existingPages = await existingPagesResponse.json();
+        const existingPage = existingPages.find(p => p.template_type === activePage);
+        if (existingPage) {
+          targetPageId = existingPage._id;
+        }
+      }
+      
+      let saveResponse;
+      
+      if (targetPageId) {
+        // Update existing page
+        console.log('📝 Updating existing page:', targetPageId);
+        saveResponse = await fetch(`${API_BASE_URL}/api/pages/${targetPageId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(pageData)
+        });
+      } else {
+        // Create new page
+        console.log('📝 Creating new page for:', activePage);
+        saveResponse = await fetch(`${API_BASE_URL}/api/pages`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(pageData)
+        });
+      }
+
+      console.log('📡 Save response:', saveResponse.status, saveResponse.statusText);
+      
+      if (!saveResponse.ok) {
+        const errorText = await saveResponse.text();
+        console.error('❌ Save error details:', errorText);
+        throw new Error(`Save failed: ${saveResponse.status} ${saveResponse.statusText} - ${errorText}`);
+      }
+
+      // Get the page ID from response to use for publish (if needed)
+      const savedData = await saveResponse.json();
+      const pageIdForPublish = savedData._id || targetPageId;
+
+      if (pageIdForPublish && !targetPageId) {
+        // Only publish if it's a new page (existing pages are already published via pageData.published = true)
+        const publishResponse = await fetch(`${API_BASE_URL}/api/pages/${pageIdForPublish}/publish`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!publishResponse.ok) {
+          console.warn('Failed to publish page:', publishResponse.statusText);
+        }
+      }
+
+      setSaveStatus('saved');
+      console.log('✅ Theme saved and available on storefront');
+      
+    } catch (error) {
+      console.error('Save error:', error);
+      setSaveStatus('error');
+      alert(`Failed to save: ${error.message}`);
+    }
+  }, [activePage, sections, theme, pages]);
+
+  // Load page data from MongoDB - FIXED to handle page_type lookup
+  const loadPageData = useCallback(async (pageType) => {
+    try {
+      const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+      
+      // First get all pages and find by page_type
+      const response = await fetch(`${API_BASE_URL}/api/pages`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const allPages = await response.json();
+        const targetPage = allPages.find(p => p.template_type === pageType);
+        
+        if (targetPage) {
+          console.log('📥 Loaded page data for', pageType, ':', targetPage);
+          
+          // Convert backend structure back to ThemeEditor format
+          const convertedSections = (targetPage.sections || []).map(section => ({
+            id: section.section_id,
+            type: section.type,
+            visible: section.visible,
+            settings: section.settings || {},
+            content: section.content || '',
+            blocks: (section.blocks || []).map(block => ({
+              id: block.block_id,
+              type: block.type,
+              content: block.content,
+              settings: block.settings || {}
+            }))
+          }));
+          
+          setSections(convertedSections);
+          setTheme(targetPage.theme_settings || theme);
+          saveToHistory(convertedSections);
+        } else {
+          console.log('📄 No existing page found for', pageType, '- will create new on save');
+          // Use default sections for this page type
+          const defaultSections = sections; // Keep current default sections
+          setSections(defaultSections);
+          saveToHistory(defaultSections);
+        }
+      } else {
+        console.warn(`Failed to load pages:`, response.statusText);
+      }
+    } catch (error) {
+      console.error('Load error:', error);
+    }
+  }, [theme, saveToHistory, sections]);
+
+  // Upload image to Cloudflare R2
+  const uploadImageToR2 = useCallback(async (file) => {
+    setUploadProgress(0);
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const xhr = new XMLHttpRequest();
+      
+      return new Promise((resolve, reject) => {
+        xhr.upload.addEventListener('progress', (event) => {
+          if (event.lengthComputable) {
+            const progress = Math.round((event.loaded / event.total) * 100);
+            setUploadProgress(progress);
+          }
+        });
+
+        xhr.onload = () => {
+          if (xhr.status === 200) {
+            const data = JSON.parse(xhr.responseText);
+            setUploadProgress(100);
+            setTimeout(() => setUploadProgress(0), 1000);
+            resolve(data.url); // R2 CDN URL
+          } else {
+            reject(new Error('Upload failed'));
+          }
+        };
+
+        xhr.onerror = () => reject(new Error('Upload failed'));
+
+        xhr.open('POST', `${API_BASE_URL}/api/media/upload`);
+        xhr.setRequestHeader('Authorization', `Bearer ${localStorage.getItem('token')}`);
+        xhr.send(formData);
+      });
+    } catch (error) {
+      console.error('Upload error:', error);
+      setUploadProgress(0);
+      throw error;
+    }
+  }, []);
+
+  // Enhanced block management with backend integration
+  const addBlockEnhanced = useCallback((sectionId, blockType) => {
+    console.log('Adding block:', blockType, 'to section:', sectionId);
+    
+    const newBlock = {
+      id: `block-${Date.now()}`,
+      type: blockType,
+      content: `New ${blockType}`,
+      settings: {}
+    };
+
+    const updated = sections.map(s => {
+      if (s.id == sectionId) { // Use == to handle string/number comparison
+        console.log('Found section to add block to:', s.id);
+        return {
+          ...s,
+          blocks: [...(s.blocks || []), newBlock]
+        };
+      }
+      return s;
+    });
+
+    console.log('Updated sections with new block:', updated);
+    setSections(updated);
+    saveToHistory(updated);
+    setSaveStatus('unsaved');
+    setShowAddBlock(false);
+  }, [sections, saveToHistory]);
+
+  const deleteBlockEnhanced = useCallback((sectionId, blockId) => {
+    console.log('Deleting block:', blockId, 'from section:', sectionId);
+    
+    const updated = sections.map(s => {
+      if (s.id == sectionId) { // Use == to handle string/number comparison
+        return {
+          ...s,
+          blocks: (s.blocks || []).filter(b => b.id !== blockId)
+        };
+      }
+      return s;
+    });
+
+    setSections(updated);
+    saveToHistory(updated);
+    setSaveStatus('unsaved');
+  }, [sections, saveToHistory]);
+
+  const updateBlockSettingsEnhanced = useCallback((sectionId, blockId, settings) => {
+    console.log('Updating block settings:', blockId, 'in section:', sectionId, 'with:', settings);
+    
+    const updated = sections.map(s => {
+      if (s.id == sectionId) { // Use == to handle string/number comparison
+        return {
+          ...s,
+          blocks: (s.blocks || []).map(b => 
+            b.id === blockId ? { ...b, settings: { ...b.settings, ...settings } } : b
+          )
+        };
+      }
+      return s;
+    });
+
+    setSections(updated);
+    saveToHistory(updated);
+    setSaveStatus('unsaved');
+  }, [sections, saveToHistory]);
+
+  // Scroll overflow check from Fix File 15 - Add New Handler Functions.tsx
+  const checkForOverflow = useCallback(() => {
+    if (editorScrollRef.current) {
+      const { scrollHeight, clientHeight } = editorScrollRef.current;
+      console.log('Scrollable:', scrollHeight > clientHeight);
+    }
+  }, []);
+
+
   // Enhanced Drag and Drop Handlers
   const handleDragStart = useCallback((e, section, index, type = 'section') => {
     e.stopPropagation();
@@ -434,7 +747,7 @@ const ThemeEditor = () => {
           // If uploading for specific section/block, update it
           if (sectionId) {
             if (blockId) {
-              updateBlockSettings(sectionId, blockId, { imageUrl: imageData.url });
+              updateBlockSettingsEnhanced(sectionId, blockId, { imageUrl: imageData.url });
             } else {
               updateSectionSettings(sectionId, { image: imageData.url });
             }
@@ -630,99 +943,9 @@ const ThemeEditor = () => {
     );
     setSections(updated);
     saveToHistory(updated);
-  }, [sections]);
-
-  // Block Management
-  const addBlock = useCallback((sectionId, blockType) => {
-    const defaultBlockSettings = {
-      heading: { content: 'New Heading', tag: 'h2', fontSize: 32 },
-      text: { content: 'Add your text here' },
-      button: { content: 'Button Text', url: '#', style: 'primary' },
-      image: { url: '', alt: '', width: '100%' },
-      menu: { title: 'Menu', items: ['Item 1', 'Item 2'] },
-      social: { platforms: ['facebook', 'instagram', 'twitter'] }
-    };
-
-    const newBlock = {
-      id: `${Date.now()}-${Math.random()}`,
-      type: blockType,
-      content: defaultBlockSettings[blockType]?.content || `New ${blockType}`,
-      settings: defaultBlockSettings[blockType] || {}
-    };
-
-    const updated = sections.map(s => {
-      if (s.id === sectionId) {
-        return {
-          ...s,
-          blocks: [...(s.blocks || []), newBlock]
-        };
-      }
-      return s;
-    });
-
-    setSections(updated);
-    setSelectedBlock({ sectionId, block: newBlock });
-    setShowAddBlock(false);
-    saveToHistory(updated);
-  }, [sections]);
-
-  const deleteBlock = useCallback((sectionId, blockId) => {
-    const updated = sections.map(s => {
-      if (s.id === sectionId) {
-        return {
-          ...s,
-          blocks: s.blocks?.filter(b => b.id !== blockId) || []
-        };
-      }
-      return s;
-    });
-
-    setSections(updated);
-    setSelectedBlock(null);
-    saveToHistory(updated);
-  }, [sections]);
-
-  const updateBlockSettings = useCallback((sectionId, blockId, settings) => {
-    const updated = sections.map(s => {
-      if (s.id === sectionId) {
-        return {
-          ...s,
-          blocks: s.blocks?.map(b => 
-            b.id === blockId ? { ...b, settings: { ...b.settings, ...settings } } : b
-          ) || []
-        };
-      }
-      return s;
-    });
-
-    setSections(updated);
-    saveToHistory(updated);
-  }, [sections]);
-
-  const reorderBlocks = useCallback((sectionId, startIndex, endIndex) => {
-    const updated = sections.map(s => {
-      if (s.id === sectionId) {
-        const blocks = Array.from(s.blocks || []);
-        const [removed] = blocks.splice(startIndex, 1);
-        blocks.splice(endIndex, 0, removed);
-        return { ...s, blocks };
-      }
-      return s;
-    });
-
-    setSections(updated);
-    saveToHistory(updated);
-  }, [sections]);
+  }, [sections, saveToHistory]);
 
   // History Management
-  const saveToHistory = useCallback((state) => {
-    const newHistory = history.slice(0, historyIndex + 1);
-    newHistory.push(JSON.parse(JSON.stringify(state)));
-    if (newHistory.length > 50) newHistory.shift();
-    setHistory(newHistory);
-    setHistoryIndex(newHistory.length - 1);
-    setSaveStatus('unsaved');
-  }, [history, historyIndex]);
 
   const undo = useCallback(() => {
     if (historyIndex > 0) {
@@ -781,14 +1004,14 @@ const ThemeEditor = () => {
       };
       reader.readAsText(file);
     }
-  }, []);
+  }, [saveToHistory]);
 
   // Template Application
   const applyTemplate = useCallback((template) => {
     setSections(template.sections);
     saveToHistory(template.sections);
     setShowTemplateLibrary(false);
-  }, []);
+  }, [saveToHistory]);
 
   // Initialize history
   useEffect(() => {
@@ -797,28 +1020,148 @@ const ThemeEditor = () => {
     }
   }, []);
 
-  // Auto-save
+  // Auto-save with backend integration
   useEffect(() => {
     const autoSaveInterval = setInterval(() => {
       if (saveStatus === 'unsaved') {
-        handleSave();
+        handleSaveToBackend();
       }
     }, 30000); // Auto-save every 30 seconds
 
     return () => clearInterval(autoSaveInterval);
-  }, [saveStatus, handleSave]);
+  }, [saveStatus, handleSaveToBackend]);
 
-  // Responsive device preview dimensions
+  // Load page on mount and page change - Backend Integration
+  useEffect(() => {
+    loadPageData(activePage);
+  }, [activePage, loadPageData]);
+
+  // Keyboard Shortcuts from Fix Files 19-20
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Save - Ctrl/Cmd + S
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        handleSaveToBackend();
+        return;
+      }
+
+      // Undo - Ctrl/Cmd + Z
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+        return;
+      }
+      
+      // Redo - Ctrl/Cmd + Y or Ctrl/Cmd + Shift + Z
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        redo();
+        return;
+      }
+      
+      // Duplicate - Ctrl/Cmd + D
+      if ((e.ctrlKey || e.metaKey) && e.key === 'd' && selectedSection) {
+        e.preventDefault();
+        duplicateSection(selectedSection);
+        return;
+      }
+      
+      // Delete - Delete key
+      if (e.key === 'Delete' && selectedSection) {
+        e.preventDefault();
+        deleteSection(selectedSection.id);
+        return;
+      }
+      
+      // Preview toggle - Ctrl/Cmd + P
+      if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+        e.preventDefault();
+        setPreviewMode(!previewMode);
+        return;
+      }
+
+      // Escape - Close modals/deselect
+      if (e.key === 'Escape') {
+        setSelectedSection(null);
+        setShowAddSection(false);
+        setShowAddBlock(false);
+        setShowThemeEditor(false);
+        setShowPageModal(false);
+        setShowExportModal(false);
+        setShowMediaLibrary(false);
+        return;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedSection, previewMode, historyIndex, handleSaveToBackend, undo, redo, duplicateSection]);
+
+  // Body overflow management from Fix Files 8 & 21
+  useEffect(() => {
+    // Set body overflow to visible for proper scrolling
+    document.body.style.overflow = 'visible';
+    document.documentElement.style.overflow = 'visible';
+    
+    // Cleanup function to reset values
+    return () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
+  }, []);
+
+  // Scroll overflow check and resize listener from Fix File 21
+  useEffect(() => {
+    checkForOverflow();
+    
+    const handleResize = () => {
+      checkForOverflow();
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [checkForOverflow, sections]);
+
+  // Topbar mount detection from Fix File 5
+  useEffect(() => {
+    console.log('Topbar mounted:', showTopbar);
+  }, [showTopbar]);
+
+  // Responsive device preview dimensions - Fixed to use devicePreview
   const getDeviceDimensions = () => {
-    switch (deviceMode) {
+    switch (devicePreview) {
       case 'mobile':
-        return { width: '375px', height: '667px' };
+        return { 
+          width: '375px', 
+          height: '100%',
+          scale: 1,
+          label: 'Mobile'
+        };
       case 'tablet':
-        return { width: '768px', height: '1024px' };
-      default:
-        return { width: '100%', height: '100%' };
+        return { 
+          width: '768px', 
+          height: '100%',
+          scale: 0.8,
+          label: 'Tablet'
+        };
+      default: // desktop
+        return { 
+          width: '100%', 
+          height: '100%',
+          scale: 1,
+          label: 'Desktop'
+        };
     }
   };
+
+  // Get responsive settings for sections based on device preview
+  const getResponsiveSettings = useCallback((settings) => {
+    if (settings.responsive && settings.responsive[devicePreview]) {
+      return { ...settings, ...settings.responsive[devicePreview] };
+    }
+    return settings;
+  }, [devicePreview]);
 
   // Render Section with Enhanced Features
   const renderSection = (section) => {
@@ -861,7 +1204,7 @@ const ThemeEditor = () => {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    deleteBlock(section.id, block.id);
+                    deleteBlockEnhanced(section.id, block.id);
                   }}
                   className="p-1 hover:bg-red-50"
                 >
@@ -970,7 +1313,7 @@ const ThemeEditor = () => {
             <div 
               className="grid gap-6"
               style={{
-                gridTemplateColumns: `repeat(${Math.min(settings.columns || 4, deviceMode === 'mobile' ? 2 : deviceMode === 'tablet' ? 3 : 4)}, 1fr)`
+                gridTemplateColumns: `repeat(${Math.min(settings.columns || 4, devicePreview === 'mobile' ? 2 : devicePreview === 'tablet' ? 3 : 4)}, 1fr)`
               }}
             >
               {[...Array(settings.productsPerPage || 8)].map((_, i) => (
@@ -1302,127 +1645,425 @@ const ThemeEditor = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-100">
-      <div className="text-center py-8">
-        <h1 className="text-2xl font-bold">Theme Editor</h1>
-        <p className="text-gray-600">Design your store with our advanced theme editor</p>
-      </div>
-      
-      {/* Main Editor Content */}
-      <div className="flex-1 overflow-hidden flex">
-        {/* Left Sidebar */}
-        <div className="w-80 bg-white border-r border-gray-200 p-6">
-          <h3 className="font-semibold mb-4">Sections</h3>
-          <div className="space-y-2">
-            {sectionTypes.map((sectionType) => (
+    <div className="theme-editor-container" style={{ height: '100vh', overflow: 'hidden' }}>
+      {/* Fixed Topbar - Phase 1 Fixes Applied */}
+      {showTopbar && (
+        <div 
+          className="topbar-fixed"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '64px',
+            zIndex: 9999,
+            display: 'flex',
+            backgroundColor: '#ffffff',
+            borderBottom: '1px solid #e5e7eb',
+            visibility: 'visible',
+            opacity: 1
+          }}
+        >
+          <div className="flex items-center justify-between w-full px-4">
+            <div className="flex items-center gap-4">
+              {/* Back to Admin Dashboard Button */}
               <button
-                key={sectionType.type}
-                onClick={() => addSection(sectionType.type)}
-                className="w-full flex items-center gap-3 p-3 bg-gray-50 hover:bg-blue-50 rounded-lg transition-colors text-left"
+                onClick={() => window.location.href = '/admin'}
+                className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Back to Admin Dashboard"
               >
-                <sectionType.icon className="w-5 h-5" />
-                <div>
-                  <p className="font-medium">{sectionType.name}</p>
-                  <p className="text-xs text-gray-500">{sectionType.description}</p>
-                </div>
+                <ChevronLeft className="w-4 h-4" />
+                <span className="text-sm font-medium">Admin</span>
               </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Main Canvas */}
-        <div className="flex-1 overflow-y-auto bg-gray-100 p-6">
-          <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
-            {sections.filter(s => s.visible).map((section, index) => (
-              <div
-                key={section.id}
-                className="relative group"
-                onMouseEnter={() => setHoveredSection(section.id)}
-                onMouseLeave={() => setHoveredSection(null)}
-                onClick={() => setSelectedSection(section)}
-              >
-                {renderSection(section)}
-                
-                {/* Section Controls */}
-                {!previewMode && (
-                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white shadow-lg rounded p-2 flex gap-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        duplicateSection(section);
-                      }}
-                      className="p-1 hover:bg-gray-100 rounded"
-                      title="Duplicate"
-                    >
-                      <Copy className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteSection(section.id);
-                      }}
-                      className="p-1 hover:bg-red-100 text-red-600 rounded"
-                      title="Delete"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
+              
+              <div className="h-6 w-px bg-gray-300"></div> {/* Separator */}
+              
+              <h1 className="text-xl font-bold">Theme Editor</h1>
+              
+              {/* Navigation Buttons */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setLeftSidebarOpen(!leftSidebarOpen)}
+                  className="p-2 hover:bg-gray-100 rounded"
+                  title="Toggle Left Sidebar"
+                >
+                  {leftSidebarOpen ? <SidebarClose className="w-4 h-4" /> : <SidebarOpen className="w-4 h-4" />}
+                </button>
+                <button
+                  onClick={() => setShowAddSection(true)}
+                  className="p-2 hover:bg-gray-100 rounded"
+                  title="Add Section"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setShowPageModal(true)}
+                  className="p-2 hover:bg-gray-100 rounded"
+                  title="Page Management"
+                >
+                  <Globe className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setShowThemeEditor(true)}
+                  className="p-2 hover:bg-gray-100 rounded"
+                  title="Theme Settings"
+                >
+                  <Palette className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setShowExportModal(true)}
+                  className="p-2 hover:bg-gray-100 rounded"
+                  title="Export/Import"
+                >
+                  <Download className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setShowMediaLibrary(true)}
+                  className="p-2 hover:bg-gray-100 rounded"
+                  title="Media Library"
+                >
+                  <FileImage className="w-4 h-4" />
+                </button>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Right Sidebar */}
-        {selectedSection && (
-          <div className="w-80 bg-white border-l border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold">Section Settings</h3>
-              <button
-                onClick={() => setSelectedSection(null)}
-                className="p-1 hover:bg-gray-100 rounded"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              
+              {/* Device Preview Controls from Fix File 33 */}
+              <div className="flex items-center gap-2 border rounded-lg p-1">
+                <button
+                  onClick={() => setDevicePreview('desktop')}
+                  className={`p-2 rounded ${devicePreview === 'desktop' ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'}`}
+                  title="Desktop Preview"
+                >
+                  <Monitor className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setDevicePreview('tablet')}
+                  className={`p-2 rounded ${devicePreview === 'tablet' ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'}`}
+                  title="Tablet Preview"
+                >
+                  <Tablet className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setDevicePreview('mobile')}
+                  className={`p-2 rounded ${devicePreview === 'mobile' ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'}`}
+                  title="Mobile Preview"
+                >
+                  <Smartphone className="w-4 h-4" />
+                </button>
+              </div>
             </div>
             
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Background Color</label>
-                <input
-                  type="color"
-                  value={selectedSection.settings?.bgColor || '#ffffff'}
-                  onChange={(e) => updateSectionSettings(selectedSection.id, { bgColor: e.target.value })}
-                  className="w-full h-10 rounded border"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-2">Text Color</label>
-                <input
-                  type="color"
-                  value={selectedSection.settings?.textColor || '#000000'}
-                  onChange={(e) => updateSectionSettings(selectedSection.id, { textColor: e.target.value })}
-                  className="w-full h-10 rounded border"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-2">Padding</label>
-                <input
-                  type="range"
-                  min="0"
-                  max="200"
-                  value={selectedSection.settings?.padding || 60}
-                  onChange={(e) => updateSectionSettings(selectedSection.id, { padding: parseInt(e.target.value) })}
-                  className="w-full"
-                />
-                <span className="text-sm text-gray-500">{selectedSection.settings?.padding || 60}px</span>
-              </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
+                className="p-2 hover:bg-gray-100 rounded"
+                title="Toggle Right Sidebar"
+              >
+                <PanelRight className="w-4 h-4" />
+              </button>
+              <button
+                onClick={undo}
+                disabled={historyIndex <= 0}
+                className="p-2 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Undo (Ctrl+Z)"
+              >
+                <Undo className="w-4 h-4" />
+              </button>
+              <button
+                onClick={redo}
+                disabled={historyIndex >= history.length - 1}
+                className="p-2 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Redo (Ctrl+Y)"
+              >
+                <Redo className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setPreviewMode(!previewMode)}
+                className={`p-2 rounded ${previewMode ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'}`}
+                title="Preview Mode (Ctrl+P)"
+              >
+                <Eye className="w-4 h-4" />
+              </button>
+              <button
+                onClick={handleSaveToBackend}
+                disabled={saveStatus === 'saving'}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+                title="Save (Ctrl+S)"
+              >
+                <Save className="w-4 h-4" />
+                {saveStatus === 'saving' ? 'Saving...' : 'Save'}
+              </button>
             </div>
           </div>
-        )}
+        </div>
+      )}
+
+      {/* Scrollable Editor Content - Phase 2 Fixes Applied */}
+      <div 
+        ref={editorScrollRef}
+        className="editor-main-content"
+        style={{
+          marginTop: '64px', // Offset for fixed topbar
+          height: 'calc(100vh - 64px)',
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          position: 'relative',
+          scrollBehavior: 'smooth',
+          WebkitOverflowScrolling: 'touch'
+        }}
+      >
+        {/* Main Editor Layout */}
+        <div className="flex h-full">
+          {/* Enhanced Left Sidebar */}
+          {leftSidebarOpen && (
+            <div className="w-80 bg-white border-r border-gray-200 p-6" style={{ minHeight: 'min-content', height: 'auto', overflow: 'visible' }}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold">Sections</h3>
+                <button
+                  onClick={() => setLeftSidebarOpen(false)}
+                  className="p-1 hover:bg-gray-100 rounded"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              
+              {/* Search Bar */}
+              <div className="mb-4 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search sections..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* Category Filter */}
+              <div className="mb-4 relative">
+                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <select
+                  value={sectionFilter}
+                  onChange={(e) => setSectionFilter(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
+                >
+                  {Object.entries(sectionCategories).map(([key, label]) => (
+                    <option key={key} value={key}>{label}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </div>
+
+              {/* Section Types List */}
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {sectionTypes.filter(sectionType => {
+                  const matchesSearch = sectionType.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                       sectionType.description.toLowerCase().includes(searchTerm.toLowerCase());
+                  const matchesCategory = sectionFilter === 'all' || sectionType.category === sectionFilter;
+                  return matchesSearch && matchesCategory;
+                }).map((sectionType) => (
+                  <button
+                    key={sectionType.type}
+                    onClick={() => addSection(sectionType.type)}
+                    className="w-full flex items-center gap-3 p-3 bg-gray-50 hover:bg-blue-50 rounded-lg transition-colors text-left"
+                  >
+                    <sectionType.icon className="w-5 h-5" />
+                    <div>
+                      <p className="font-medium">{sectionType.name}</p>
+                      <p className="text-xs text-gray-500">{sectionType.description}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+              
+              {/* Results Count */}
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <p className="text-xs text-gray-500 text-center">
+                  {sectionTypes.filter(sectionType => {
+                    const matchesSearch = sectionType.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                         sectionType.description.toLowerCase().includes(searchTerm.toLowerCase());
+                    const matchesCategory = sectionFilter === 'all' || sectionType.category === sectionFilter;
+                    return matchesSearch && matchesCategory;
+                  }).length} sections available
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Main Canvas with Device Preview */}
+          <div className="flex-1 bg-gray-100 p-6" style={{ minHeight: '100%', paddingBottom: '50px' }}>
+            <div 
+              className="mx-auto bg-white shadow-lg rounded-lg overflow-hidden"
+              style={{
+                width: devicePreview === 'mobile' ? '375px' : devicePreview === 'tablet' ? '768px' : '100%',
+                maxWidth: '100%',
+                transform: devicePreview === 'tablet' ? 'scale(0.8)' : 'scale(1)',
+                transformOrigin: 'top center'
+              }}
+            >
+              {sections.filter(s => s.visible).map((section, index) => (
+                <div
+                  key={section.id}
+                  className={`relative group ${draggedSection?.id === section.id ? 'opacity-50' : ''}`}
+                  draggable={!previewMode}
+                  onDragStart={(e) => handleDragStart(e, section, index)}
+                  onDragOver={(e) => handleDragOver(e, index)}
+                  onDrop={(e) => handleDrop(e, index)}
+                  onDragEnd={handleDragEnd}
+                  onMouseEnter={() => setHoveredSection(section.id)}
+                  onMouseLeave={() => setHoveredSection(null)}
+                  onClick={() => setSelectedSection(section)}
+                >
+                  {/* Drag and Drop Visual Indicators from Fix File 32 */}
+                  {draggedSection && draggedSection.id !== section.id && (
+                    <div className="absolute -top-1 left-0 right-0 h-1 bg-blue-500 z-50" />
+                  )}
+                  
+                  {renderSection(section)}
+                  
+                  {/* Enhanced Section Controls */}
+                  {!previewMode && (
+                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white shadow-lg rounded p-2 flex gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedSection(section);
+                          setShowAddBlock(true);
+                        }}
+                        className="p-1 hover:bg-blue-100 text-blue-600 rounded"
+                        title="Add Block"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          duplicateSection(section);
+                        }}
+                        className="p-1 hover:bg-gray-100 rounded"
+                        title="Duplicate"
+                      >
+                        <Copy className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteSection(section.id);
+                        }}
+                        className="p-1 hover:bg-red-100 text-red-600 rounded"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Enhanced Right Sidebar from Fix File 23 */}
+          {selectedSection && rightSidebarOpen && (
+            <EnhancedRightSidebar
+              selectedSection={selectedSection}
+              onClose={() => setSelectedSection(null)}
+              onUpdateSection={updateSection}
+              onUpdateSettings={updateSectionSettings}
+              onDeleteSection={deleteSection}
+              onDuplicateSection={duplicateSection}
+              onUploadImage={uploadImageToR2}
+              blocks={selectedSection.blocks || []}
+              onAddBlock={addBlockEnhanced}
+              onUpdateBlock={updateBlockSettingsEnhanced}
+              onDeleteBlock={deleteBlockEnhanced}
+            />
+          )}
+        </div>
       </div>
+
+      {/* Enhanced Modals from Fix Files 24-30 */}
+      {showAddSection && (
+        <AddSectionModal
+          isOpen={showAddSection}
+          onClose={() => setShowAddSection(false)}
+          onAddSection={addSection}
+          sectionTypes={sectionTypes}
+        />
+      )}
+
+      {showAddBlock && selectedSection && (
+        <AddBlockModal
+          isOpen={showAddBlock}
+          onClose={() => setShowAddBlock(false)}
+          onAddBlock={addBlockEnhanced}
+          sectionId={selectedSection.id}
+        />
+      )}
+
+      {showThemeEditor && (
+        <ThemeEditorModal
+          isOpen={showThemeEditor}
+          onClose={() => setShowThemeEditor(false)}
+          theme={theme}
+          onUpdateTheme={setTheme}
+        />
+      )}
+
+      {showPageModal && (
+        <PageManagementModal
+          isOpen={showPageModal}
+          onClose={() => setShowPageModal(false)}
+          pages={pages}
+          onUpdatePages={setPages}
+          activePage={activePage}
+          onSetActivePage={setActivePage}
+        />
+      )}
+
+      {showExportModal && (
+        <ExportImportModal
+          isOpen={showExportModal}
+          onClose={() => setShowExportModal(false)}
+          sections={sections}
+          theme={theme}
+          onImport={(data) => {
+            setSections(data.sections);
+            setTheme(data.theme);
+            saveToHistory(data.sections);
+          }}
+        />
+      )}
+
+      {showMediaLibrary && (
+        <MediaLibraryModal
+          isOpen={showMediaLibrary}
+          onClose={() => setShowMediaLibrary(false)}
+          onUpload={uploadImageToR2}
+          mediaFiles={mediaFiles}
+          onSelectMedia={(url) => {
+            // Handle media selection
+            console.log('Selected media:', url);
+          }}
+        />
+      )}
+
+      {/* Upload Progress Indicator */}
+      {uploadProgress > 0 && (
+        <div className="fixed bottom-4 right-4 bg-white p-4 rounded-lg shadow-lg z-50">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 relative">
+              <div className="w-8 h-8 rounded-full border-2 border-gray-200"></div>
+              <div 
+                className="w-8 h-8 rounded-full border-2 border-blue-500 border-t-transparent absolute top-0 left-0"
+                style={{ 
+                  transform: `rotate(${uploadProgress * 3.6}deg)`,
+                  transition: 'transform 0.3s ease'
+                }}
+              ></div>
+            </div>
+            <span className="text-sm font-medium">Uploading... {uploadProgress}%</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

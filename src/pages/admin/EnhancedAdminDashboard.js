@@ -4,7 +4,7 @@ import {
   BarChart3, Users, Package, Mail, Settings, Shield,
   Bell, Search, Menu, X, Home, TrendingUp, AlertTriangle,
   MessageCircle, Calendar, Download, RefreshCw, Activity,
-  ShoppingBag, DollarSign, Star, FileText
+  ShoppingBag, DollarSign, Star, FileText, Palette
 } from 'lucide-react';
 import ConnectionStatus from '../../components/ui/ConnectionStatus';
 import { useAnalyticsData } from '../../hooks/useAnalyticsData.js';
@@ -41,6 +41,7 @@ const EnhancedAdminDashboard = () => {
     { id: 'contacts', label: 'Contact Us', icon: MessageCircle },
     { id: 'marketing', label: 'Marketing', icon: Mail },
     { id: 'content', label: 'Content', icon: FileText },
+    { id: 'theme-editor', label: 'Theme Editor', icon: Palette },
     { id: 'performance', label: 'Performance', icon: Activity },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
@@ -67,7 +68,7 @@ const EnhancedAdminDashboard = () => {
 
   // Force clear any cached tabs that no longer exist
   useEffect(() => {
-    const validTabs = ['overview', 'analytics', 'orders', 'products', 'inventory', 'users', 'customers', 'contacts', 'marketing', 'content', 'performance', 'settings'];
+    const validTabs = ['overview', 'analytics', 'orders', 'products', 'inventory', 'users', 'customers', 'contacts', 'marketing', 'content', 'theme-editor', 'performance', 'settings'];
     if (!validTabs.includes(activeTab)) {
       setActiveTab('overview');
     }
@@ -359,6 +360,18 @@ const EnhancedAdminDashboard = () => {
           <Suspense fallback={<LoadingSkeleton />}>
             <ContentManagement />
           </Suspense>
+        );
+
+      case 'theme-editor':
+        // Redirect to the dedicated theme editor page
+        window.location.href = '/design';
+        return (
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <Palette className="mx-auto w-12 h-12 mb-4 text-blue-500" />
+              <p className="text-gray-600">Redirecting to Theme Editor...</p>
+            </div>
+          </div>
         );
 
       case 'performance':
