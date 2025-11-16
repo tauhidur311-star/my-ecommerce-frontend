@@ -507,6 +507,7 @@ const ThemeEditor = () => {
       const cleanSection = {
         // ❌ NEVER include _id field - let MongoDB generate it
         section_id: section.section_id || section.id?.toString() || `section_${Date.now()}_${index}`,
+        order: section.order ?? index, // ✅ CRITICAL: Add required order field based on position
         type: section.type,
         content: section.content || '',
         visible: section.visible !== false,
