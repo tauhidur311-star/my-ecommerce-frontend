@@ -73,11 +73,11 @@ const ThemeEditor = () => {
   console.log('🎨 Enhanced ThemeEditor loaded with 35 fixes - v2.0', new Date().toISOString());
   // Enhanced State Management
   const [pages, setPages] = useState([
-    { id: 'home', name: 'Home', icon: Home, sections: [], template: 'default' },
-    { id: 'products', name: 'Products', icon: ShoppingBag, sections: [], template: 'catalog' },
-    { id: 'collections', name: 'Collections', icon: LayoutGrid, sections: [], template: 'grid' },
-    { id: 'about', name: 'About', icon: Users, sections: [], template: 'default' },
-    { id: 'contact', name: 'Contact', icon: MessageSquare, sections: [], template: 'contact' }
+    { id: 'home', name: 'Home', page_name: 'Home', icon: Home, sections: [], template: 'default' },
+    { id: 'products', name: 'Products', page_name: 'Products', icon: ShoppingBag, sections: [], template: 'catalog' },
+    { id: 'collections', name: 'Collections', page_name: 'Collections', icon: LayoutGrid, sections: [], template: 'grid' },
+    { id: 'about', name: 'About', page_name: 'About', icon: Users, sections: [], template: 'default' },
+    { id: 'contact', name: 'Contact', page_name: 'Contact', icon: MessageSquare, sections: [], template: 'contact' }
   ]);
   
   const [activePage, setActivePage] = useState('home');
@@ -457,23 +457,59 @@ const ThemeEditor = () => {
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
       console.log('🔑 Using token:', token ? 'Found' : 'Missing');
       
+      // Comprehensive validation before creating pageData  
+      const currentPage = pages.find(p => p.id === activePage);
+      const pageName = currentPage?.page_name || currentPage?.name || 'Home';
+      const pageType = activePage;
+      
+      if (!pageName?.trim()) {
+        alert('Please enter a page name before saving.');
+        return;
+      }
+      
+      if (!pageType?.trim()) {
+        throw new Error('Page type is required. Please set a page type before saving.');
+      }
+      
+      if (!Array.isArray(sections)) {
+        throw new Error('Sections must be an array. Current sections invalid.');
+      }
+      
+      // Validate sections array structure
+      const invalidSections = sections.filter(section => 
+        !section.id || !section.type || typeof section.type !== 'string'
+      );
+      
+      if (invalidSections.length > 0) {
+        console.error('❌ Invalid sections found:', invalidSections);
+        throw new Error('Some sections are missing required id or type fields.');
+      }
+      
       const pageData = {
-        page_name: pages.find(p => p.id === activePage)?.name || 'Home', // Backend expects 'page_name'
-        page_type: activePage, // 'home', 'product', etc. - renamed for backend consistency
+        page_name: pageName.trim(), // Backend validates req.body.page_name
+        pageType: pageType, // Backend destructures { pageType }
         sections: sections.map((section, index) => ({
-          id: section.id.toString(),
+          id: section.id.toString(), // Backend maps this to section_id
           type: section.type,
           visible: section.visible !== false,
           settings: section.settings || {},
           blocks: (section.blocks || []).map((block, blockIndex) => ({
-            id: block.id.toString(),
+            id: block.id.toString(), // Backend maps this to block_id
             type: block.type,
             content: block.content,
             settings: block.settings || {}
           }))
         })),
-        theme_settings: theme // Renamed for backend consistency
+        themeSettings: theme || {}, // Backend destructures { themeSettings }
+        pageName: pageName.trim() // Backend destructures { pageName }
       };
+      
+      console.log('🔍 Validation passed - pageData structure:');
+      console.log('📄 Page name:', pageData.page_name);
+      console.log('📄 Page type:', pageData.page_type);
+      console.log('📄 Sections count:', pageData.sections?.length || 0);
+      console.log('📄 Theme settings:', pageData.theme_settings ? 'Present' : 'Missing');
+      console.log('📦 Full payload:', JSON.stringify(pageData, null, 2));
       
       // First try to get existing pages to find if this page exists
       const existingPagesResponse = await fetch(`${API_BASE_URL}/api/pages`, {
@@ -532,8 +568,29 @@ const ThemeEditor = () => {
       
       if (!saveResponse.ok) {
         const errorText = await saveResponse.text();
-        console.error('❌ Save error details:', errorText);
-        throw new Error(`Save failed: ${saveResponse.status} ${saveResponse.statusText} - ${errorText}`);
+        let errorDetail = errorText;
+        
+        try {
+          const errorJson = JSON.parse(errorText);
+          errorDetail = errorJson.error || errorJson.message || errorText;
+          
+          console.error('❌ Save failed:', saveResponse.status, errorJson);
+          console.error('❌ Request that failed:', JSON.stringify(pageData, null, 2));
+          
+          if (saveResponse.status === 500) {
+            console.error('💥 Server Error - Backend is receiving the data but cannot process it');
+            console.error('💡 Common causes:');
+            console.error('  - Missing required fields in backend validation');
+            console.error('  - Data type mismatch (array vs object)');
+            console.error('  - Database constraint violation (unique fields)');
+            console.error('  - Mongoose schema validation failure');
+            console.error('📋 Check backend logs for exact error details');
+          }
+        } catch (parseError) {
+          console.error('❌ Save failed with non-JSON response:', saveResponse.status, errorText);
+        }
+        
+        throw new Error(`Save failed with ${saveResponse.status}: ${errorDetail}`);
       }
 
       // Get the page ID from response to use for publish (if needed)
