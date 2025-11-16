@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import SectionRenderer from './sections/SectionRenderer';
 import SafeSectionRenderer from './SafeSectionRenderer';
 import { publicAPI } from '../services/themeAPI.js';
@@ -10,11 +10,7 @@ const DynamicStorefront = ({ pageType = 'home', slug = null }) => {
   const [error, setError] = useState(null);
   const [seoData, setSeoData] = useState({});
 
-  useEffect(() => {
-    loadPublishedLayout();
-  }, [pageType, slug]);
-
-  const loadPublishedLayout = async () => {
+  const loadPublishedLayout = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -49,7 +45,11 @@ const DynamicStorefront = ({ pageType = 'home', slug = null }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [pageType, slug]);
+
+  useEffect(() => {
+    loadPublishedLayout();
+  }, [loadPublishedLayout]);
 
   const updateMetaTag = (name, content) => {
     let metaTag = document.querySelector(`meta[name="${name}"]`);

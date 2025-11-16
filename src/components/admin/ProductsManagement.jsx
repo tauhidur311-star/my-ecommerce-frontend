@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus, Search, Filter, Edit, Trash2, Package, DollarSign,
@@ -44,7 +44,7 @@ const ProductsManagement = () => {
   });
 
   // API functions
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
@@ -71,7 +71,7 @@ const ProductsManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const calculateStats = (productsData) => {
     const stats = {

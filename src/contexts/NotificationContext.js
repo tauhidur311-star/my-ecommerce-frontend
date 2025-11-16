@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Bell, Package, AlertCircle, CheckCircle, Info, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -33,7 +33,7 @@ const NotificationProvider = ({ children }) => {
     setUnreadCount(notifications.filter(n => !n.read).length);
   }, [notifications]);
 
-  const addNotification = (notification) => {
+  const addNotification = useCallback((notification) => {
     const newNotification = {
       id: Date.now() + Math.random(),
       timestamp: new Date().toISOString(),
@@ -55,7 +55,7 @@ const NotificationProvider = ({ children }) => {
     });
 
     return newNotification.id;
-  };
+  }, []);
 
   const markAsRead = (id) => {
     setNotifications(prev => 

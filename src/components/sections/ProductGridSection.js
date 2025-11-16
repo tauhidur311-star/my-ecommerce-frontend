@@ -1,5 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Star, ShoppingCart, Heart } from 'lucide-react';
+
+// API constants outside component
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const ProductGridSection = ({ section, settings, isEditing, previewMode }) => {
   const [products, setProducts] = useState([]);
@@ -22,12 +25,12 @@ const ProductGridSection = ({ section, settings, isEditing, previewMode }) => {
     loadProducts();
   }, [limit, sort]);
 
-  const loadProducts = async () => {
+  const loadProducts = useCallback(async () => {
     try {
       setLoading(true);
       
       // Try to load from API
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/products?limit=${limit}&sort=${sort}`, {
+      const response = await fetch(`${API_BASE_URL}/api/products?limit=${limit}&sort=${sort}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken') || localStorage.getItem('token')}`,
           'Content-Type': 'application/json',
@@ -56,7 +59,7 @@ const ProductGridSection = ({ section, settings, isEditing, previewMode }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [limit, sort]);
 
   const generateSampleProducts = (count) => {
     return Array.from({ length: count }, (_, i) => ({

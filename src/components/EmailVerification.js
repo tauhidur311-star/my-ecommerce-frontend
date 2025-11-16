@@ -3,6 +3,9 @@ import { Mail, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../services/api.js';
 
+// API constants outside component
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 const EmailVerification = ({ user, onVerificationComplete }) => {
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
@@ -20,7 +23,7 @@ const EmailVerification = ({ user, onVerificationComplete }) => {
   const handleResendVerification = async () => {
     try {
       setResending(true);
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/resend-verification`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/resend-verification`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -54,7 +57,7 @@ const EmailVerification = ({ user, onVerificationComplete }) => {
 
     try {
       setVerifying(true);
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/verify-email`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/verify-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

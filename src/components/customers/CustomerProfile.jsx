@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
   User, Mail, Phone, MapPin, Calendar, ShoppingBag, 
@@ -29,7 +29,7 @@ const CustomerProfile = ({ customerId, isOpen, onClose }) => {
     }
   }, [customerId, isOpen]);
 
-  const fetchCustomerData = async () => {
+  const fetchCustomerData = useCallback(async () => {
     try {
       setLoading(true);
       const [customerRes, ordersRes, analyticsRes] = await Promise.all([
@@ -47,7 +47,7 @@ const CustomerProfile = ({ customerId, isOpen, onClose }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [customerId]);
 
   const handleUpdateCustomer = async () => {
     try {

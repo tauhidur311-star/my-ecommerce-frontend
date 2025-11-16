@@ -226,10 +226,9 @@ const GlassCard = forwardRef(({
       style={{ ...style, ...dragStyle }}
       variants={cardVariants}
       initial="initial"
-      animate="animate"
+      animate={isDragging ? "dragging" : "animate"}
       whileHover={interactive && !disabled ? "hover" : "animate"}
       whileTap={interactive && !disabled ? "tap" : "animate"}
-      animate={isDragging ? "dragging" : "animate"}
       onClick={onClick}
       onTap={onTap}
       {...attributes}

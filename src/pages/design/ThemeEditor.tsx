@@ -33,6 +33,7 @@ import Image from 'lucide-react/dist/esm/icons/image';
 import SidebarClose from 'lucide-react/dist/esm/icons/sidebar-close';
 import SidebarOpen from 'lucide-react/dist/esm/icons/sidebar-open';
 import Home from 'lucide-react/dist/esm/icons/home';
+import ShoppingBag from 'lucide-react/dist/esm/icons/shopping-bag';
 
 // Enhanced imports from Fix File 13 - Add Imports.tsx
 import EnhancedRightSidebar from '../../components/EnhancedRightSidebar';
@@ -405,19 +406,14 @@ const ThemeEditor = () => {
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
   console.log('🌐 API Base URL:', API_BASE_URL);
 
-  // Fixed saveToHistory function - MOVED UP to prevent initialization error
-  const saveToHistory = useCallback((state) => {
-    console.log('Saving to history:', state);
+  // Enhanced saveToHistory function with proper history management
+  const saveToHistory = useCallback((nextSections) => {
+    console.log('Saving to history:', nextSections);
     setHistory(prev => {
-      const newHistory = prev.slice(0, historyIndex + 1);
-      newHistory.push(JSON.parse(JSON.stringify(state)));
-      if (newHistory.length > 50) { // Limit history to 50 entries
-        newHistory.shift();
-        return newHistory;
-      }
-      return newHistory;
+      const newHistory = [...prev.slice(0, historyIndex + 1), JSON.parse(JSON.stringify(nextSections))];
+      return newHistory.slice(-50); // Keep only last 50 entries for performance
     });
-    setHistoryIndex(prev => prev + 1);
+    setHistoryIndex(prev => Math.min(prev + 1, 49)); // Cap at 49 (0-based indexing)
     setSaveStatus('unsaved');
   }, [historyIndex]);
 
@@ -430,25 +426,21 @@ const ThemeEditor = () => {
       console.log('🔑 Using token:', token ? 'Found' : 'Missing');
       
       const pageData = {
+        pageType: activePage, // 'home', 'product', etc.
         sections: sections.map((section, index) => ({
-          section_id: section.id.toString(),
+          id: section.id.toString(),
           type: section.type,
-          order: index,
           visible: section.visible !== false,
           settings: section.settings || {},
           blocks: (section.blocks || []).map((block, blockIndex) => ({
-            block_id: block.id.toString(),
+            id: block.id.toString(),
             type: block.type,
             content: block.content,
-            settings: block.settings || {},
-            order: blockIndex
+            settings: block.settings || {}
           }))
         })),
-        theme_settings: theme,
-        page_name: pages.find(p => p.id === activePage)?.name || 'Home',
-        template_type: activePage, // ✅ FIXED: Use template_type instead of page_type
-        slug: activePage.toLowerCase(),
-        published: true // Auto-publish for storefront visibility
+        themeSettings: theme,
+        pageName: pages.find(p => p.id === activePage)?.name || 'Home'
       };
       
       // First try to get existing pages to find if this page exists
@@ -631,7 +623,7 @@ const ThemeEditor = () => {
     };
 
     const updated = sections.map(s => {
-      if (s.id == sectionId) { // Use == to handle string/number comparison
+      if (s.id === sectionId) { // Use strict equality
         console.log('Found section to add block to:', s.id);
         return {
           ...s,
@@ -652,7 +644,7 @@ const ThemeEditor = () => {
     console.log('Deleting block:', blockId, 'from section:', sectionId);
     
     const updated = sections.map(s => {
-      if (s.id == sectionId) { // Use == to handle string/number comparison
+      if (s.id === sectionId) { // Use strict equality
         return {
           ...s,
           blocks: (s.blocks || []).filter(b => b.id !== blockId)
@@ -669,22 +661,23 @@ const ThemeEditor = () => {
   const updateBlockSettingsEnhanced = useCallback((sectionId, blockId, settings) => {
     console.log('Updating block settings:', blockId, 'in section:', sectionId, 'with:', settings);
     
-    const updated = sections.map(s => {
-      if (s.id == sectionId) { // Use == to handle string/number comparison
-        return {
-          ...s,
-          blocks: (s.blocks || []).map(b => 
-            b.id === blockId ? { ...b, settings: { ...b.settings, ...settings } } : b
-          )
-        };
-      }
-      return s;
+    setSections(prev => {
+      const updated = prev.map(s => {
+        if (s.id === sectionId) { // Use strict equality
+          return {
+            ...s,
+            blocks: (s.blocks || []).map(b => 
+              b.id === blockId ? { ...b, settings: { ...b.settings, ...settings } } : b
+            )
+          };
+        }
+        return s;
+      });
+      saveToHistory(updated);
+      setSaveStatus('unsaved');
+      return updated;
     });
-
-    setSections(updated);
-    saveToHistory(updated);
-    setSaveStatus('unsaved');
-  }, [sections, saveToHistory]);
+  }, [saveToHistory]);
 
   // Scroll overflow check from Fix File 15 - Add New Handler Functions.tsx
   const checkForOverflow = useCallback(() => {
@@ -732,7 +725,7 @@ const ThemeEditor = () => {
     setDraggedSection(null);
     setDragOverIndex(null);
     dragItemRef.current = null;
-  }, [draggedSection, sections]);
+  }, [draggedSection, sections, saveToHistory]);
 
   const handleDragEnd = useCallback(() => {
     setDraggedSection(null);
@@ -962,12 +955,14 @@ const ThemeEditor = () => {
   }, [sections]);
 
   const updateSectionSettings = useCallback((id, settings) => {
-    const updated = sections.map(s => 
-      s.id === id ? { ...s, settings: { ...s.settings, ...settings } } : s
-    );
-    setSections(updated);
-    saveToHistory(updated);
-  }, [sections, saveToHistory]);
+    setSections(prev => {
+      const updated = prev.map(s => 
+        s.id === id ? { ...s, settings: { ...s.settings, ...settings } } : s
+      );
+      saveToHistory(updated);
+      return updated;
+    });
+  }, [saveToHistory]);
 
   // History Management
 
@@ -1120,7 +1115,7 @@ const ThemeEditor = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedSection, previewMode, historyIndex, handleSaveToBackend, undo, redo, duplicateSection]);
+  }, [selectedSection, previewMode, historyIndex, handleSaveToBackend, undo, redo, duplicateSection, updateSectionSettings, updateBlockSettingsEnhanced]);
 
   // Body overflow management from Fix Files 8 & 21
   useEffect(() => {
@@ -1270,10 +1265,10 @@ const ThemeEditor = () => {
                 <>
                   <div className="font-bold text-xl">{section.content}</div>
                   <nav className="flex gap-6">
-                    <a href="#" className="hover:opacity-70">Home</a>
-                    <a href="#" className="hover:opacity-70">Shop</a>
-                    <a href="#" className="hover:opacity-70">About</a>
-                    <a href="#" className="hover:opacity-70">Contact</a>
+                    <a href="/" className="hover:opacity-70">Home</a>
+                    <a href="/store" className="hover:opacity-70">Shop</a>
+                    <a href="/about" className="hover:opacity-70">About</a>
+                    <a href="/contact" className="hover:opacity-70">Contact</a>
                   </nav>
                   <div className="flex items-center gap-4">
                     <Search className="w-5 h-5 cursor-pointer" />
@@ -1437,17 +1432,17 @@ const ThemeEditor = () => {
                     <div>
                       <h3 className="font-bold mb-4">Shop</h3>
                       <ul className="space-y-2 opacity-80">
-                        <li><a href="#" className="hover:opacity-100">All Products</a></li>
-                        <li><a href="#" className="hover:opacity-100">New Arrivals</a></li>
-                        <li><a href="#" className="hover:opacity-100">Best Sellers</a></li>
+                        <li><a href="/store" className="hover:opacity-100">All Products</a></li>
+                        <li><a href="/store?filter=new" className="hover:opacity-100">New Arrivals</a></li>
+                        <li><a href="/store?filter=popular" className="hover:opacity-100">Best Sellers</a></li>
                       </ul>
                     </div>
                     <div>
                       <h3 className="font-bold mb-4">About</h3>
                       <ul className="space-y-2 opacity-80">
-                        <li><a href="#" className="hover:opacity-100">Our Story</a></li>
-                        <li><a href="#" className="hover:opacity-100">Contact</a></li>
-                        <li><a href="#" className="hover:opacity-100">Careers</a></li>
+                        <li><a href="/about" className="hover:opacity-100">Our Story</a></li>
+                        <li><a href="/contact" className="hover:opacity-100">Contact</a></li>
+                        <li><a href="/careers" className="hover:opacity-100">Careers</a></li>
                       </ul>
                     </div>
                     <div>
@@ -1623,11 +1618,18 @@ const ThemeEditor = () => {
       case 'menu':
         return (
           <nav className="flex gap-6">
-            {(block.items || ['Home', 'Shop', 'About', 'Contact']).map((item, i) => (
-              <a key={i} href="#" className="hover:opacity-70">
-                {item}
-              </a>
-            ))}
+            {(block.items || ['Home', 'Shop', 'About', 'Contact']).map((item, i) => {
+              const href = item === 'Home' ? '/' : 
+                          item === 'Shop' ? '/store' : 
+                          item === 'About' ? '/about' : 
+                          item === 'Contact' ? '/contact' : 
+                          `/${item.toLowerCase()}`;
+              return (
+                <a key={i} href={href} className="hover:opacity-70">
+                  {item}
+                </a>
+              );
+            })}
           </nav>
         );
       

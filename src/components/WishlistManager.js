@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Heart, ShoppingCart, Eye, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -27,7 +27,7 @@ const WishlistManager = ({ isModal = false, onClose = null }) => {
     }
   };
 
-  const loadProducts = async () => {
+  const loadProducts = useCallback(async () => {
     try {
       const productsData = localStorage.getItem('admin-products');
       if (productsData) {
@@ -36,7 +36,7 @@ const WishlistManager = ({ isModal = false, onClose = null }) => {
     } catch (error) {
       console.error('Error loading products:', error);
     }
-  };
+  }, []);
 
   const addToWishlist = async (productId) => {
     try {

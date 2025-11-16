@@ -4,6 +4,9 @@ import toast from 'react-hot-toast';
 import { GoogleLogin } from '@react-oauth/google';
 import { EnhancedOTPForm } from './EnhancedOTPForm';
 
+// API constants outside component
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 export default function AuthModal({ 
   showAuth,
   setShowAuth, 
@@ -43,7 +46,7 @@ export default function AuthModal({
     setIsLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/forgot-password`, {
+      const res = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: authForm.email }),
@@ -66,7 +69,7 @@ export default function AuthModal({
     setError(null);
     try {
       // Verify OTP with backend first
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/verify-otp`, {
+      const res = await fetch(`${API_BASE_URL}/api/auth/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: authForm.email, otp })
@@ -89,7 +92,7 @@ export default function AuthModal({
     setIsLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/reset-password`, {
+      const res = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: authForm.email, otp: authForm.otp, password: authForm.password })
@@ -112,7 +115,7 @@ export default function AuthModal({
     setIsLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/google-login`, {
+      const res = await fetch(`${API_BASE_URL}/api/auth/google-login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

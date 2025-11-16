@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, ArrowLeft, ShoppingCart, Trash2, Star, Filter, Grid, List, Search, X } from 'lucide-react';
 import { useWishlist } from '../hooks/useWishlist.js';
@@ -16,23 +16,23 @@ export default function WishlistPage() {
   const [priceFilter, setPriceFilter] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
 
-  useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        setLoading(true);
-        const localProducts = localStorage.getItem('admin-products');
-        if (localProducts) {
-          const parsedProducts = JSON.parse(localProducts);
-          
-          // Filter products that are in wishlist
-          const wishlistItems = parsedProducts.filter(product => 
-            wishlist.includes(product.id)
-          );
-          setWishlistProducts(wishlistItems);
-          setFilteredProducts(wishlistItems);
-        } else {
-          // Create sample products if none exist
-          const sampleProducts = [
+  // Define loadProducts at component top level with useCallback
+  const loadProducts = useCallback(async () => {
+    try {
+      setLoading(true);
+      const localProducts = localStorage.getItem('admin-products');
+      if (localProducts) {
+        const parsedProducts = JSON.parse(localProducts);
+        
+        // Filter products that are in wishlist
+        const wishlistItems = parsedProducts.filter(product => 
+          wishlist.includes(product.id)
+        );
+        setWishlistProducts(wishlistItems);
+        setFilteredProducts(wishlistItems);
+      } else {
+        // Create sample products if none exist
+        const sampleProducts = [
             {
               id: 1,
               name: "Premium Wireless Headphones",
@@ -88,15 +88,17 @@ export default function WishlistPage() {
           setWishlistProducts(sampleProducts);
           setFilteredProducts(sampleProducts);
         }
-      } catch (error) {
-        console.error('Error loading products:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProducts();
+    } catch (error) {
+      console.error('Error loading products:', error);
+    } finally {
+      setLoading(false);
+    }
   }, [wishlist]);
+
+  // Call loadProducts in useEffect
+  useEffect(() => {
+    loadProducts();
+  }, [loadProducts]);
 
   useEffect(() => {
     let filtered = [...wishlistProducts];

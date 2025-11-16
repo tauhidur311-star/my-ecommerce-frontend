@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
   Activity, Server, Database, Clock, Cpu, HardDrive,
@@ -27,7 +27,7 @@ const SimplePerformanceMonitor = () => {
     storage: { status: 'unknown', detail: 'Loading...', usage: 'N/A' }
   });
 
-  const refreshMetrics = async () => {
+  const refreshMetrics = useCallback(async () => {
     try {
       // Try to fetch REAL performance data from your backend
       const token = localStorage.getItem('token');
@@ -200,7 +200,7 @@ const SimplePerformanceMonitor = () => {
     }
     
     setLastUpdated(new Date());
-  };
+  }, []);
 
   // Load initial data and setup auto-refresh
   useEffect(() => {

@@ -5,6 +5,9 @@ import { GoogleLogin } from '@react-oauth/google';
 import toast, { Toaster } from 'react-hot-toast';
 import { EnhancedOTPForm } from '../../components/EnhancedOTPForm';
 
+// API constants outside component
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 export default function AuthPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -63,7 +66,7 @@ export default function AuthPage() {
     setLoading(true);
     setMessage({ type: '', text: '' });
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/login`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formData.email, password: formData.password })
@@ -87,7 +90,7 @@ export default function AuthPage() {
     setLoading(true);
     setMessage({ type: '', text: '' });
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/register`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: formData.name, email: formData.email, password: formData.password, phone: formData.phone })
@@ -106,7 +109,7 @@ export default function AuthPage() {
     setLoading(true);
     setMessage({ type: '', text: '' });
     try {
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/google-login`, {
+      const res = await fetch(`${API_BASE_URL}/api/auth/google-login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: credentialResponse.credential }),
@@ -126,7 +129,7 @@ export default function AuthPage() {
     setLoading(true);
     setMessage({ type: '', text: '' });
     try {
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/forgot-password`, {
+      const res = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formData.email })
@@ -148,7 +151,7 @@ export default function AuthPage() {
     setMessage({ type: '', text: '' });
     try {
       // Verify OTP with backend first
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/verify-otp`, {
+      const res = await fetch(`${API_BASE_URL}/api/auth/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formData.email, otp })
@@ -172,7 +175,7 @@ export default function AuthPage() {
     setLoading(true);
     setMessage({ type: '', text: '' });
     try {
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/reset-password`, {
+      const res = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formData.email, otp: formData.otp, password: formData.password })

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -33,7 +33,7 @@ const EnhancedAdminDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   
-  const navigationItems = [
+  const navigationItems = useCallback(() => [
     { id: 'overview', label: 'Overview', icon: Home },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'orders', label: 'Orders', icon: ShoppingBag },
@@ -48,7 +48,7 @@ const EnhancedAdminDashboard = () => {
     { id: 'performance', label: 'Performance', icon: Activity },
     { id: 'diagnostics', label: 'Diagnostics', icon: Shield },
     { id: 'settings', label: 'Settings', icon: Settings },
-  ];
+  ], []);
   
   // Load admin preferences from cookies
   React.useEffect(() => {
@@ -56,13 +56,13 @@ const EnhancedAdminDashboard = () => {
     const savedTab = cookieManager.getCookie('adminActiveTab');
     const savedLayout = cookieManager.getAdminLayout();
     
-    if (savedTab && navigationItems.find(item => item.id === savedTab)) {
+    if (savedTab && navigationItems().find(item => item.id === savedTab)) {
       setActiveTab(savedTab);
     }
     
     // Apply admin layout preferences
     document.body.setAttribute('data-admin-layout', savedLayout);
-  }, []); // Empty dependency array - only run once on mount
+  }, [navigationItems]); // Include navigationItems dependency
   
   // Save active tab to cookies when it changes
   React.useEffect(() => {
@@ -77,7 +77,7 @@ const EnhancedAdminDashboard = () => {
       console.log('Invalid tab detected, resetting to overview:', activeTab);
       setActiveTab('overview');
     }
-  }, []); // Empty dependency - only run once on mount
+  }, [activeTab]); // Include activeTab dependency
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
@@ -98,7 +98,7 @@ const EnhancedAdminDashboard = () => {
     }, 5 * 60 * 1000);
 
     return () => clearInterval(interval);
-  }, [isOnline]); // Removed refreshAll from dependencies to prevent infinite loop
+  }, [isOnline, refreshAll]); // Include refreshAll dependency
 
   const quickStats = [
     {
@@ -451,7 +451,7 @@ const EnhancedAdminDashboard = () => {
                 </div>
 
                 <nav className="space-y-2">
-                  {navigationItems.map((item) => (
+                  {navigationItems().map((item) => (
                     <SidebarItem
                       key={item.id}
                       item={item}
@@ -480,7 +480,7 @@ const EnhancedAdminDashboard = () => {
                 
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900">
-                    {navigationItems.find(item => item.id === activeTab)?.label || 'Dashboard'}
+                    {navigationItems().find(item => item.id === activeTab)?.label || 'Dashboard'}
                   </h1>
                   <p className="text-gray-600">
                     Welcome back! Here's what's happening with your store.

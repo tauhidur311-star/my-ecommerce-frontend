@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 // Error logger removed for performance
 
+// API constants outside hook
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 const useAuth = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -30,7 +33,7 @@ const useAuth = () => {
   // Session validation with IP checking
   const validateSession = useCallback(async (token) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/validate-session`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/validate-session`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -135,7 +138,7 @@ const useAuth = () => {
         throw error;
       }
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/terminate-all-sessions`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/terminate-all-sessions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

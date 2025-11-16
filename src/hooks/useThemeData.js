@@ -96,9 +96,11 @@ export const useInvalidateTheme = () => {
   };
 };
 
-export default {
+const themeDataHooks = {
   usePublishedTheme,
   usePreviewTheme,
   usePublishedPages,
   useInvalidateTheme
 };
+
+export default themeDataHooks;

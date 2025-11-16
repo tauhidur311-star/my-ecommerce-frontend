@@ -103,9 +103,9 @@ export const useAnalyticsData = (timeRange = '7d') => {
     }
   }, [timeRange]);
 
-  const refreshAll = () => {
+  const refreshAll = useCallback(() => {
     fetchAnalyticsData();
-  };
+  }, [fetchAnalyticsData]);
 
   useEffect(() => {
     fetchAnalyticsData();

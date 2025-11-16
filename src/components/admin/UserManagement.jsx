@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Users, Search, Filter, Edit, Trash2, Shield, Mail,
@@ -30,7 +30,7 @@ const UserManagement = () => {
   });
 
   // Enhanced API functions using userService
-  const fetchUsers = async (forceRefresh = false) => {
+  const fetchUsers = useCallback(async (forceRefresh = false) => {
     try {
       setLoading(true);
       
@@ -97,7 +97,7 @@ const UserManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const forceRefreshUsers = () => {
     fetchUsers(true);

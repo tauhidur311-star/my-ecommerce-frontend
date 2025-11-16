@@ -197,6 +197,9 @@ const GlassDropdown = ({
       case 'Tab':
         setIsOpen(false);
         break;
+      default:
+        // Handle other keys - no action needed
+        break;
     }
   };
 

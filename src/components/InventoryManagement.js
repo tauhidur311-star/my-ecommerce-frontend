@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Package, AlertTriangle, TrendingUp, TrendingDown, Search, 
   Download, RefreshCw, Edit2, BarChart3, Eye, 
@@ -33,7 +33,7 @@ const InventoryManagement = () => {
     checkLowStockAlerts();
   }, [products, lowStockThreshold]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const loadProducts = async () => {
+  const loadProducts = useCallback(async () => {
     setLoading(true);
     try {
       const productsData = localStorage.getItem('admin-products');
@@ -47,7 +47,7 @@ const InventoryManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const saveProducts = async (updatedProducts) => {
     try {

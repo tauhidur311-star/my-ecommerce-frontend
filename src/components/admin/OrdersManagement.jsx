@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ShoppingBag, Search, Filter, Eye, Edit, Truck, DollarSign,
@@ -117,7 +117,7 @@ const OrdersManagement = () => {
     filterOrders();
   }, [orders, searchQuery, statusFilter, dateFilter]);
 
-  const filterOrders = () => {
+  const filterOrders = useCallback(() => {
     let filtered = orders;
 
     // Filter by search query
@@ -149,13 +149,16 @@ const OrdersManagement = () => {
         case 'month':
           filterDate.setMonth(now.getMonth() - 1);
           break;
+        default:
+          console.warn('Unexpected dateFilter value:', dateFilter);
+          break;
       }
       
       filtered = filtered.filter(order => new Date(order.createdAt) >= filterDate);
     }
 
     setFilteredOrders(filtered);
-  };
+  }, [orders, searchQuery, statusFilter, dateFilter]);
 
 
   const getStatusIcon = (status) => {

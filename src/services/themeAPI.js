@@ -174,12 +174,13 @@ export const publicAPI = {
       ? `/api/public/theme/custom/${slug}`
       : `/api/public/theme/${pageType}`;
     const response = await axios.get(`${API_URL}${url}?t=${Date.now()}`);
-    return response.data.data;
+    // Handle the actual backend response structure from theme.js
+    return response.data.theme || response.data.data || response.data;
   },
 
   getPublishedPages: async () => {
-    const response = await axios.get(`${API_URL}/api/public/pages`);
-    return response.data.data;
+    const response = await axios.get(`${API_URL}/api/public/theme/pages`);
+    return response.data.data || response.data;
   },
 
   // Preview theme access (admin only)
@@ -194,7 +195,7 @@ export const publicAPI = {
     }
     
     const response = await axios.get(`${API_URL}${url}?t=${Date.now()}`, { headers });
-    return response.data.data;
+    return response.data.theme || response.data.data || response.data;
   },
 
   // SSE connection for theme updates

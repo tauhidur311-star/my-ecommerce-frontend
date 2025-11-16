@@ -16,6 +16,9 @@ import SafeSectionRenderer from '../../components/SafeSectionRenderer';
 
 const AuthModal = lazy(() => import('../../components/AuthModal.js'));
 
+// API constants outside component
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 export default function Store() {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
@@ -97,7 +100,7 @@ export default function Store() {
 
     try {
       const endpoint = authMode === 'login' ? '/api/auth/login' : '/api/auth/register';
-      const response = await fetch(`${process.env.REACT_APP_API_URL}${endpoint}`, {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -176,14 +179,14 @@ export default function Store() {
         }
         // If it's a relative URL starting with /, prepend the backend URL
         if (imageField.startsWith('/')) {
-          return `${process.env.REACT_APP_API_URL}${imageField}`;
+          return `${API_BASE_URL}${imageField}`;
         }
         // If it's just a filename, prepend backend URL with /
         if (!imageField.includes('/')) {
-          return `${process.env.REACT_APP_API_URL}/${imageField}`;
+          return `${API_BASE_URL}/${imageField}`;
         }
         // Otherwise, treat as relative path
-        return `${process.env.REACT_APP_API_URL}${imageField}`;
+        return `${API_BASE_URL}${imageField}`;
       }
     }
     
@@ -326,7 +329,7 @@ export default function Store() {
       setError(null);
       
       // Load products from backend API instead of localStorage
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/products`, {
+      const response = await fetch(`${API_BASE_URL}/api/products`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -435,6 +438,11 @@ export default function Store() {
     }
   }, [cart]);
 
+  // Temporary debug for theme data
+  useEffect(() => {
+    console.log('themeData in Store:', themeData);
+  }, [themeData]);
+
   // Listen for preview updates from design editor
   useEffect(() => {
     const handleMessage = (event) => {
@@ -523,7 +531,7 @@ export default function Store() {
     try {
       setCartLoading(true);
       
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/orders`, { 
+      const response = await fetch(`${API_BASE_URL}/api/orders`, { 
         method: 'POST', 
         headers: { 
           'Content-Type': 'application/json', 
@@ -741,79 +749,94 @@ export default function Store() {
           </div>
         )}
 
-        {/* Theme Loading State */}
-        {themeLoading && (
-          <div className="min-h-screen flex items-center justify-center">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading theme...</p>
-            </div>
-          </div>
-        )}
+        {/* Enhanced Theme Content Handler */}
+        {(() => {
+          // Decide what layout to use: preview first, then published theme
+          const getEffectiveLayout = () => {
+            if (isPreviewMode && previewLayout) {
+              return previewLayout;        // data sent from ThemeEditor via postMessage
+            }
+            return themeData || null;      // data from usePublishedTheme
+          };
 
-        {/* Theme Error State */}
-        {themeError && !isPreviewMode && (
-          <div className="min-h-screen flex items-center justify-center">
-            <div className="text-center">
-              <p className="text-red-600 mb-4">Error loading theme: {themeError.message}</p>
-              <button 
-                onClick={() => refetch()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-              >
-                Retry
-              </button>
-            </div>
-          </div>
-        )}
+          const effectiveLayout = getEffectiveLayout();
+          const effectiveSections =
+            effectiveLayout?.sections ||
+            effectiveLayout?.page?.sections ||  // if backend wraps in page
+            [];
 
-        {/* Render Theme Sections */}
-        {!themeLoading && !themeError && (
-          <div className="theme-sections">
-            {/* Use preview layout if in preview mode, otherwise use published theme data */}
-            {(() => {
-              const currentLayout = isPreviewMode ? previewLayout : themeData?.layout;
-              const sections = currentLayout?.sections || [];
+          return (
+            <section className="max-w-6xl mx-auto px-4 py-8">
+              <h1 className="text-3xl font-bold mb-4">
+                Welcome to Your Store
+              </h1>
 
-              if (sections.length === 0) {
-                return (
-                  <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                    <div className="text-center">
-                      <h1 className="text-4xl font-bold text-gray-900 mb-4">Welcome to Your Store</h1>
-                      <p className="text-xl text-gray-600 mb-8">No theme sections configured yet</p>
-                      <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto px-6">
-                        {products.slice(0, 6).map(product => (
-                          <div key={product._id} className="bg-white rounded-lg shadow-md p-6">
-                            <div className="aspect-square bg-gray-200 rounded-md mb-4 overflow-hidden">
-                              <img 
-                                src={getImageUrl(product)} 
-                                alt={product.name}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  e.target.src = 'https://via.placeholder.com/300?text=No+Image';
-                                }}
-                              />
-                            </div>
-                            <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
-                            <p className="text-blue-600 font-bold">৳{product.price}</p>
-                          </div>
-                        ))}
+              {/* Theme loading and errors */}
+              {themeLoading && (
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-gray-500">
+                    Loading theme...
+                  </p>
+                </div>
+              )}
+
+              {!themeLoading && themeError && !isPreviewMode && (
+                <div className="text-center py-12">
+                  <p className="text-red-500 mb-4">
+                    Error loading theme: {themeError.message || 'Unknown error'}
+                  </p>
+                  <button 
+                    onClick={() => refetch()}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  >
+                    Retry
+                  </button>
+                </div>
+              )}
+
+              {!themeLoading && !themeError && effectiveSections.length === 0 && (
+                <div>
+                  <p className="text-gray-500 mb-8">
+                    No theme sections configured yet
+                  </p>
+                  {/* Fallback product grid when no theme sections */}
+                  <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                    {products.slice(0, 6).map(product => (
+                      <div key={product._id} className="bg-white rounded-lg shadow-md p-6">
+                        <div className="aspect-square bg-gray-200 rounded-md mb-4 overflow-hidden">
+                          <img 
+                            src={getImageUrl(product)} 
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.src = 'https://via.placeholder.com/300?text=No+Image';
+                            }}
+                          />
+                        </div>
+                        <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
+                        <p className="text-blue-600 font-bold">৳{product.price}</p>
                       </div>
-                    </div>
+                    ))}
                   </div>
-                );
-              }
+                </div>
+              )}
 
-              return sections.map((section, index) => (
-                <SafeSectionRenderer
-                  key={`${section.id || section.type}-${index}`}
-                  section={section}
-                  products={products}
-                  onAddToCart={handleAddToCart}
-                />
-              ));
-            })()}
-          </div>
-        )}
+              {!themeLoading && !themeError && effectiveSections.length > 0 && (
+                <div className="space-y-6">
+                  {effectiveSections.map((section, index) => (
+                    <SafeSectionRenderer
+                      key={section.id || section._id || `section-${index}`}
+                      section={section}
+                      products={products}
+                      onAddToCart={handleAddToCart}
+                    />
+                  ))}
+                </div>
+              )}
+            </section>
+          );
+        })()}
       </main>
 
       {/* Session Security Status */}
