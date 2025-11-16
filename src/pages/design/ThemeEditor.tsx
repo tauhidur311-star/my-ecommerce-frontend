@@ -65,6 +65,291 @@ import ExportImportModal from '../../components/ExportImportModal';
 import AddBlockModal from '../../components/AddBlockModal';
 import MediaLibraryModal from '../../components/MediaLibraryModal';
 
+// ✅ BLOCK EDITOR COMPONENTS - Individual editors for each block type
+const HeadingBlockEditor = ({ section, block, onChange }) => {
+  return (
+    <div className="space-y-3 p-3 border rounded bg-white">
+      <div className="flex items-center justify-between">
+        <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide">
+          Heading
+        </label>
+        <select 
+          value={block.settings?.tag || 'h2'} 
+          onChange={e => onChange('settings', { tag: e.target.value })}
+          className="text-xs border rounded px-2 py-1"
+        >
+          <option value="h1">H1</option>
+          <option value="h2">H2</option>
+          <option value="h3">H3</option>
+          <option value="h4">H4</option>
+          <option value="h5">H5</option>
+          <option value="h6">H6</option>
+        </select>
+      </div>
+      <input
+        className="w-full border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        value={block.content || ''}
+        placeholder="Enter heading text..."
+        onChange={e => onChange('content', e.target.value)}
+      />
+    </div>
+  );
+};
+
+const TextBlockEditor = ({ section, block, onChange }) => {
+  return (
+    <div className="space-y-3 p-3 border rounded bg-white">
+      <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide">
+        Text Content
+      </label>
+      <textarea
+        className="w-full border rounded px-3 py-2 text-sm h-24 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        value={block.content || ''}
+        placeholder="Enter text content..."
+        onChange={e => onChange('content', e.target.value)}
+      />
+    </div>
+  );
+};
+
+const ButtonBlockEditor = ({ section, block, onChange }) => {
+  return (
+    <div className="space-y-3 p-3 border rounded bg-white">
+      <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide">
+        Button
+      </label>
+      <input
+        className="w-full border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        value={block.content || ''}
+        placeholder="Button text..."
+        onChange={e => onChange('content', e.target.value)}
+      />
+      <input
+        className="w-full border rounded px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        value={block.settings?.url || ''}
+        placeholder="Button URL (https:// or /path)"
+        onChange={e => onChange('settings', { ...block.settings, url: e.target.value })}
+      />
+      <div className="flex gap-2">
+        <select 
+          value={block.settings?.style || 'primary'} 
+          onChange={e => onChange('settings', { ...block.settings, style: e.target.value })}
+          className="flex-1 text-xs border rounded px-2 py-1"
+        >
+          <option value="primary">Primary</option>
+          <option value="secondary">Secondary</option>
+          <option value="outline">Outline</option>
+        </select>
+        <select 
+          value={block.settings?.size || 'medium'} 
+          onChange={e => onChange('settings', { ...block.settings, size: e.target.value })}
+          className="flex-1 text-xs border rounded px-2 py-1"
+        >
+          <option value="small">Small</option>
+          <option value="medium">Medium</option>
+          <option value="large">Large</option>
+        </select>
+      </div>
+    </div>
+  );
+};
+
+const ImageBlockEditor = ({ section, block, onChange, onOpenMediaLibrary }) => {
+  return (
+    <div className="space-y-3 p-3 border rounded bg-white">
+      <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide">
+        Image
+      </label>
+      {block.settings?.imageUrl ? (
+        <div className="space-y-2">
+          <img src={block.settings.imageUrl} alt="" className="w-full h-32 object-cover rounded border" />
+          <button 
+            onClick={() => onOpenMediaLibrary && onOpenMediaLibrary(section.id, block.id, 'imageUrl')}
+            className="w-full text-xs bg-blue-500 text-white py-2 px-3 rounded hover:bg-blue-600"
+          >
+            Change Image
+          </button>
+        </div>
+      ) : (
+        <button 
+          onClick={() => onOpenMediaLibrary && onOpenMediaLibrary(section.id, block.id, 'imageUrl')}
+          className="w-full border-2 border-dashed border-gray-300 rounded py-8 text-center text-sm text-gray-500 hover:border-blue-400 hover:text-blue-600"
+        >
+          + Select Image
+        </button>
+      )}
+      <input
+        className="w-full border rounded px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        value={block.settings?.alt || ''}
+        placeholder="Alt text for accessibility..."
+        onChange={e => onChange('settings', { ...block.settings, alt: e.target.value })}
+      />
+    </div>
+  );
+};
+
+const VideoBlockEditor = ({ section, block, onChange }) => {
+  return (
+    <div className="space-y-3 p-3 border rounded bg-white">
+      <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide">
+        Video
+      </label>
+      <input
+        className="w-full border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        value={block.settings?.videoUrl || ''}
+        placeholder="YouTube, Vimeo, or direct video URL..."
+        onChange={e => onChange('settings', { ...block.settings, videoUrl: e.target.value })}
+      />
+      {block.settings?.videoUrl && (
+        <div className="aspect-video bg-gray-100 rounded border flex items-center justify-center text-sm text-gray-500">
+          <Video size={24} className="mr-2" />
+          Video Preview
+        </div>
+      )}
+      <div className="flex gap-2">
+        <label className="flex items-center text-xs">
+          <input
+            type="checkbox"
+            checked={block.settings?.autoplay || false}
+            onChange={e => onChange('settings', { ...block.settings, autoplay: e.target.checked })}
+            className="mr-1"
+          />
+          Autoplay
+        </label>
+        <label className="flex items-center text-xs">
+          <input
+            type="checkbox"
+            checked={block.settings?.controls !== false}
+            onChange={e => onChange('settings', { ...block.settings, controls: e.target.checked })}
+            className="mr-1"
+          />
+          Show Controls
+        </label>
+      </div>
+    </div>
+  );
+};
+
+const SpacerBlockEditor = ({ section, block, onChange }) => {
+  return (
+    <div className="space-y-3 p-3 border rounded bg-white">
+      <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide">
+        Spacer
+      </label>
+      <div className="flex items-center gap-2">
+        <label className="text-xs text-gray-600 min-w-0">Height:</label>
+        <input
+          type="range"
+          min="10"
+          max="200"
+          value={block.settings?.height || 50}
+          onChange={e => onChange('settings', { ...block.settings, height: parseInt(e.target.value) })}
+          className="flex-1"
+        />
+        <span className="text-xs text-gray-500 min-w-0">{block.settings?.height || 50}px</span>
+      </div>
+      <div className="bg-gray-100 rounded" style={{ height: `${Math.min(block.settings?.height || 50, 100)}px` }}>
+        <div className="h-full bg-blue-200 opacity-50 rounded flex items-center justify-center text-xs text-gray-600">
+          Spacer Preview
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ✅ BLOCK RENDERER COMPONENT - Renders the correct editor for each block type
+const BlockRenderer = ({ section, block, onUpdate, onDelete, onOpenMediaLibrary }) => {
+  // ✅ NULL GUARD - Prevent crashes when block is null/undefined
+  if (!block) {
+    console.warn('BlockRenderer received null block for section', section?.id);
+    return null;
+  }
+
+  // ✅ SECTION GUARD - Ensure section exists
+  if (!section) {
+    console.warn('BlockRenderer received null section for block', block?.id, 'blockType:', block?.type);
+    return null;
+  }
+
+  const handleChange = (field, value) => {
+    onUpdate(section.id, block.id, field, value);
+  };
+
+  return (
+    <div className="relative group">
+      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+        <button
+          onClick={() => onDelete(section.id, block.id)}
+          className="bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+          title="Delete block"
+        >
+          <X size={12} />
+        </button>
+      </div>
+      
+      {block.type === 'heading' && (
+        <HeadingBlockEditor
+          section={section}
+          block={block}
+          onChange={handleChange}
+        />
+      )}
+
+      {block.type === 'text' && (
+        <TextBlockEditor
+          section={section}
+          block={block}
+          onChange={handleChange}
+        />
+      )}
+
+      {block.type === 'button' && (
+        <ButtonBlockEditor
+          section={section}
+          block={block}
+          onChange={handleChange}
+        />
+      )}
+
+      {block.type === 'image' && (
+        <ImageBlockEditor
+          section={section}
+          block={block}
+          onChange={handleChange}
+          onOpenMediaLibrary={onOpenMediaLibrary}
+        />
+      )}
+
+      {block.type === 'video' && (
+        <VideoBlockEditor
+          section={section}
+          block={block}
+          onChange={handleChange}
+        />
+      )}
+
+      {block.type === 'spacer' && (
+        <SpacerBlockEditor
+          section={section}
+          block={block}
+          onChange={handleChange}
+        />
+      )}
+
+      {!['heading', 'text', 'button', 'image', 'video', 'spacer'].includes(block.type) && (
+        <div className="space-y-3 p-3 border rounded bg-gray-50">
+          <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide">
+            Block: {block.type}
+          </label>
+          <div className="text-xs text-gray-500">
+            Block editor for "{block.type}" not implemented yet.
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // API constants outside component for clean dependency arrays
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -296,6 +581,16 @@ const ThemeEditor = () => {
   const dragItemRef = useRef(null);
   const dragNodeRef = useRef(null);
 
+  // ✅ FIX 3: MEDIA LIBRARY SELECTION CONTEXT - Track what receives the image
+  const [mediaSelectionContext, setMediaSelectionContext] = useState({
+    sectionId: null,
+    blockId: null,
+    field: null
+  });
+
+  // ✅ MISSING: Track active section ID for blocks panel synchronization
+  const [activeSectionId, setActiveSectionId] = useState(null);
+
   const [theme, setTheme] = useState({
     primaryColor: '#000000',
     secondaryColor: '#ffffff',
@@ -474,6 +769,22 @@ const ThemeEditor = () => {
     return `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }, []);
 
+  // ✅ ENSURE BLOCK ID - Ensures all blocks have required block_id field
+  const ensureBlockId = useCallback((block) => {
+    if (!block.block_id && !block.id) {
+      const newBlockId = generateBlockId();
+      return {
+        ...block,
+        id: block.id || newBlockId,
+        block_id: newBlockId
+      };
+    }
+    return {
+      ...block,
+      block_id: block.block_id || block.id || generateBlockId()
+    };
+  }, [generateBlockId]);
+
   // ✅ SLUG UTILITY - Generates valid slugs for backend validation
   const slugify = useCallback((name: string): string => {
     if (!name || typeof name !== 'string') return 'home';
@@ -605,7 +916,7 @@ const ThemeEditor = () => {
     );
     
     return pageData;
-  }, [getUserInfo, generateBlockId, theme, slugify, validateSlug]);
+  }, [getUserInfo, generateBlockId, slugify, validateSlug, theme]);
 
   // Backend API Functions - ENHANCED with proper data normalization
   const handleSaveToBackend = useCallback(async () => {
@@ -776,7 +1087,7 @@ const ThemeEditor = () => {
       
       alert(errorMsg);
     }
-  }, [activePage, sections, theme, pages, normalizePages]);
+  }, [activePage, sections, pages, normalizePages, ensureBlockId, normalizeDataForBackend]);
 
   // Load page data from MongoDB - FIXED to handle page_type lookup
   const loadPageData = useCallback(async (pageType) => {
@@ -827,7 +1138,7 @@ const ThemeEditor = () => {
     } catch (error) {
       console.error('Load error:', error);
     }
-  }, [theme, saveToHistory, sections]);
+  }, [theme, saveToHistory, sections, ensureBlockId, generateBlockId]);
 
   // Upload image to Cloudflare R2
   const uploadImageToR2 = useCallback(async (file) => {
@@ -909,7 +1220,7 @@ const ThemeEditor = () => {
     saveToHistory(updated);
     setSaveStatus('unsaved');
     setShowAddBlock(false);
-  }, [sections, saveToHistory]);
+  }, [sections, saveToHistory, generateBlockId]);
 
   const deleteBlockEnhanced = useCallback((sectionId, blockId) => {
     console.log('Deleting block:', blockId, 'from section:', sectionId);
@@ -949,6 +1260,137 @@ const ThemeEditor = () => {
       return updated;
     });
   }, [saveToHistory]);
+
+  // ✅ MEDIA UPLOAD HANDLER - Fixed FormData construction and file handling
+  const handleMediaUpload = useCallback(async (files) => {
+    try {
+      // Convert FileList to Array if needed
+      const fileArray = Array.isArray(files) ? files : Array.from(files);
+
+      if (!fileArray.length) {
+        console.warn('📤 Uploading to backend: 0 files (nothing to upload)');
+        return;
+      }
+
+      console.log('📤 Uploading files:', fileArray);
+
+      const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+      if (!token) {
+        throw new Error('Authentication required for file upload');
+      }
+
+      // ✅ FIXED: Create FormData with proper field name and append the first file
+      const formData = new FormData();
+      formData.append('file', fileArray[0]); // Backend expects 'file', not 'files'
+
+      // ✅ VERIFICATION: Log that file is actually in FormData
+      console.log('📤 Uploading to backend:', formData.getAll('file').length, 'files');
+
+      // Upload to backend endpoint
+      const uploadResponse = await fetch(`${API_BASE_URL}/api/media/upload`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+          // Don't set Content-Type - let browser set it for FormData
+        },
+        body: formData
+      });
+
+      const uploadResult = await uploadResponse.json();
+
+      if (!uploadResponse.ok || !uploadResult.success) {
+        throw new Error(`Upload failed: ${uploadResponse.status} - ${JSON.stringify(uploadResult)}`);
+      }
+
+      console.log('✅ Upload successful:', uploadResult);
+
+      // Add uploaded file to media files state
+      if (uploadResult.file && uploadResult.file.url) {
+        setMediaFiles(prev => [
+          ...prev,
+          {
+            id: Date.now().toString(),
+            name: uploadResult.file.name,
+            url: uploadResult.file.url,
+            mimeType: uploadResult.file.mimeType,
+            size: uploadResult.file.size,
+            uploadedAt: new Date().toISOString()
+          }
+        ]);
+      }
+
+      // Also refresh media files list from backend
+      await fetchMediaFiles();
+      
+      return uploadResult;
+    } catch (error) {
+      console.error('❌ Upload failed:', error);
+      alert(`Upload failed: ${error.message}`);
+      throw error;
+    }
+  }, []);
+
+  // ✅ FETCH MEDIA FILES - Load media files from backend
+  const fetchMediaFiles = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+      if (!token) {
+        console.warn('No token found for media fetch');
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/media`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('📁 Media files loaded:', data);
+        setMediaFiles(data.media || data || []);
+      } else {
+        console.warn('Failed to fetch media files:', response.status);
+        setMediaFiles([]);
+      }
+    } catch (error) {
+      console.error('Error fetching media files:', error);
+      setMediaFiles([]);
+    }
+  }, []);
+
+  // ✅ MISSING FUNCTION 2: addBlockToSection - Central block addition handler
+  const addBlockToSection = useCallback((sectionId, blockType) => {
+    console.log('➕ addBlockToSection:', { sectionId, blockType });
+    
+    const newBlock = {
+      id: generateBlockId(),
+      block_id: generateBlockId(), // for backend
+      type: blockType,
+      content: blockType === 'heading' ? 'New Heading' : 
+               blockType === 'text' ? 'New paragraph text...' :
+               blockType === 'button' ? 'Click Me' : 
+               `New ${blockType}`,
+      settings: blockType === 'heading' ? { tag: 'h2' } :
+                blockType === 'button' ? { url: '#', style: 'primary' } :
+                blockType === 'image' ? { alt: '', width: '100%' } :
+                blockType === 'spacer' ? { height: 50 } : {}
+    };
+
+    setSections(prev =>
+      prev.map(section =>
+        section.id === sectionId
+          ? {
+              ...section,
+              blocks: [...(section.blocks || []), newBlock],
+            }
+          : section
+      )
+    );
+    setSaveStatus('unsaved');
+    
+    console.log('✅ Block added successfully');
+  }, [generateBlockId]);
 
   // Scroll overflow check from Fix File 15 - Add New Handler Functions.tsx
   const checkForOverflow = useCallback(() => {
@@ -1264,13 +1706,195 @@ const ThemeEditor = () => {
     saveToHistory(updated);
   }, [sections, saveToHistory]);
 
-  // ✅ DATA MIGRATION UTILITY - Ensures block_id exists on all blocks
-  const ensureBlockId = useCallback((block) => {
-    return {
-      ...block,
-      block_id: block.block_id || block.id || generateBlockId()
-    };
-  }, [generateBlockId]);
+
+  // ✅ FIX 1: UNIFIED BLOCK UPDATE HANDLER - Replaces inconsistent update functions
+  const handleBlockUpdate = useCallback((sectionId, blockId, field, value) => {
+    console.log('🔧 Block update:', { sectionId, blockId, field, value });
+    
+    setSections(prev => prev.map(section => 
+      section.id === sectionId ? {
+        ...section,
+        blocks: (section.blocks || []).filter(Boolean).map(block => 
+          block.id === blockId ? {
+            ...block,
+            [field]: field === 'settings' ? { ...block.settings, ...value } : value
+          } : block
+        )
+      } : section
+    ));
+    
+    setSaveStatus('unsaved');
+    console.log('✅ Block updated successfully');
+  }, []);
+
+  // ✅ FIX 2: THEME SETTINGS APPLICATION - Live CSS variable updates
+  const handleThemeUpdate = useCallback((updates) => {
+    console.log('🎨 Theme update:', updates);
+    
+    setTheme(prev => {
+      const newTheme = { ...prev, ...updates };
+
+      // ✅ APPLY CSS VARIABLES FOR LIVE PREVIEW
+      const root = document.documentElement;
+      if (newTheme.primaryColor) {
+        root.style.setProperty('--primary-color', newTheme.primaryColor);
+      }
+      if (newTheme.secondaryColor) {
+        root.style.setProperty('--secondary-color', newTheme.secondaryColor);
+      }
+      if (newTheme.accentColor) {
+        root.style.setProperty('--accent-color', newTheme.accentColor);
+      }
+      if (newTheme.fontFamily) {
+        root.style.setProperty('--font-family', newTheme.fontFamily);
+      }
+      if (newTheme.headingFont) {
+        root.style.setProperty('--heading-font', newTheme.headingFont);
+      }
+      if (newTheme.borderRadius) {
+        root.style.setProperty('--border-radius', `${newTheme.borderRadius}px`);
+      }
+
+      console.log('✅ Theme CSS variables applied');
+      return newTheme;
+    });
+    
+    setSaveStatus('unsaved');
+  }, []);
+
+  // ✅ FIX 3: MEDIA LIBRARY INTEGRATION - Complete image selection workflow
+  const openMediaLibraryForBlock = useCallback((sectionId, blockId, field = 'imageUrl') => {
+    console.log('📸 Opening media library for block:', { sectionId, blockId, field });
+    setMediaSelectionContext({ sectionId, blockId, field });
+    setShowMediaLibrary(true);
+  }, []);
+
+  const openMediaLibraryForSection = useCallback((sectionId, field = 'backgroundImage') => {
+    console.log('📸 Opening media library for section:', { sectionId, field });
+    setMediaSelectionContext({ sectionId, blockId: null, field });
+    setShowMediaLibrary(true);
+  }, []);
+
+  const handleImageSelect = useCallback((imageUrl) => {
+    console.log('📸 Image selected:', imageUrl, 'Context:', mediaSelectionContext);
+    
+    const { sectionId, blockId, field } = mediaSelectionContext;
+    
+    if (blockId && sectionId) {
+      // ✅ UPDATE BLOCK WITH IMAGE
+      handleBlockUpdate(sectionId, blockId, 'settings', { [field]: imageUrl });
+      console.log('✅ Image applied to block');
+    } else if (sectionId) {
+      // ✅ UPDATE SECTION WITH IMAGE
+      updateSectionSettings(sectionId, { [field]: imageUrl });
+      console.log('✅ Image applied to section');
+    }
+    
+    // ✅ CLOSE MODAL AND CLEAR CONTEXT
+    setShowMediaLibrary(false);
+    setMediaSelectionContext({ sectionId: null, blockId: null, field: null });
+  }, [mediaSelectionContext, handleBlockUpdate, updateSectionSettings]);
+
+  // ✅ FIX 4: PREVIEW MODE RENDERER - Create actual preview component
+  const PreviewRenderer = useCallback(() => {
+    return (
+      <div className="preview-container h-full bg-white overflow-auto">
+        <div className="min-h-full" style={{
+          fontFamily: `var(--font-family, ${theme.fontFamily})`,
+          '--primary-color': theme.primaryColor,
+          '--secondary-color': theme.secondaryColor,
+          '--accent-color': theme.accentColor
+        }}>
+          {sections.map((section, index) => (
+            <div 
+              key={section.id}
+              className="preview-section"
+              style={{
+                backgroundColor: section.settings?.bgColor,
+                color: section.settings?.textColor,
+                padding: `${section.settings?.padding || 0}px`,
+                display: section.visible !== false ? 'block' : 'none'
+              }}
+            >
+              {/* ✅ RENDER SECTION CONTENT BASED ON TYPE */}
+              {section.type === 'hero' && (
+                <div className="text-center" style={{ fontSize: `${section.settings?.fontSize}px` }}>
+                  <h1 className="font-bold mb-4">{section.content}</h1>
+                  {(section.blocks || []).filter(Boolean).map(block => (
+                    <div key={block.id} className="block-preview">
+                      {block.type === 'text' && <p className="mb-4">{block.content}</p>}
+                      {block.type === 'button' && (
+                        <button 
+                          className="px-6 py-3 rounded"
+                          style={{ 
+                            backgroundColor: theme.accentColor,
+                            color: theme.secondaryColor 
+                          }}
+                        >
+                          {block.content}
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {section.type === 'announcement' && (
+                <div className="text-center py-3">
+                  {section.blocks?.find(b => b.type === 'text')?.content || section.content}
+                </div>
+              )}
+              
+              {section.type === 'header' && (
+                <header className="flex justify-between items-center py-4 px-6 border-b">
+                  <div className="font-bold text-xl">
+                    {section.blocks?.find(b => b.type === 'logo')?.content || 'Logo'}
+                  </div>
+                  <nav className="flex space-x-6">
+                    {['Home', 'Shop', 'About', 'Contact'].map(item => (
+                      <span key={item} className="cursor-pointer hover:opacity-75">{item}</span>
+                    ))}
+                  </nav>
+                </header>
+              )}
+              
+              {section.type === 'products' && (
+                <div className="py-12">
+                  <h2 className="text-3xl font-bold text-center mb-8">{section.content}</h2>
+                  <div className="grid grid-cols-4 gap-6 max-w-6xl mx-auto">
+                    {Array(4).fill().map((_, i) => (
+                      <div key={i} className="bg-white rounded-lg shadow-md p-4">
+                        <div className="w-full h-48 bg-gray-200 rounded mb-3"></div>
+                        <h3 className="font-semibold">Product {i + 1}</h3>
+                        <p className="text-blue-600 font-bold">$29.99</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {section.type === 'footer' && (
+                <footer className="py-12 px-6 border-t">
+                  <div className="grid grid-cols-4 gap-6 max-w-6xl mx-auto">
+                    {section.blocks?.filter(b => b.type === 'menu').map((menu, i) => (
+                      <div key={i}>
+                        <h3 className="font-semibold mb-3">{menu.title}</h3>
+                        <ul className="space-y-1">
+                          {menu.items?.map((item, j) => (
+                            <li key={j} className="text-sm opacity-75">{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                </footer>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }, [sections, theme]);
 
   const duplicateSection = useCallback((section) => {
     const newSection = {
@@ -1547,7 +2171,7 @@ const ThemeEditor = () => {
     const renderBlocks = () => {
       if (!section.blocks || section.blocks.length === 0) return null;
 
-      return section.blocks.map((block, index) => {
+      return (section.blocks || []).filter(Boolean).map((block, index) => {
         const isBlockSelected = selectedBlock?.block?.id === block.id;
         
         return (
@@ -2008,7 +2632,7 @@ const ThemeEditor = () => {
       default:
         return (
           <div className="p-4 bg-gray-100 rounded">
-            <p className="text-sm text-gray-600">Block: {block.type}</p>
+            <p>Unknown block type: {block.type}</p>
           </div>
         );
     }
@@ -2407,12 +3031,9 @@ const ThemeEditor = () => {
         <MediaLibraryModal
           isOpen={showMediaLibrary}
           onClose={() => setShowMediaLibrary(false)}
-          onUpload={uploadImageToR2}
+          onSelectImage={handleImageSelect}
+          onUpload={handleMediaUpload}
           mediaFiles={mediaFiles}
-          onSelectMedia={(url) => {
-            // Handle media selection
-            console.log('Selected media:', url);
-          }}
         />
       )}
 

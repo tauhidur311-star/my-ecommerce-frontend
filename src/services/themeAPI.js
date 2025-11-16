@@ -187,9 +187,9 @@ export const publicAPI = {
     
     const theme = response.data.theme;
     
-    // ✅ NORMALIZE: Flatten the structure for storefront consumption
+    // ✅ NORMALIZE: Flatten the structure for storefront consumption  
     const normalizedTheme = {
-      sections: theme.sections || [],
+      sections: theme.layout?.sections || [], // ✅ FIXED: Read from theme.layout.sections
       themeSettings: theme.theme_settings || {},
       pageType: theme.type || pageType,
       pageName: theme.name || pageType,

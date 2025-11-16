@@ -82,30 +82,31 @@ const MediaLibraryModal = ({
   };
 
   const handleFileUpload = async (files) => {
+    console.log('📤 MediaLibraryModal uploading files:', files && files[0]);
+    
+    if (!files || files.length === 0) {
+      console.warn('📤 No files selected for upload');
+      return;
+    }
+    
     setUploading(true);
     const fileArray = Array.from(files);
     
     try {
+      // ✅ FIXED: Pass the entire files object/array to onUpload, not individual files
+      console.log('📤 Calling onUpload with files:', fileArray);
+      const result = await onUpload(files); // Pass original files object
+      
       for (const file of fileArray) {
-        setUploadProgress(prev => ({ ...prev, [file.name]: 0 }));
-        
-        try {
-          const uploadedUrl = await onUpload(file);
-          setUploadProgress(prev => ({ ...prev, [file.name]: 100 }));
+        setUploadProgress(prev => ({ ...prev, [file.name]: 100 }));
+      }
           
-          // Simulate adding to media files (in real app, this would come from backend)
-          // mediaFiles.push({
-          //   id: Date.now() + Math.random(),
-          //   name: file.name,
-          //   url: uploadedUrl,
-          //   type: file.type,
-          //   size: file.size,
-          //   uploadedAt: new Date().toISOString()
-          // });
-        } catch (error) {
-          console.error('Upload failed for', file.name, error);
-          setUploadProgress(prev => ({ ...prev, [file.name]: -1 }));
-        }
+      console.log('✅ Upload completed for all files');
+    } catch (error) {
+      console.error('❌ Upload failed:', error);
+      // Mark all files as failed
+      for (const file of fileArray) {
+        setUploadProgress(prev => ({ ...prev, [file.name]: -1 }));
       }
     } finally {
       setUploading(false);

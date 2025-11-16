@@ -4,6 +4,294 @@ import { ShoppingCart, Star, Mail, Phone, Eye } from 'lucide-react';
 const SafeSectionRenderer = ({ section, products = [], onAddToCart }) => {
   try {
     const settings = section.settings || {};
+    const blocks = section.blocks || [];
+
+    // ✅ ANNOUNCEMENT SECTION
+    if (section.type === 'announcement') {
+      const textBlock = blocks.find(b => b.type === 'text');
+      const {
+        bgColor = '#000000',
+        textColor = '#ffffff',
+        padding = 12,
+        fontSize = 14,
+        alignment = 'center'
+      } = settings;
+
+      return (
+        <div 
+          className="w-full relative"
+          style={{ 
+            backgroundColor: bgColor,
+            color: textColor,
+            padding: `${padding}px`,
+            fontSize: `${fontSize}px`,
+            textAlign: alignment
+          }}
+        >
+          <div className="container mx-auto">
+            {textBlock?.content && (
+              textBlock.settings?.linkUrl ? (
+                <a href={textBlock.settings.linkUrl} className="hover:opacity-80">
+                  {textBlock.content}
+                </a>
+              ) : (
+                <span className="hover:opacity-80 cursor-pointer">
+                  {textBlock.content}
+                </span>
+              )
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // ✅ HEADER SECTION  
+    if (section.type === 'header') {
+      const logoBlock = blocks.find(b => b.type === 'logo');
+      const menuBlock = blocks.find(b => b.type === 'menu');
+      const cartBlock = blocks.find(b => b.type === 'cart');
+      const searchBlock = blocks.find(b => b.type === 'search');
+      
+      const {
+        bgColor = '#ffffff',
+        textColor = '#000000',
+        padding = 20,
+        sticky = true
+      } = settings;
+
+      return (
+        <header 
+          className={`w-full border-b ${sticky ? 'sticky top-0 z-50' : ''}`}
+          style={{ 
+            backgroundColor: bgColor,
+            color: textColor,
+            padding: `${padding}px 0`
+          }}
+        >
+          <div className="container mx-auto px-4 flex items-center justify-between">
+            {logoBlock && (
+              <div className="flex-shrink-0">
+                <a href="/" className="text-xl font-bold">
+                  {logoBlock.settings?.imageUrl ? (
+                    <img 
+                      src={logoBlock.settings.imageUrl} 
+                      alt={logoBlock.content}
+                      style={{ width: logoBlock.settings.width || 120 }}
+                      className="h-auto"
+                    />
+                  ) : (
+                    logoBlock.content || 'My Store'
+                  )}
+                </a>
+              </div>
+            )}
+            
+            <nav className="hidden md:flex space-x-8">
+              {menuBlock?.items?.map((item, index) => {
+                const menuItem = typeof item === 'string' ? item : item.title || item;
+                const menuUrl = typeof item === 'object' && item.url ? item.url : `/${menuItem.toLowerCase().replace(/\s+/g, '-')}`;
+                return (
+                  <a key={index} href={menuUrl} className="hover:opacity-75">
+                    {menuItem}
+                  </a>
+                );
+              }) || ['Home', 'Shop', 'About', 'Contact'].map((item, index) => (
+                <a key={index} href={`/${item.toLowerCase()}`} className="hover:opacity-75">
+                  {item}
+                </a>
+              ))}
+            </nav>
+
+            <div className="flex items-center space-x-4">
+              {searchBlock && (
+                <button className="p-2 hover:bg-gray-100 rounded">
+                  🔍
+                </button>
+              )}
+              {cartBlock && (
+                <button className="p-2 hover:bg-gray-100 rounded flex items-center">
+                  <ShoppingCart className="w-5 h-5" />
+                  {cartBlock.settings?.showCount && <span className="ml-1">0</span>}
+                </button>
+              )}
+            </div>
+          </div>
+        </header>
+      );
+    }
+
+    // ✅ PRODUCTS SECTION
+    if (section.type === 'products') {
+      const {
+        bgColor = '#f9fafb',
+        textColor = '#000000',
+        padding = 80,
+        columns = 4,
+        showPrice = true,
+        showButton = true
+      } = settings;
+
+      return (
+        <section 
+          className="w-full"
+          style={{ 
+            backgroundColor: bgColor,
+            color: textColor,
+            padding: `${padding}px 0`
+          }}
+        >
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold text-center mb-12">
+              {section.content || 'Featured Products'}
+            </h2>
+            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-${columns} gap-8`}>
+              {products.slice(0, 8).map((product, index) => (
+                <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="aspect-square bg-gray-200 relative">
+                    {product.images?.[0] ? (
+                      <img 
+                        src={product.images[0]} 
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        📦 Product Image
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-semibold text-lg mb-2">{product.name || `Product ${index + 1}`}</h3>
+                    {showPrice && (
+                      <p className="text-2xl font-bold text-blue-600 mb-3">
+                        ${product.price || '29.99'}
+                      </p>
+                    )}
+                    {showButton && (
+                      <button 
+                        onClick={() => onAddToCart && onAddToCart(product)}
+                        className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors flex items-center justify-center"
+                      >
+                        <ShoppingCart className="w-4 h-4 mr-2" />
+                        Add to Cart
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )) || (
+                // Fallback when no products provided
+                Array(4).fill(null).map((_, index) => (
+                  <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div className="aspect-square bg-gray-200 flex items-center justify-center">
+                      <span className="text-gray-400">📦</span>
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-semibold text-lg mb-2">Sample Product {index + 1}</h3>
+                      <p className="text-2xl font-bold text-blue-600 mb-3">$29.99</p>
+                      <button className="w-full bg-blue-600 text-white py-2 px-4 rounded">
+                        Add to Cart
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    // ✅ FOOTER SECTION
+    if (section.type === 'footer') {
+      const menuBlocks = blocks.filter(b => b.type === 'menu');
+      const socialBlock = blocks.find(b => b.type === 'social');
+      const newsletterBlock = blocks.find(b => b.type === 'newsletter');
+      
+      const {
+        bgColor = '#111827',
+        textColor = '#ffffff',
+        padding = 60,
+        columns = 4,
+        showCopyright = true,
+        copyrightText = '© 2024 My Store. All rights reserved.'
+      } = settings;
+
+      return (
+        <footer 
+          className="w-full"
+          style={{ 
+            backgroundColor: bgColor,
+            color: textColor,
+            padding: `${padding}px 0`
+          }}
+        >
+          <div className="container mx-auto px-4">
+            <div className={`grid grid-cols-1 md:grid-cols-${Math.min(columns, 4)} gap-8 mb-8`}>
+              {menuBlocks.map((menu, index) => (
+                <div key={index}>
+                  <h3 className="font-semibold text-lg mb-4">{menu.title || 'Menu'}</h3>
+                  <ul className="space-y-2">
+                    {menu.items?.map((item, itemIndex) => {
+                      const linkText = typeof item === 'string' ? item : item.title;
+                      const linkUrl = typeof item === 'object' && item.url ? item.url : `/${linkText.toLowerCase().replace(/\s+/g, '-')}`;
+                      return (
+                        <li key={itemIndex}>
+                          <a href={linkUrl} className="hover:opacity-75 text-sm">
+                            {linkText}
+                          </a>
+                        </li>
+                      );
+                    }) || ['Link 1', 'Link 2', 'Link 3'].map((item, itemIndex) => (
+                      <li key={itemIndex}>
+                        <a href={`/${item.toLowerCase().replace(/\s+/g, '-')}`} className="hover:opacity-75 text-sm">{item}</a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+              
+              {socialBlock && (
+                <div>
+                  <h3 className="font-semibold text-lg mb-4">{socialBlock.title || 'Follow Us'}</h3>
+                  <div className="flex space-x-4">
+                    {socialBlock.items?.map((social, index) => (
+                      <a key={index} href={social.url} className="hover:opacity-75">
+                        📱 {social.platform}
+                      </a>
+                    )) || ['📘 Facebook', '📷 Instagram', '🐦 Twitter'].map((item, index) => (
+                      <span key={index} className="cursor-pointer hover:opacity-75">{item}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {newsletterBlock && (
+                <div>
+                  <h3 className="font-semibold text-lg mb-4">{newsletterBlock.title || 'Newsletter'}</h3>
+                  <p className="text-sm mb-4">{newsletterBlock.description || 'Subscribe to get updates'}</p>
+                  <div className="flex">
+                    <input 
+                      type="email" 
+                      placeholder={newsletterBlock.settings?.placeholder || 'Enter your email'}
+                      className="flex-1 px-3 py-2 border rounded-l text-gray-900"
+                    />
+                    <button className="bg-blue-600 text-white px-4 py-2 rounded-r hover:bg-blue-700">
+                      Subscribe
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {showCopyright && (
+              <div className="border-t border-gray-600 pt-8 text-center text-sm opacity-75">
+                {copyrightText}
+              </div>
+            )}
+          </div>
+        </footer>
+      );
+    }
 
     // Hero Section
     if (section.type === 'hero') {
@@ -28,12 +316,22 @@ const SafeSectionRenderer = ({ section, products = [], onAddToCart }) => {
             <h1 className="text-4xl md:text-6xl font-bold mb-6">{title}</h1>
             <p className="text-xl md:text-2xl mb-8 opacity-90">{subtitle}</p>
             {buttonText && (
-              <a 
-                href={buttonLink || '#products'}
-                className="inline-block bg-white text-gray-900 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors shadow-lg"
-              >
-                {buttonText}
-              </a>
+              buttonLink ? (
+                <a 
+                  href={buttonLink}
+                  className="inline-block bg-white text-gray-900 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors shadow-lg"
+                >
+                  {buttonText}
+                </a>
+              ) : (
+                <button 
+                  type="button"
+                  onClick={() => console.log('Hero button clicked:', buttonText)}
+                  className="inline-block bg-white text-gray-900 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors shadow-lg"
+                >
+                  {buttonText}
+                </button>
+              )
             )}
           </div>
         </section>
