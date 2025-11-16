@@ -717,29 +717,16 @@ const ThemeEditor = () => {
       
       let saveResponse;
       
-      if (targetPageId) {
-        // Update existing page
-        console.log('📝 Updating existing page:', targetPageId);
-        saveResponse = await fetch(`${API_BASE_URL}/api/pages/${targetPageId}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(pageData)
-        });
-      } else {
-        // Create new page
-        console.log('📝 Creating new page for:', activePage);
-        saveResponse = await fetch(`${API_BASE_URL}/api/pages`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(pageData)
-        });
-      }
+      // ✅ CRITICAL FIX: Always use the /api/pages/publish route that sets published: true
+      console.log('📝 Saving page via publish route (always sets published: true)');
+      saveResponse = await fetch(`${API_BASE_URL}/api/pages/publish`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(pageData)
+      });
 
       console.log('📡 Save response:', saveResponse.status, saveResponse.statusText);
       
@@ -770,24 +757,9 @@ const ThemeEditor = () => {
         throw new Error(`Save failed with ${saveResponse.status}: ${errorDetail}`);
       }
 
-      // Get the page ID from response to use for publish (if needed)
+      // ✅ PUBLISH HANDLED: /api/pages/publish route automatically publishes pages
       const savedData = await saveResponse.json();
-      const pageIdForPublish = savedData._id || targetPageId;
-
-      if (pageIdForPublish && !targetPageId) {
-        // Only publish if it's a new page (existing pages are already published via pageData.published = true)
-        const publishResponse = await fetch(`${API_BASE_URL}/api/pages/${pageIdForPublish}/publish`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (!publishResponse.ok) {
-          console.warn('Failed to publish page:', publishResponse.statusText);
-        }
-      }
+      console.log('📋 Page saved with published: true via publish route');
 
       setSaveStatus('saved');
       console.log('✅ Theme saved and available on storefront');
