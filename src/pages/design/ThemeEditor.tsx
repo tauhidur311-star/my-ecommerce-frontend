@@ -1261,6 +1261,23 @@ const ThemeEditor = () => {
     });
   }, [saveToHistory]);
 
+  // ✅ URL NORMALIZATION - Fix localhost URLs when using production backend
+  const normalizeMediaUrl = useCallback((url) => {
+    if (!url) return url;
+    
+    // Replace localhost with current API base URL
+    if (url.includes('localhost:5000')) {
+      return url.replace('http://localhost:5000', API_BASE_URL);
+    }
+    
+    // If URL is relative, make it absolute with API base
+    if (url.startsWith('/uploads/')) {
+      return `${API_BASE_URL}${url}`;
+    }
+    
+    return url;
+  }, []);
+
   // ✅ MEDIA UPLOAD HANDLER - Fixed FormData construction and file handling
   const handleMediaUpload = useCallback(async (files) => {
     try {
@@ -1304,19 +1321,19 @@ const ThemeEditor = () => {
 
       console.log('✅ Upload successful:', uploadResult);
 
-      // Add uploaded file to media files state
+      // Add uploaded file to media files state with normalized URL
       if (uploadResult.file && uploadResult.file.url) {
-        setMediaFiles(prev => [
-          ...prev,
-          {
-            id: Date.now().toString(),
-            name: uploadResult.file.name,
-            url: uploadResult.file.url,
-            mimeType: uploadResult.file.mimeType,
-            size: uploadResult.file.size,
-            uploadedAt: new Date().toISOString()
-          }
-        ]);
+        const normalizedFile = {
+          id: Date.now().toString(),
+          name: uploadResult.file.name,
+          url: normalizeMediaUrl(uploadResult.file.url), // ✅ Fix URL for production
+          mimeType: uploadResult.file.mimeType,
+          size: uploadResult.file.size,
+          uploadedAt: new Date().toISOString()
+        };
+        
+        console.log('📁 Adding normalized file to media library:', normalizedFile);
+        setMediaFiles(prev => [...prev, normalizedFile]);
       }
 
       // Also refresh media files list from backend
@@ -1779,21 +1796,24 @@ const ThemeEditor = () => {
     console.log('📸 Image selected:', imageUrl, 'Context:', mediaSelectionContext);
     
     const { sectionId, blockId, field } = mediaSelectionContext;
+    const normalizedUrl = normalizeMediaUrl(imageUrl); // ✅ Fix URL for production
+    
+    console.log('📸 Normalized URL:', normalizedUrl);
     
     if (blockId && sectionId) {
       // ✅ UPDATE BLOCK WITH IMAGE
-      handleBlockUpdate(sectionId, blockId, 'settings', { [field]: imageUrl });
+      handleBlockUpdate(sectionId, blockId, 'settings', { [field]: normalizedUrl });
       console.log('✅ Image applied to block');
     } else if (sectionId) {
       // ✅ UPDATE SECTION WITH IMAGE
-      updateSectionSettings(sectionId, { [field]: imageUrl });
+      updateSectionSettings(sectionId, { [field]: normalizedUrl });
       console.log('✅ Image applied to section');
     }
     
     // ✅ CLOSE MODAL AND CLEAR CONTEXT
     setShowMediaLibrary(false);
     setMediaSelectionContext({ sectionId: null, blockId: null, field: null });
-  }, [mediaSelectionContext, handleBlockUpdate, updateSectionSettings]);
+  }, [mediaSelectionContext, handleBlockUpdate, updateSectionSettings, normalizeMediaUrl]);
 
   // ✅ FIX 4: PREVIEW MODE RENDERER - Create actual preview component
   const PreviewRenderer = useCallback(() => {
