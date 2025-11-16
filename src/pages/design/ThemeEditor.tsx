@@ -569,18 +569,17 @@ const ThemeEditor = () => {
       isValid: validateSlug(finalSlug)
     });
 
-    // ✅ BUILD COMPLETELY CLEAN PAGE DATA - Absolutely no _id fields anywhere
+    // ✅ BUILD COMPLETELY CLEAN PAGE DATA - Backend handles user_id from authentication
     const pageData = {
       // ❌ NEVER include _id, id, or any variant in request body - let MongoDB generate
       page_name: pageName.trim(),
-      page_type: activePage, // Use page_type instead of pageType for backend consistency
+      page_type: activePage, // Use page_type for backend consistency
       slug: finalSlug, // ✅ VALID SLUG - Clean format without slashes
       template_type: activePage,
       published: true,
       sections: normalizedSections,
-      themeSettings: theme || {},
-      // ✅ REQUIRED: user_id field - set from authenticated user
-      ...(userInfo && { user_id: userInfo.id })
+      themeSettings: theme || {}
+      // ✅ REMOVED: user_id - Backend sets this from req.user.userId (more secure)
     };
 
     // ✅ COMPREHENSIVE VALIDATION LOGGING
