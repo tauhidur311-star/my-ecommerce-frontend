@@ -173,9 +173,37 @@ export const publicAPI = {
     const url = slug 
       ? `/api/public/theme/custom/${slug}`
       : `/api/public/theme/${pageType}`;
+    
+    console.log('🌐 Fetching published theme from:', `${API_URL}${url}`);
     const response = await axios.get(`${API_URL}${url}?t=${Date.now()}`);
-    // Handle the actual backend response structure from theme.js
-    return response.data.theme || response.data.data || response.data;
+    
+    console.log('📥 Raw backend response:', response.data);
+    
+    // ✅ FIXED: Properly handle the backend response structure
+    if (!response.data.success || !response.data.theme) {
+      console.warn('❌ Backend returned unsuccessful response:', response.data);
+      return { sections: [], themeSettings: {} };
+    }
+    
+    const theme = response.data.theme;
+    
+    // ✅ NORMALIZE: Flatten the structure for storefront consumption
+    const normalizedTheme = {
+      sections: theme.sections || [],
+      themeSettings: theme.theme_settings || {},
+      pageType: theme.type || pageType,
+      pageName: theme.name || pageType,
+      lastUpdated: response.data.lastUpdated,
+      publishedAt: response.data.publishedAt
+    };
+    
+    console.log('✅ Normalized theme data:', {
+      sections_count: normalizedTheme.sections.length,
+      has_theme_settings: !!normalizedTheme.themeSettings,
+      page_type: normalizedTheme.pageType
+    });
+    
+    return normalizedTheme;
   },
 
   getPublishedPages: async () => {
