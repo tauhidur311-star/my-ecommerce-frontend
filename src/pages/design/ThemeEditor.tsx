@@ -34,6 +34,27 @@ import SidebarClose from 'lucide-react/dist/esm/icons/sidebar-close';
 import SidebarOpen from 'lucide-react/dist/esm/icons/sidebar-open';
 import Home from 'lucide-react/dist/esm/icons/home';
 import ShoppingBag from 'lucide-react/dist/esm/icons/shopping-bag';
+import LayoutGrid from 'lucide-react/dist/esm/icons/layout-grid';
+import Users from 'lucide-react/dist/esm/icons/users';
+import MessageSquare from 'lucide-react/dist/esm/icons/message-square';
+import Maximize2 from 'lucide-react/dist/esm/icons/maximize-2';
+import Layout from 'lucide-react/dist/esm/icons/layout';
+import Menu from 'lucide-react/dist/esm/icons/menu';
+import Layers from 'lucide-react/dist/esm/icons/layers';
+import Columns from 'lucide-react/dist/esm/icons/columns';
+import Type from 'lucide-react/dist/esm/icons/type';
+import List from 'lucide-react/dist/esm/icons/list';
+import Clock from 'lucide-react/dist/esm/icons/clock';
+import Grid3x3 from 'lucide-react/dist/esm/icons/grid-3x3';
+import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
+import Grid from 'lucide-react/dist/esm/icons/grid';
+import Zap from 'lucide-react/dist/esm/icons/zap';
+import Mail from 'lucide-react/dist/esm/icons/mail';
+import AlignCenter from 'lucide-react/dist/esm/icons/align-center';
+import Square from 'lucide-react/dist/esm/icons/square';
+import ArrowDown from 'lucide-react/dist/esm/icons/arrow-down';
+import Share2 from 'lucide-react/dist/esm/icons/share-2';
+import Edit3 from 'lucide-react/dist/esm/icons/edit-3';
 
 // Enhanced imports from Fix File 13 - Add Imports.tsx
 import EnhancedRightSidebar from '../../components/EnhancedRightSidebar';
@@ -43,6 +64,9 @@ import PageManagementModal from '../../components/PageManagementModal';
 import ExportImportModal from '../../components/ExportImportModal';
 import AddBlockModal from '../../components/AddBlockModal';
 import MediaLibraryModal from '../../components/MediaLibraryModal';
+
+// API constants outside component for clean dependency arrays
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const ThemeEditor = () => {
   // Cache-busting: Force browser to recognize this as new component
@@ -403,7 +427,6 @@ const ThemeEditor = () => {
   ];
 
   // Backend Integration from Fix Files 16-18 - Backend Integration Functions.tsx
-  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
   console.log('🌐 API Base URL:', API_BASE_URL);
 
   // Enhanced saveToHistory function with proper history management
@@ -417,6 +440,15 @@ const ThemeEditor = () => {
     setSaveStatus('unsaved');
   }, [historyIndex]);
 
+  // Data normalization helper
+  const normalizePages = useCallback((response) => {
+    if (Array.isArray(response)) return response;
+    if (Array.isArray(response.pages)) return response.pages;
+    if (Array.isArray(response.data)) return response.data;
+    console.warn('Unexpected pages response format:', response);
+    return [];
+  }, []);
+
   // Backend API Functions - FIXED to handle page creation and updates
   const handleSaveToBackend = useCallback(async () => {
     setSaveStatus('saving');
@@ -426,7 +458,8 @@ const ThemeEditor = () => {
       console.log('🔑 Using token:', token ? 'Found' : 'Missing');
       
       const pageData = {
-        pageType: activePage, // 'home', 'product', etc.
+        page_name: pages.find(p => p.id === activePage)?.name || 'Home', // Backend expects 'page_name'
+        page_type: activePage, // 'home', 'product', etc. - renamed for backend consistency
         sections: sections.map((section, index) => ({
           id: section.id.toString(),
           type: section.type,
@@ -439,8 +472,7 @@ const ThemeEditor = () => {
             settings: block.settings || {}
           }))
         })),
-        themeSettings: theme,
-        pageName: pages.find(p => p.id === activePage)?.name || 'Home'
+        theme_settings: theme // Renamed for backend consistency
       };
       
       // First try to get existing pages to find if this page exists
@@ -450,10 +482,23 @@ const ThemeEditor = () => {
       
       let targetPageId = null;
       if (existingPagesResponse.ok) {
-        const existingPages = await existingPagesResponse.json();
-        const existingPage = existingPages.find(p => p.template_type === activePage);
-        if (existingPage) {
-          targetPageId = existingPage._id;
+        const existingPagesData = await existingPagesResponse.json();
+        console.log('📄 Raw pages response:', existingPagesData);
+        
+        // Normalize the response to ensure we have an array
+        const existingPages = normalizePages(existingPagesData);
+        console.log('📄 Normalized pages:', existingPages, 'Length:', existingPages.length);
+        
+        // Defensive check before calling .find
+        if (!Array.isArray(existingPages)) {
+          console.error('❌ existingPages is not an array:', existingPages, typeof existingPages);
+          // Continue with empty array to prevent crash
+        } else {
+          const existingPage = existingPages.find(p => p.template_type === activePage);
+          console.log('📄 Found existing page:', existingPage ? 'Yes' : 'No');
+          if (existingPage) {
+            targetPageId = existingPage._id;
+          }
         }
       }
       
@@ -514,11 +559,17 @@ const ThemeEditor = () => {
       console.log('✅ Theme saved and available on storefront');
       
     } catch (error) {
-      console.error('Save error:', error);
+      console.error('❌ Save error:', error);
       setSaveStatus('error');
-      alert(`Failed to save: ${error.message}`);
+      
+      // More informative error message
+      const errorMsg = error.message.includes('existingPages') 
+        ? 'Server response format error. Please check your connection and try again.'
+        : `Failed to save: ${error.message}`;
+      
+      alert(errorMsg);
     }
-  }, [activePage, sections, theme, pages]);
+  }, [activePage, sections, theme, pages, normalizePages]);
 
   // Load page data from MongoDB - FIXED to handle page_type lookup
   const loadPageData = useCallback(async (pageType) => {
@@ -610,6 +661,17 @@ const ThemeEditor = () => {
       throw error;
     }
   }, []);
+
+  // Section Settings Update Function - Defined before first use
+  const updateSectionSettings = useCallback((id, settings) => {
+    setSections(prev => {
+      const updated = prev.map(s => 
+        s.id === id ? { ...s, settings: { ...s.settings, ...settings } } : s
+      );
+      saveToHistory(updated);
+      return updated;
+    });
+  }, [saveToHistory]);
 
   // Enhanced block management with backend integration
   const addBlockEnhanced = useCallback((sectionId, blockType) => {
@@ -779,7 +841,7 @@ const ThemeEditor = () => {
     });
     
     e.target.value = ''; // Reset input
-  }, []);
+  }, [updateBlockSettingsEnhanced, updateSectionSettings]);
 
   // Section Management
   const addSection = useCallback((type, position = 'end') => {
@@ -910,14 +972,14 @@ const ThemeEditor = () => {
     setSelectedSection(newSection);
     setShowAddSection(false);
     saveToHistory(updated);
-  }, [sections]);
+  }, [sections, saveToHistory]);
 
   const deleteSection = useCallback((id) => {
     const updated = sections.filter(s => s.id !== id);
     setSections(updated);
     setSelectedSection(null);
     saveToHistory(updated);
-  }, [sections]);
+  }, [sections, saveToHistory]);
 
   const duplicateSection = useCallback((section) => {
     const newSection = {
@@ -935,7 +997,7 @@ const ThemeEditor = () => {
     updated.splice(index + 1, 0, newSection);
     setSections(updated);
     saveToHistory(updated);
-  }, [sections]);
+  }, [sections, saveToHistory]);
 
   const moveSection = useCallback((id, direction) => {
     const index = sections.findIndex(s => s.id === id);
@@ -946,23 +1008,13 @@ const ThemeEditor = () => {
     [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
     setSections(updated);
     saveToHistory(updated);
-  }, [sections]);
+  }, [sections, saveToHistory]);
 
   const updateSection = useCallback((id, updates) => {
     const updated = sections.map(s => s.id === id ? { ...s, ...updates } : s);
     setSections(updated);
     saveToHistory(updated);
-  }, [sections]);
-
-  const updateSectionSettings = useCallback((id, settings) => {
-    setSections(prev => {
-      const updated = prev.map(s => 
-        s.id === id ? { ...s, settings: { ...s.settings, ...settings } } : s
-      );
-      saveToHistory(updated);
-      return updated;
-    });
-  }, [saveToHistory]);
+  }, [sections, saveToHistory]);
 
   // History Management
 
@@ -1037,7 +1089,7 @@ const ThemeEditor = () => {
     if (history.length === 0) {
       saveToHistory(sections);
     }
-  }, []);
+  }, [history.length, saveToHistory, sections]);
 
   // Auto-save with backend integration
   useEffect(() => {
@@ -1115,7 +1167,7 @@ const ThemeEditor = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedSection, previewMode, historyIndex, handleSaveToBackend, undo, redo, duplicateSection, updateSectionSettings, updateBlockSettingsEnhanced]);
+  }, [selectedSection, previewMode, historyIndex, handleSaveToBackend, undo, redo, duplicateSection, updateSectionSettings, updateBlockSettingsEnhanced, deleteSection]);
 
   // Body overflow management from Fix Files 8 & 21
   useEffect(() => {
