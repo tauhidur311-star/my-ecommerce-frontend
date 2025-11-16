@@ -33,6 +33,7 @@ const EnhancedAdminDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   
+  // ✅ FIXED: Removed 'theme-editor' from admin navigation - it should be a separate app
   const navigationItems = useCallback(() => [
     { id: 'overview', label: 'Overview', icon: Home },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
@@ -44,7 +45,6 @@ const EnhancedAdminDashboard = () => {
     { id: 'contacts', label: 'Contact Us', icon: MessageCircle },
     { id: 'marketing', label: 'Marketing', icon: Mail },
     { id: 'content', label: 'Content', icon: FileText },
-    { id: 'theme-editor', label: 'Theme Editor', icon: Palette },
     { id: 'performance', label: 'Performance', icon: Activity },
     { id: 'diagnostics', label: 'Diagnostics', icon: Shield },
     { id: 'settings', label: 'Settings', icon: Settings },
@@ -70,9 +70,9 @@ const EnhancedAdminDashboard = () => {
     cookieManager.setCookie('adminActiveTab', activeTab, { maxAge: 31536000 });
   }, [activeTab]);
 
-  // Force clear any cached tabs that no longer exist (only check once on mount)
+  // ✅ FIXED: Updated valid tabs list - removed 'theme-editor'
   useEffect(() => {
-    const validTabs = ['overview', 'analytics', 'orders', 'products', 'inventory', 'users', 'customers', 'contacts', 'marketing', 'content', 'theme-editor', 'performance', 'diagnostics', 'settings'];
+    const validTabs = ['overview', 'analytics', 'orders', 'products', 'inventory', 'users', 'customers', 'contacts', 'marketing', 'content', 'performance', 'diagnostics', 'settings'];
     if (!validTabs.includes(activeTab)) {
       console.log('Invalid tab detected, resetting to overview:', activeTab);
       setActiveTab('overview');
@@ -367,18 +367,6 @@ const EnhancedAdminDashboard = () => {
           </Suspense>
         );
 
-      case 'theme-editor':
-        // Properly navigate to the dedicated theme editor page
-        navigate('/design');
-        return (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <Palette className="mx-auto w-12 h-12 mb-4 text-blue-500" />
-              <p className="text-gray-600">Navigating to Theme Editor...</p>
-            </div>
-          </div>
-        );
-
       case 'performance':
         return (
           <Suspense fallback={<LoadingSkeleton />}>
@@ -510,14 +498,15 @@ const EnhancedAdminDashboard = () => {
                   View Store
                 </EnhancedButton>
 
-                {/* Design Button */}
+                {/* ✅ FIXED: Clear Theme Editor Button */}
                 <EnhancedButton
                   variant="primary"
                   size="sm"
-                  onClick={() => window.location.href = '/design'}
+                  onClick={() => navigate('/design')}
+                  title="Open Theme Editor in new tab"
                 >
-                  <Settings size={16} />
-                  Design
+                  <Palette size={16} />
+                  Theme Editor
                 </EnhancedButton>
 
                 <EnhancedButton
