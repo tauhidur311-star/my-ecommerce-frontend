@@ -474,6 +474,26 @@ const ThemeEditor = () => {
     return `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }, []);
 
+  // ✅ SLUG UTILITY - Generates valid slugs for backend validation
+  const slugify = useCallback((name: string): string => {
+    if (!name || typeof name !== 'string') return 'home';
+    
+    return name
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, '') // Remove non-alphanumeric characters except spaces and dashes
+      .replace(/\s+/g, '-')         // Replace spaces with dashes
+      .replace(/-+/g, '-')          // Collapse multiple dashes into one
+      .replace(/^-|-$/g, '')        // Remove leading/trailing dashes
+      .replace(/^$/, 'home');       // Fallback to 'home' if empty after cleaning
+  }, []);
+
+  // ✅ SLUG VALIDATION - Frontend validation before sending to backend
+  const validateSlug = useCallback((slug: string): boolean => {
+    const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+    return slugPattern.test(slug);
+  }, []);
+
   // Data normalization function - removes invalid _id fields and ensures required fields
   const normalizeDataForBackend = useCallback((sections, activePage, pageName) => {
     const userInfo = getUserInfo();
@@ -481,51 +501,80 @@ const ThemeEditor = () => {
     console.log('🔧 Normalizing data for backend...');
     console.log('👤 User info extracted:', userInfo ? 'Found' : 'Missing');
     
-    // Normalize sections - remove any _id fields and ensure required fields
+    // ✅ COMPLETELY STRIP _ID FIELDS - Never send any _id to backend
     const normalizedSections = sections.map((section, index) => {
-      const normalizedSection = {
-        // ❌ NEVER send _id - let MongoDB generate it
-        section_id: section.id?.toString() || `section_${Date.now()}_${index}`, // Custom ID for reference
+      // Create clean section object without ANY _id fields
+      const cleanSection = {
+        // ❌ NEVER include _id field - let MongoDB generate it
+        section_id: section.section_id || section.id?.toString() || `section_${Date.now()}_${index}`,
         type: section.type,
         content: section.content || '',
         visible: section.visible !== false,
-        settings: section.settings || {},
-        // Normalize blocks with required block_id
-        blocks: (section.blocks || []).map((block, blockIndex) => {
-          const normalizedBlock = {
-            // ❌ NEVER send _id - let MongoDB generate it
-            block_id: block.block_id || block.id || generateBlockId(), // ✅ REQUIRED: block_id field
-            type: block.type,
-            content: block.content || '',
-            settings: block.settings || {}
-          };
-          
-          console.log(`🔧 Block ${blockIndex} normalized:`, {
-            original_id: block.id,
-            new_block_id: normalizedBlock.block_id,
-            type: normalizedBlock.type
-          });
-          
-          return normalizedBlock;
-        })
+        settings: section.settings || {}
       };
+
+      // ✅ NORMALIZE ALL BLOCKS - Ensure block_id and strip any _id
+      const normalizedBlocks = (section.blocks || []).map((block, blockIndex) => {
+        // Create completely clean block object
+        const cleanBlock = {
+          // ❌ NEVER include _id field - let MongoDB generate it  
+          block_id: block.block_id || block.id?.toString() || generateBlockId(), // ✅ REQUIRED field
+          type: block.type,
+          content: block.content || '',
+          settings: block.settings || {}
+        };
+
+        console.log(`🔧 Block ${blockIndex} normalized:`, {
+          original_has_id: !!block.id,
+          original_has_block_id: !!block.block_id, 
+          original_has_underscore_id: !!block._id,
+          final_block_id: cleanBlock.block_id,
+          type: cleanBlock.type,
+          stripped_fields: ['_id'] // Always stripped
+        });
+
+        return cleanBlock;
+      });
+
+      cleanSection.blocks = normalizedBlocks;
       
       console.log(`🔧 Section ${index} normalized:`, {
-        original_id: section.id,
-        new_section_id: normalizedSection.section_id,
-        type: normalizedSection.type,
-        blocks_count: normalizedSection.blocks.length
+        original_has_id: !!section.id,
+        original_has_section_id: !!section.section_id,
+        original_has_underscore_id: !!section._id,
+        final_section_id: cleanSection.section_id,
+        type: cleanSection.type,
+        blocks_count: cleanSection.blocks.length,
+        stripped_fields: ['_id'] // Always stripped
       });
       
-      return normalizedSection;
+      return cleanSection;
     });
 
-    // Build clean page data without any _id fields
+    // ✅ GENERATE VALID SLUG - Backend expects clean slug without slashes
+    const generatedSlug = slugify(pageName);
+    const finalSlug = generatedSlug || (activePage === 'home' ? 'home' : slugify(activePage));
+    
+    // ✅ VALIDATE SLUG - Ensure it matches backend requirements
+    if (!validateSlug(finalSlug)) {
+      console.error('❌ Generated invalid slug:', finalSlug);
+      throw new Error(`Invalid slug format: "${finalSlug}". Only lowercase letters, numbers and hyphens are allowed.`);
+    }
+
+    console.log('✅ Generated valid slug:', {
+      pageName,
+      activePage,
+      generatedSlug,
+      finalSlug,
+      isValid: validateSlug(finalSlug)
+    });
+
+    // ✅ BUILD COMPLETELY CLEAN PAGE DATA - Absolutely no _id fields anywhere
     const pageData = {
-      // ❌ NEVER include _id in request body
+      // ❌ NEVER include _id, id, or any variant in request body - let MongoDB generate
       page_name: pageName.trim(),
-      pageType: activePage,
-      slug: activePage === 'home' ? '/' : `/${activePage}`,
+      page_type: activePage, // Use page_type instead of pageType for backend consistency
+      slug: finalSlug, // ✅ VALID SLUG - Clean format without slashes
       template_type: activePage,
       published: true,
       sections: normalizedSections,
@@ -533,17 +582,30 @@ const ThemeEditor = () => {
       // ✅ REQUIRED: user_id field - set from authenticated user
       ...(userInfo && { user_id: userInfo.id })
     };
-    
-    console.log('✅ Normalized page data:', {
+
+    // ✅ COMPREHENSIVE VALIDATION LOGGING
+    console.log('🔍 Final page data validation:', {
       page_name: pageData.page_name,
-      pageType: pageData.pageType,
+      page_type: pageData.page_type,
+      slug: pageData.slug,
       user_id: pageData.user_id ? 'SET' : 'MISSING',
       sections_count: pageData.sections.length,
-      blocks_total: pageData.sections.reduce((total, s) => total + s.blocks.length, 0)
+      blocks_total: pageData.sections.reduce((total, s) => total + s.blocks.length, 0),
+      has_underscore_id: '_id' in pageData ? 'YES - ERROR!' : 'NO - GOOD',
+      has_id: 'id' in pageData ? 'YES - ERROR!' : 'NO - GOOD',
+      all_blocks_have_block_id: pageData.sections.every(s => 
+        s.blocks.every(b => b.block_id)
+      ) ? 'YES - GOOD' : 'NO - ERROR!',
+      all_sections_have_section_id: pageData.sections.every(s => s.section_id) ? 'YES - GOOD' : 'NO - ERROR!'
     });
+
+    // ✅ FINAL STRUCTURE LOG - Shows exactly what gets sent to backend
+    console.log('📤 FINAL REQUEST BODY (what backend will receive):', 
+      JSON.stringify(pageData, null, 2)
+    );
     
     return pageData;
-  }, [getUserInfo, generateBlockId, theme]);
+  }, [getUserInfo, generateBlockId, theme, slugify, validateSlug]);
 
   // Backend API Functions - ENHANCED with proper data normalization
   const handleSaveToBackend = useCallback(async () => {
