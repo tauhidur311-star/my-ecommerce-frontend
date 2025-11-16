@@ -90,6 +90,7 @@ const ThemeEditor = () => {
       blocks: [
         { 
           id: 'ann-1', 
+          block_id: 'ann-1', // ✅ REQUIRED: Added block_id field
           type: 'text', 
           content: 'Free Shipping on Orders Over $50 - Use Code: FREESHIP',
           settings: { linkUrl: '/collections/sale' }
@@ -113,10 +114,10 @@ const ThemeEditor = () => {
       content: 'My Store', 
       visible: true,
       blocks: [
-        { id: 'logo-1', type: 'logo', content: 'My Store', settings: { imageUrl: '', width: 120 } },
-        { id: 'menu-1', type: 'menu', items: ['Home', 'Shop', 'About', 'Contact'], settings: {} },
-        { id: 'cart-1', type: 'cart', settings: { showCount: true } },
-        { id: 'search-1', type: 'search', settings: { showIcon: true } }
+        { id: 'logo-1', block_id: 'logo-1', type: 'logo', content: 'My Store', settings: { imageUrl: '', width: 120 } },
+        { id: 'menu-1', block_id: 'menu-1', type: 'menu', items: ['Home', 'Shop', 'About', 'Contact'], settings: {} },
+        { id: 'cart-1', block_id: 'cart-1', type: 'cart', settings: { showCount: true } },
+        { id: 'search-1', block_id: 'search-1', type: 'search', settings: { showIcon: true } }
       ],
       settings: { 
         bgColor: '#ffffff', 
@@ -143,9 +144,9 @@ const ThemeEditor = () => {
       image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200', 
       visible: true,
       blocks: [
-        { id: 'hero-heading', type: 'heading', content: 'Summer Collection 2024', settings: { tag: 'h1' } },
-        { id: 'hero-text', type: 'text', content: 'Discover the latest trends', settings: {} },
-        { id: 'hero-button', type: 'button', content: 'Shop Now', settings: { url: '/collections/all', style: 'primary' } }
+        { id: 'hero-heading', block_id: 'hero-heading', type: 'heading', content: 'Summer Collection 2024', settings: { tag: 'h1' } },
+        { id: 'hero-text', block_id: 'hero-text', type: 'text', content: 'Discover the latest trends', settings: {} },
+        { id: 'hero-button', block_id: 'hero-button', type: 'button', content: 'Shop Now', settings: { url: '/collections/all', style: 'primary' } }
       ],
       settings: { 
         bgColor: '#8b5cf6', 
@@ -204,6 +205,7 @@ const ThemeEditor = () => {
       blocks: [
         { 
           id: 'footer-menu-1', 
+          block_id: 'footer-menu-1', // ✅ REQUIRED: Added block_id
           type: 'menu', 
           title: 'Shop',
           items: ['All Products', 'New Arrivals', 'Best Sellers', 'Sale'],
@@ -211,6 +213,7 @@ const ThemeEditor = () => {
         },
         { 
           id: 'footer-menu-2', 
+          block_id: 'footer-menu-2', // ✅ REQUIRED: Added block_id
           type: 'menu', 
           title: 'About',
           items: ['Our Story', 'Contact', 'Careers', 'Press'],
@@ -218,6 +221,7 @@ const ThemeEditor = () => {
         },
         { 
           id: 'footer-social', 
+          block_id: 'footer-social', // ✅ REQUIRED: Added block_id
           type: 'social', 
           title: 'Follow Us',
           items: [
@@ -229,6 +233,7 @@ const ThemeEditor = () => {
         },
         { 
           id: 'footer-newsletter', 
+          block_id: 'footer-newsletter', // ✅ REQUIRED: Added block_id
           type: 'newsletter', 
           title: 'Newsletter',
           description: 'Subscribe to get special offers and updates',
@@ -449,13 +454,108 @@ const ThemeEditor = () => {
     return [];
   }, []);
 
-  // Backend API Functions - FIXED to handle page creation and updates
+  // ✅ ENHANCED DATA NORMALIZATION - Fixes validation errors while preserving all functionality
+  const getUserInfo = useCallback(() => {
+    try {
+      const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+      if (!token) return null;
+      
+      // Try to decode JWT to get user info
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return { id: payload.userId || payload.id, ...payload };
+    } catch (error) {
+      console.warn('Unable to decode token for user info:', error);
+      return null;
+    }
+  }, []);
+
+  // Enhanced block ID generator to ensure uniqueness
+  const generateBlockId = useCallback(() => {
+    return `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }, []);
+
+  // Data normalization function - removes invalid _id fields and ensures required fields
+  const normalizeDataForBackend = useCallback((sections, activePage, pageName) => {
+    const userInfo = getUserInfo();
+    
+    console.log('🔧 Normalizing data for backend...');
+    console.log('👤 User info extracted:', userInfo ? 'Found' : 'Missing');
+    
+    // Normalize sections - remove any _id fields and ensure required fields
+    const normalizedSections = sections.map((section, index) => {
+      const normalizedSection = {
+        // ❌ NEVER send _id - let MongoDB generate it
+        section_id: section.id?.toString() || `section_${Date.now()}_${index}`, // Custom ID for reference
+        type: section.type,
+        content: section.content || '',
+        visible: section.visible !== false,
+        settings: section.settings || {},
+        // Normalize blocks with required block_id
+        blocks: (section.blocks || []).map((block, blockIndex) => {
+          const normalizedBlock = {
+            // ❌ NEVER send _id - let MongoDB generate it
+            block_id: block.block_id || block.id || generateBlockId(), // ✅ REQUIRED: block_id field
+            type: block.type,
+            content: block.content || '',
+            settings: block.settings || {}
+          };
+          
+          console.log(`🔧 Block ${blockIndex} normalized:`, {
+            original_id: block.id,
+            new_block_id: normalizedBlock.block_id,
+            type: normalizedBlock.type
+          });
+          
+          return normalizedBlock;
+        })
+      };
+      
+      console.log(`🔧 Section ${index} normalized:`, {
+        original_id: section.id,
+        new_section_id: normalizedSection.section_id,
+        type: normalizedSection.type,
+        blocks_count: normalizedSection.blocks.length
+      });
+      
+      return normalizedSection;
+    });
+
+    // Build clean page data without any _id fields
+    const pageData = {
+      // ❌ NEVER include _id in request body
+      page_name: pageName.trim(),
+      pageType: activePage,
+      slug: activePage === 'home' ? '/' : `/${activePage}`,
+      template_type: activePage,
+      published: true,
+      sections: normalizedSections,
+      themeSettings: theme || {},
+      // ✅ REQUIRED: user_id field - set from authenticated user
+      ...(userInfo && { user_id: userInfo.id })
+    };
+    
+    console.log('✅ Normalized page data:', {
+      page_name: pageData.page_name,
+      pageType: pageData.pageType,
+      user_id: pageData.user_id ? 'SET' : 'MISSING',
+      sections_count: pageData.sections.length,
+      blocks_total: pageData.sections.reduce((total, s) => total + s.blocks.length, 0)
+    });
+    
+    return pageData;
+  }, [getUserInfo, generateBlockId, theme]);
+
+  // Backend API Functions - ENHANCED with proper data normalization
   const handleSaveToBackend = useCallback(async () => {
     setSaveStatus('saving');
     
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
       console.log('🔑 Using token:', token ? 'Found' : 'Missing');
+      
+      if (!token) {
+        throw new Error('Authentication token not found. Please log in again.');
+      }
       
       // Comprehensive validation before creating pageData  
       const currentPage = pages.find(p => p.id === activePage);
@@ -475,7 +575,7 @@ const ThemeEditor = () => {
         throw new Error('Sections must be an array. Current sections invalid.');
       }
       
-      // Validate sections array structure
+      // ✅ ENHANCED VALIDATION - Check for all required fields including block_id
       const invalidSections = sections.filter(section => 
         !section.id || !section.type || typeof section.type !== 'string'
       );
@@ -484,25 +584,41 @@ const ThemeEditor = () => {
         console.error('❌ Invalid sections found:', invalidSections);
         throw new Error('Some sections are missing required id or type fields.');
       }
+
+      // ✅ VALIDATE BLOCKS - Ensure all blocks have required block_id
+      const sectionsWithInvalidBlocks = [];
+      sections.forEach((section, sectionIndex) => {
+        const invalidBlocks = (section.blocks || []).filter(block => 
+          !block.block_id && !block.id
+        );
+        if (invalidBlocks.length > 0) {
+          sectionsWithInvalidBlocks.push({
+            sectionIndex,
+            sectionId: section.id,
+            invalidBlocks
+          });
+        }
+      });
+
+      // ✅ AUTO-FIX AND NORMALIZE DATA
+      let dataToSave = sections;
+      if (sectionsWithInvalidBlocks.length > 0) {
+        console.error('❌ Sections with invalid blocks found:', sectionsWithInvalidBlocks);
+        
+        // ✅ AUTO-FIX: Add missing block_id to blocks
+        console.log('🔧 Auto-fixing missing block_id fields...');
+        const fixedSections = sections.map(section => ({
+          ...section,
+          blocks: (section.blocks || []).map(block => ensureBlockId(block))
+        }));
+        
+        setSections(fixedSections);
+        console.log('✅ Fixed sections with missing block_id fields');
+        dataToSave = fixedSections;
+      }
       
-      const pageData = {
-        page_name: pageName.trim(), // Backend validates req.body.page_name
-        pageType: pageType, // Backend destructures { pageType }
-        sections: sections.map((section, index) => ({
-          id: section.id.toString(), // Backend maps this to section_id
-          type: section.type,
-          visible: section.visible !== false,
-          settings: section.settings || {},
-          blocks: (section.blocks || []).map((block, blockIndex) => ({
-            id: block.id.toString(), // Backend maps this to block_id
-            type: block.type,
-            content: block.content,
-            settings: block.settings || {}
-          }))
-        })),
-        themeSettings: theme || {}, // Backend destructures { themeSettings }
-        pageName: pageName.trim() // Backend destructures { pageName }
-      };
+      // ✅ NORMALIZE DATA - Fix all validation issues
+      const pageData = normalizeDataForBackend(dataToSave, pageType, pageName);
       
       console.log('🔍 Validation passed - pageData structure:');
       console.log('📄 Page name:', pageData.page_name);
@@ -645,17 +761,18 @@ const ThemeEditor = () => {
         if (targetPage) {
           console.log('📥 Loaded page data for', pageType, ':', targetPage);
           
-          // Convert backend structure back to ThemeEditor format
+          // ✅ ENHANCED DATA CONVERSION - Ensures all required fields exist
           const convertedSections = (targetPage.sections || []).map(section => ({
-            id: section.section_id,
+            id: section.section_id || section.id || `section_${Date.now()}_${Math.random()}`,
             type: section.type,
-            visible: section.visible,
+            visible: section.visible !== false,
             settings: section.settings || {},
             content: section.content || '',
-            blocks: (section.blocks || []).map(block => ({
-              id: block.block_id,
+            blocks: (section.blocks || []).map(block => ensureBlockId({
+              id: block.block_id || block.id || generateBlockId(),
+              block_id: block.block_id || block.id || generateBlockId(), // ✅ REQUIRED: Ensure block_id exists
               type: block.type,
-              content: block.content,
+              content: block.content || '',
               settings: block.settings || {}
             }))
           }));
@@ -730,12 +847,13 @@ const ThemeEditor = () => {
     });
   }, [saveToHistory]);
 
-  // Enhanced block management with backend integration
+  // ✅ ENHANCED BLOCK CREATION - Ensures all blocks have required block_id
   const addBlockEnhanced = useCallback((sectionId, blockType) => {
     console.log('Adding block:', blockType, 'to section:', sectionId);
     
     const newBlock = {
-      id: `block-${Date.now()}`,
+      id: generateBlockId(), // ✅ Use enhanced ID generator
+      block_id: generateBlockId(), // ✅ REQUIRED: Explicit block_id field for backend
       type: blockType,
       content: `New ${blockType}`,
       settings: {}
@@ -984,26 +1102,100 @@ const ThemeEditor = () => {
       }
     };
 
+    // ✅ ENHANCED DEFAULT BLOCKS - All blocks now have required block_id field
     const defaultBlocks = {
       announcement: [
-        { id: `${Date.now()}-1`, type: 'text', content: 'Announcement text', settings: {} }
+        { 
+          id: generateBlockId(), 
+          block_id: generateBlockId(), // ✅ REQUIRED field
+          type: 'text', 
+          content: 'Announcement text', 
+          settings: {} 
+        }
       ],
       header: [
-        { id: `${Date.now()}-1`, type: 'logo', content: 'Logo', settings: { width: 120 } },
-        { id: `${Date.now()}-2`, type: 'menu', items: ['Home', 'Shop', 'About', 'Contact'], settings: {} },
-        { id: `${Date.now()}-3`, type: 'search', settings: {} },
-        { id: `${Date.now()}-4`, type: 'cart', settings: { showCount: true } }
+        { 
+          id: generateBlockId(), 
+          block_id: generateBlockId(), // ✅ REQUIRED field
+          type: 'logo', 
+          content: 'Logo', 
+          settings: { width: 120 } 
+        },
+        { 
+          id: generateBlockId(), 
+          block_id: generateBlockId(), // ✅ REQUIRED field
+          type: 'menu', 
+          items: ['Home', 'Shop', 'About', 'Contact'], 
+          settings: {} 
+        },
+        { 
+          id: generateBlockId(), 
+          block_id: generateBlockId(), // ✅ REQUIRED field
+          type: 'search', 
+          settings: {} 
+        },
+        { 
+          id: generateBlockId(), 
+          block_id: generateBlockId(), // ✅ REQUIRED field
+          type: 'cart', 
+          settings: { showCount: true } 
+        }
       ],
       hero: [
-        { id: `${Date.now()}-1`, type: 'heading', content: 'Hero Title', settings: { tag: 'h1' } },
-        { id: `${Date.now()}-2`, type: 'text', content: 'Hero description', settings: {} },
-        { id: `${Date.now()}-3`, type: 'button', content: 'Shop Now', settings: { style: 'primary' } }
+        { 
+          id: generateBlockId(), 
+          block_id: generateBlockId(), // ✅ REQUIRED field
+          type: 'heading', 
+          content: 'Hero Title', 
+          settings: { tag: 'h1' } 
+        },
+        { 
+          id: generateBlockId(), 
+          block_id: generateBlockId(), // ✅ REQUIRED field
+          type: 'text', 
+          content: 'Hero description', 
+          settings: {} 
+        },
+        { 
+          id: generateBlockId(), 
+          block_id: generateBlockId(), // ✅ REQUIRED field
+          type: 'button', 
+          content: 'Shop Now', 
+          settings: { style: 'primary' } 
+        }
       ],
       footer: [
-        { id: `${Date.now()}-1`, type: 'menu', title: 'Shop', items: ['All Products', 'New Arrivals'], settings: {} },
-        { id: `${Date.now()}-2`, type: 'menu', title: 'About', items: ['Our Story', 'Contact'], settings: {} },
-        { id: `${Date.now()}-3`, type: 'social', title: 'Follow Us', items: [], settings: {} },
-        { id: `${Date.now()}-4`, type: 'newsletter', title: 'Newsletter', settings: {} }
+        { 
+          id: generateBlockId(), 
+          block_id: generateBlockId(), // ✅ REQUIRED field
+          type: 'menu', 
+          title: 'Shop', 
+          items: ['All Products', 'New Arrivals'], 
+          settings: {} 
+        },
+        { 
+          id: generateBlockId(), 
+          block_id: generateBlockId(), // ✅ REQUIRED field
+          type: 'menu', 
+          title: 'About', 
+          items: ['Our Story', 'Contact'], 
+          settings: {} 
+        },
+        { 
+          id: generateBlockId(), 
+          block_id: generateBlockId(), // ✅ REQUIRED field
+          type: 'social', 
+          title: 'Follow Us', 
+          items: [], 
+          settings: {} 
+        },
+        { 
+          id: generateBlockId(), 
+          block_id: generateBlockId(), // ✅ REQUIRED field
+          type: 'newsletter', 
+          title: 'Newsletter', 
+          settings: {} 
+        }
       ]
     };
 
@@ -1038,6 +1230,14 @@ const ThemeEditor = () => {
     saveToHistory(updated);
   }, [sections, saveToHistory]);
 
+  // ✅ DATA MIGRATION UTILITY - Ensures block_id exists on all blocks
+  const ensureBlockId = useCallback((block) => {
+    return {
+      ...block,
+      block_id: block.block_id || block.id || generateBlockId()
+    };
+  }, [generateBlockId]);
+
   const duplicateSection = useCallback((section) => {
     const newSection = {
       ...JSON.parse(JSON.stringify(section)),
@@ -1045,7 +1245,8 @@ const ThemeEditor = () => {
       content: `${section.content} (Copy)`,
       blocks: section.blocks?.map(block => ({
         ...block,
-        id: `${Date.now()}-${Math.random()}`
+        id: generateBlockId(),
+        block_id: generateBlockId() // ✅ REQUIRED: Ensure new blocks have block_id
       })) || []
     };
     
@@ -1054,7 +1255,7 @@ const ThemeEditor = () => {
     updated.splice(index + 1, 0, newSection);
     setSections(updated);
     saveToHistory(updated);
-  }, [sections, saveToHistory]);
+  }, [sections, saveToHistory, generateBlockId]);
 
   const moveSection = useCallback((id, direction) => {
     const index = sections.findIndex(s => s.id === id);
